@@ -24,8 +24,6 @@ else
     config = devConfig;
 }
 
-console.dir(process);
-
 new WebpackDevServer(compailer,  {
     publicPath: config.output.publicPath,
     hot: true,
