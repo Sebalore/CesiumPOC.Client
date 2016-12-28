@@ -29,6 +29,7 @@ import ScreenSpaceEventHandler from 'cesium/Source/Core/ScreenSpaceEventHandler'
 import 'cesium/Source/Widgets/widgets.css';
 import Math from 'cesium/Source/Core/Math';
 import CustomDataSource from 'cesium/Source/DataSources/CustomDataSource.js';
+import DataSourceCollection from 'cesium/Source/DataSources/DataSourceCollection.js';
 
 // --------------------------------------------------------------------------------------------------------------
 
@@ -70,16 +71,17 @@ const initialViewState = {
     }
 };
 
-class CesiumView extends React.Component {
+export default class CesiumView extends React.Component {
 
     constructor(props, context) {
         super(props, context);
-
+        // class members
         this.viewState = initialViewState;
-        this.dataSource = null;
 
-        this.loadEntitiesFromProps = this.loadEntitiesFromProps.bind(this);
+        // class methods
         this.moveEntity = this.moveEntity.bind(this);
+        this.mapDataSources = this.mapDataSources.bind(this);
+        this.mapEntitiesArrayToEntityCollection = this.mapEntitiesArrayToEntityCollection.bind(this);
     }
 
     componentDidMount() {
@@ -88,16 +90,13 @@ class CesiumView extends React.Component {
         const dragging = false, isFirstClick = true;
 
         this.viewer = new CesiumViewer(this.refs.map, this.viewState.options);
-        this.handler = new ScreenSpaceEventHandler(this.viewer.scene.canvas);     
-
-        this.dataSource = new CustomDataSource('airPlaineLayer');
-        this.viewer.dataSources.add(this.dataSource);
+        this.handler = new ScreenSpaceEventHandler(this.viewer.scene.canvas);  
 
         // subscribe viewer entities
         // this.viewer.entities.collectionChanged.addEventListenter( (collection, added, removed, changed) => console.log('entities collection changed!'));
 
-        // load the map entry view entities
-        this.loadEntitiesFromProps();
+        // map the data sources from the layers
+        this.mapDataSources();
 
         this.setMapEventHandlers(this.viewer, this.handler, entity, selectedEntity, dragging, isFirstClick);
 
@@ -120,22 +119,36 @@ class CesiumView extends React.Component {
             newEntityPosition.latitude, newEntityPosition.height, entityToMove.billboard.image, entityToMove.billboard.scale));
     }
 
-    loadEntitiesFromProps() {
-        if(this.props.layers[0].entities) {
-            // for(const entity of this.props.entities) {
-            //     this.viewer.entities.add(this.generateEntity(entity.position.longitude, entity.position.latitude, entity.position.height, entity.billboard.image, entity.billboard.scale));
-            
-            // right now manualy load only the first entity
-            const entity = this.props.layers[0].entities[0];
-            const enteredEntity = this.viewer.entities.add(this.generateEntity(entity.position.longitude, 
-                entity.position.latitude, entity.position.height, entity.billboard.image, entity.billboard.scale));
-            
-            const _this = this;
-            const entityId = enteredEntity.id;
-            setTimeout( function() {
-                const targetPosition = _this.props.layers[0].entities[1].position;
-                _this.moveEntity(entityId, targetPosition);
-            }, 7000);
+    /**
+     * this function map's the entities from each layer to be data sources for the viwer object
+     */
+    mapDataSources() {
+        for(const layer of this.props.layers) {
+            if(layer.entities.length > 0) { // if there are any entities in that layer
+                // init data source to add
+                const currentDataSourceToAdd = new CustomDataSource(layer.name);
+                // init the data source entities
+                this.mapEntitiesArrayToEntityCollection(layer.entities, currentDataSourceToAdd);
+                // add the data source to the data source collection
+                this.viewer.dataSources.add(currentDataSourceToAdd);
+            }
+        }
+    }
+
+    /**
+     * map given entities array managed by our structure to cesium CustomDataSource object
+     * @param {Array} srcEntities
+     * @param {CustomDataSource} entCollection the collection to enter to
+     */
+    mapEntitiesArrayToEntityCollection(srcEntities, entCollection) {
+        for(const entity of srcEntities) {
+            entCollection.entities.add(this.generateEntity(
+                entity.position.longitude,
+                entity.position.latitude,
+                entity.position.height,
+                entity.billboard.image,
+                entity.billboard.scale
+            ));
         }
     }
 
@@ -299,5 +312,8 @@ class CesiumView extends React.Component {
     }
 }
 
-export default CesiumView;
+CesiumView.propTypes = {
+    layers : React.PropTypes.array,
+    activeLayer : React.PropTypes.object
+};
 

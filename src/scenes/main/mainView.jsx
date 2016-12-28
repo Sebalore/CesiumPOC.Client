@@ -31,16 +31,6 @@ const initialViewState = {
             image: 'http://res.cloudinary.com/dn0ep8uy3/image/upload/v1476363391/tank_gqfsf8.png',
             scale: 0.95
           }
-        }, {
-          position: {
-            longitude: -75.16617698856817,
-            latitude: 39.90607492083895,
-            height: 1.0
-          },
-          billboard: {
-            image: 'http://res.cloudinary.com/dn0ep8uy3/image/upload/v1476363391/tank_gqfsf8.png',
-            scale: 0.95
-          }
         }
       ]
     }, {
@@ -53,7 +43,19 @@ const initialViewState = {
 
         }
       ],
-      entities: []
+      entities: [
+        {
+          position: {
+            longitude: -75.16617698856817,
+            latitude: 39.90607492083895,
+            height: 1.0
+          },
+          billboard: {
+            image: 'http://res.cloudinary.com/dn0ep8uy3/image/upload/v1476363391/tank_gqfsf8.png',
+            scale: 0.95
+          }
+        }
+      ]
     }
   ]
 };
