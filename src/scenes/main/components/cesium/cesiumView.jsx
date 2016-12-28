@@ -18,7 +18,6 @@ BuildModuleUrl.setBaseUrl(BUILD_DIR);
 import BingMapsApi from 'cesium/Source/Core/BingMapsApi';
 BingMapsApi.defaultKey = 'ApKtWGAVLWzzHvuvGZFWTRIXrsyLJ5czBuu9MkIGAdWwsQpXz_GiC55jbSnI43Qq';
 
-
 //various Cesium objects
 import CesiumViewer from 'cesium/Source/Widgets/Viewer/Viewer';
 import JulianDate from 'cesium/Source/Core/JulianDate';
@@ -29,11 +28,12 @@ import Rectangle from 'cesium/Source/Core/Rectangle';
 import ScreenSpaceEventHandler from 'cesium/Source/Core/ScreenSpaceEventHandler';
 import 'cesium/Source/Widgets/widgets.css';
 import Math from 'cesium/Source/Core/Math';
+import CustomDataSource from 'cesium/Source/DataSources/CustomDataSource.js';
+
 // --------------------------------------------------------------------------------------------------------------
 
-
 // Consts
-const baseStorageURL = 'http://res.cloudinary.com/dn0ep8uy3/image/upload/v1476363391'
+const baseStorageURL = 'http://res.cloudinary.com/dn0ep8uy3/image/upload/v1476363391';
 const images = {
     // tankURL: baseStorageURL + '/tank_gqfsf8.png',
     // soldierURL: baseStorageURL + '/soldier_f0cxpf.png',
@@ -70,30 +70,91 @@ const initialViewState = {
     }
 };
 
-
 class CesiumView extends React.Component {
 
     constructor(props, context) {
         super(props, context);
 
         this.viewState = initialViewState;
-        
+        this.dataSource = null;
 
+        this.loadEntitiesFromProps = this.loadEntitiesFromProps.bind(this);
+        this.moveEntity = this.moveEntity.bind(this);
     }
 
     componentDidMount() {
 
-        let entity, 
-            selectedEntity,
-            dragging = false,
-            isFirstClick = true;
+        let entity, selectedEntity;
+        const dragging = false, isFirstClick = true;
 
         this.viewer = new CesiumViewer(this.refs.map, this.viewState.options);
         this.handler = new ScreenSpaceEventHandler(this.viewer.scene.canvas);     
+
+        this.dataSource = new CustomDataSource('airPlaineLayer');
+        this.viewer.dataSources.add(this.dataSource);
+
+        // subscribe viewer entities
+        // this.viewer.entities.collectionChanged.addEventListenter( (collection, added, removed, changed) => console.log('entities collection changed!'));
+
+        // load the map entry view entities
+        this.loadEntitiesFromProps();
+
         this.setMapEventHandlers(this.viewer, this.handler, entity, selectedEntity, dragging, isFirstClick);
 
         // move to the default map
         this.setNewFocusOnMap(this.viewState.center.x, this.viewState.center.y);
+    }
+
+    /**
+     * move on entity on the map
+     * @param {entityId} String
+     * @param {Object} newEntityPosition
+     */
+    moveEntity(entityId, newEntityPosition) {
+        const entityToMove = this.viewer.entities.getById(entityId);
+        // entityToMove.position = newEntityPosition;
+
+        // TODO: change it to update instead of remove and adding
+        this.viewer.entities.remove(entityToMove);
+        this.viewer.entities.add(this.generateEntity(newEntityPosition.longitude, 
+            newEntityPosition.latitude, newEntityPosition.height, entityToMove.billboard.image, entityToMove.billboard.scale));
+    }
+
+    loadEntitiesFromProps() {
+        if(this.props.entities) {
+            // for(const entity of this.props.entities) {
+            //     this.viewer.entities.add(this.generateEntity(entity.position.longitude, entity.position.latitude, entity.position.height, entity.billboard.image, entity.billboard.scale));
+            
+            // right now manualy load only the first entity
+            const entity = this.props.entities[0];
+            const enteredEntity = this.viewer.entities.add(this.generateEntity(entity.position.longitude, 
+                entity.position.latitude, entity.position.height, entity.billboard.image, entity.billboard.scale));
+            
+            const _this = this;
+            const entityId = enteredEntity.id;
+            setTimeout( function() {
+                const targetPosition = _this.props.entities[1].position;
+                _this.moveEntity(entityId, targetPosition);
+            }, 7000);
+        }
+    }
+
+    /**
+     * generate entity by params
+     * @param {Number} longitude
+     * @param {Number} latitude
+     * @param {Number} height
+     * @param {String} imgSource
+     * @param {Number} imgScale
+     */
+    generateEntity(longitude, latitude, height, imgSource, imgScale) {
+        return {
+                position: Cartesian3.fromDegrees(longitude, latitude, height),
+                billboard: {
+                    image: imgSource,
+                    scale: imgScale   
+                }
+        };
     }
 
     setMapEventHandlers(viewer, handler, entity, selectedEntity, dragging, isFirstClick) {
@@ -162,14 +223,12 @@ class CesiumView extends React.Component {
             }, ScreenSpaceEventType.LEFT_CLICK);
     }
 
-
     defined(object) {
         return (object !== undefined && object !== null);
     }
 
     /** change the map center view - action like fly to given coordinates */
     setNewFocusOnMap(x, y)    {
-
         this.viewer.camera.lookAt(Cartesian3.fromDegrees(x, y), new Cartesian3(0.0, 0.0, this.viewState.zoomHeight));
     }
 
@@ -177,7 +236,7 @@ class CesiumView extends React.Component {
     onDrop(event)    {
 
         // calculate new object drop area
-        const t = this.viewer.entities;
+        // const t = this.viewer.entities;
         const dim = this.refs.map.getClientRects()[0];
         const x = (event.clientX - dim.left);
         const y = (event.clientY - dim.top);
@@ -192,7 +251,7 @@ class CesiumView extends React.Component {
         }
 
      
-        const img = document.getElementById(event.dataTransfer.getData("text"));
+        const img = document.getElementById(event.dataTransfer.getData('text'));
         //console.log(img);
 
         if (cartesian && img) {
@@ -201,6 +260,7 @@ class CesiumView extends React.Component {
             const longitudeString = Math.toDegrees(cartographic.longitude);
             const latitudeString = Math.toDegrees(cartographic.latitude);
 
+            // TODO: use generateEntity()
             const cesiumEntity = {
                 position: Cartesian3.fromDegrees(longitudeString, latitudeString, 1.0),
                 billboard: {
