@@ -1,0 +1,71 @@
+{
+  "name": "reamim-cesium-poc",
+  "version": "0.0.0",
+  "description": "no description for now",
+  "scripts": {
+    "test": "jest",
+    "clean": "rimraf dist",
+    "pre_cesium": "cp -uvr ./node_modules/cesium/Build/Cesium/* ./dist",
+    "start": "node server.js --display-error-details",
+    "start_prod": "npm run clean && npm run generate_prod_bundle && node server.js --display-error-details",
+    "start_dev": "npm run lint 2>nul & node server.js --display-error-details",
+    "lint": "node_modules\\.bin\\eslint src\\**",
+    "generate_dev_bundle": "webpack --config webpack.config.dev.js",
+    "generate_prod_bundle": "webpack --config webpack.config.prod.js"
+  },
+  "author": "someone",
+  "license": "ISC",
+  "devDependencies": {
+    "babel-core": "^6.14.0",
+    "babel-eslint": "^6.1.2",
+    "babel-jest": "^17.0.2",
+    "babel-loader": "^6.2.5",
+    "babel-plugin-transform-decorators-legacy": "^1.3.4",
+    "babel-plugin-transform-react-jsx-source": "^6.9.0",
+    "babel-polyfill": "^6.16.0",
+    "babel-preset-es2015": "^6.14.0",
+    "babel-preset-react": "^6.11.1",
+    "babel-preset-react-optimize": "^1.0.1",
+    "babel-preset-stage-0": "^6.5.0",
+    "css-loader": "^0.19.0",
+    "eslint": "^3.10.0",
+    "eslint-plugin-react": "^6.7.1",
+    "express": "^4.13.3",
+    "file-loader": "^0.9.0",
+    "html-webpack-plugin": "^2.22.0",
+    "jasmine-core": "^2.5.2",
+    "jest": "^17.0.3",
+    "json-loader": "^0.5.3",
+    "react-hot-loader": "^3.0.0-beta.5",
+    "rimraf": "^2.5.4",
+    "style-loader": "^0.12.4",
+    "url-loader": "^0.5.7",
+    "webpack": "^1.13.2",
+    "webpack-dev-middleware": "^1.2.0",
+    "webpack-dev-server": "^1.16.1",
+    "webpack-hot-middleware": "^2.2.0"
+  },
+  "dependencies": {
+    "axios": "^0.15.3",
+    "bootbox": "^4.4.0",
+    "bootstrap": "^3.3.7",
+    "cesium": "^1.28.0",
+    "eslint-plugin-react": "^6.7.1",
+    "guid": "0.0.12",
+    "jquery": "^3.1.1",
+    "lodash": "^4.16.1",
+    "react": "^15.3.2",
+    "react-addons-css-transition-group": "^15.3.2",
+    "react-bootstrap": "^0.30.6",
+    "react-dom": "^15.3.2",
+    "react-measure": "^1.3.1"
+  },
+  "config": {
+    "enviroment": "dev",
+    "host": "0.0.0.0",
+    "port": 3000,
+    "ghooks": {
+      "pre-commit": "npm run lint"
+    }
+  }
+}

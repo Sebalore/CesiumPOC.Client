@@ -1,0 +1,6 @@
+node_modules
+.vscode
+npm-debug.log
+dist
+git_ssh
+git_ssh.pub

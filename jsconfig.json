@@ -1,0 +1,13 @@
+{
+    "compilerOptions": 
+    {
+        "allowSyntheticDefaultImports": true
+    },
+    
+    "exclude": 
+    [
+        "typings/main.d.ts",
+        "typings/main",
+        "node_modules"
+    ]
+}
