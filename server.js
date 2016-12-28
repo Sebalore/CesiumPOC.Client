@@ -26,9 +26,6 @@ else
 
 console.dir(process);
 
-
-
-
 new WebpackDevServer(compailer,  {
     publicPath: config.output.publicPath,
     hot: true,
@@ -43,8 +40,6 @@ new WebpackDevServer(compailer,  {
     if (err) {
         console.log(err);
     }
-
-
     console.log(`enviroment: ${enviroment}`);
     console.log(`Listening at http://${host}:${port}/`);
 });
