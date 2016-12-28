@@ -121,19 +121,19 @@ class CesiumView extends React.Component {
     }
 
     loadEntitiesFromProps() {
-        if(this.props.entities) {
+        if(this.props.layers[0].entities) {
             // for(const entity of this.props.entities) {
             //     this.viewer.entities.add(this.generateEntity(entity.position.longitude, entity.position.latitude, entity.position.height, entity.billboard.image, entity.billboard.scale));
             
             // right now manualy load only the first entity
-            const entity = this.props.entities[0];
+            const entity = this.props.layers[0].entities[0];
             const enteredEntity = this.viewer.entities.add(this.generateEntity(entity.position.longitude, 
                 entity.position.latitude, entity.position.height, entity.billboard.image, entity.billboard.scale));
             
             const _this = this;
             const entityId = enteredEntity.id;
             setTimeout( function() {
-                const targetPosition = _this.props.entities[1].position;
+                const targetPosition = _this.props.layers[0].entities[1].position;
                 _this.moveEntity(entityId, targetPosition);
             }, 7000);
         }
