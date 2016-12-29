@@ -31,16 +31,28 @@ import Math from 'cesium/Source/Core/Math';
 import CustomDataSource from 'cesium/Source/DataSources/CustomDataSource.js';
 import DataSourceCollection from 'cesium/Source/DataSources/DataSourceCollection.js';
 
+import ScreenSpaceEventType from 'cesium/Source/Core/ScreenSpaceEventType.js';
+
 // --------------------------------------------------------------------------------------------------------------
 
 // Consts
-
-const ScreenSpaceEventType = { 
-    LEFT_UP: 1, 
-    LEFT_CLICK: 2, 
-    MOUSE_MOVE: 15, 
-    LEFT_DOWN: 0 
+const componentStyle = {
+    general: {
+        width: '100vw',
+        height: '93vh', // the upperBarView height is 6 vh.
+    },
+    fullSizeDimentions: {
+        height : '95%',
+        width: '95%',
+        margin: '5px auto'
+    },
+    altimeter : {
+        position: 'relative',
+        top: '-70vh',
+        marginLeft: '120px'
+    }
 };
+
 const initialViewState = {
     // id: 'af3e91b2-3ff0-4adf-2a29-23649c017542', // Guid.create(),
     activeLayer: null,
@@ -58,18 +70,18 @@ const initialViewState = {
         infoBox: false,
         navigationHelpButton: false,
         shadows: false,
-        sceneModePicker: true,
+        sceneModePicker: false,
         sceneMode: 3, //Cesium.SceneMode.SCENE3D
         selectionIndicator: false,
         baseLayerPicker: false,
-        geocoder: false
+        geocoder: false,
     }
 };
 
 export default class CesiumView extends React.Component {
 
-    constructor(props, context) {
-        super(props, context);
+    constructor(props) {
+        super(props);
         // class members
         this.viewState = initialViewState;
 
@@ -105,11 +117,12 @@ export default class CesiumView extends React.Component {
      * @param {entityId} String
      * @param {Object} newEntityPosition
      */
+    // TODO: change it to update instead of remove and adding
     moveEntity(entityId, newEntityPosition) {
         const entityToMove = this.viewer.entities.getById(entityId);
         // entityToMove.position = newEntityPosition;
 
-        // TODO: change it to update instead of remove and adding
+        
         this.viewer.entities.remove(entityToMove);
         this.viewer.entities.add(this.generateEntity(newEntityPosition.longitude, 
             newEntityPosition.latitude, newEntityPosition.height, entityToMove.billboard.image, entityToMove.billboard.scale));
@@ -298,11 +311,12 @@ export default class CesiumView extends React.Component {
     render() {
 
         return (
-            <div>
-                <div id="general" ref="general">
-                    <div id="map"className="map" ref="map" onDragOver= { (e) => e.preventDefault() } onDrop={this.onDrop}>
+            <div style = {componentStyle.general}>
+                <div id="general" ref="general" style = {componentStyle.fullSizeDimentions}>
+                    <div style = {componentStyle.fullSizeDimentions} id="map"className="map" ref="map" onDragOver= { (e) => e.preventDefault() } onDrop={this.onDrop}>
                     </div>
                 </div>
+                <img style = {componentStyle.altimeter} src="https://s27.postimg.org/op4ssy0ur/altimeter.png" alt="altimeter"/>
             </div>
         );
     }
@@ -310,6 +324,9 @@ export default class CesiumView extends React.Component {
 
 CesiumView.propTypes = {
     layers : React.PropTypes.array,
-    activeLayer : React.PropTypes.object
+    activeLayer : React.PropTypes.object,
+    onAddEntity : React.PropTypes.func,
+    onRemovEntity : React.PropTypes.func,
+    onUpdateEntityPosition : React.PropTypes.func
 };
 
