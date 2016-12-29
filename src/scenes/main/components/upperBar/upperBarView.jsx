@@ -1,5 +1,6 @@
 import React from 'react';
-import Guid from 'guid';
+import Layers from './components/layers/layersView';
+import ActiveLayer from './components/activeLayer/activeLayerView';
 
 export default class UpperBar extends React.Component {
 
@@ -9,22 +10,17 @@ export default class UpperBar extends React.Component {
 
     render() {
         return (
-            <div>
-                <ul>
-                    {this.props.images.map((imageUrl, idx) => 
-                    <li key={idx}>
-                        <img style={{maxWidth: 25 + '%', maxHeight: 25 + '%'}} 
-                            id = {Guid.create()}
-                            src={imageUrl}
-                            draggable='true'
-                            onDragStart={ (e) => { 
-                                e.dataTransfer.setData('text/plain', e.target.id);
-                            }}
-                        />
-                    </li>)}
-                </ul>
+             <div style={componentStyle}>
+                <Layers layers={this.props.layers}/>
+                <ActiveLayer layer={this.props.activeLayer}/>
             </div>
         );
     }
 }
 
+const componentStyle = {
+    top: '0',
+    left: '0',
+    fontSize: '30px',
+    backgroundColor: '#47494c'
+};

@@ -4,7 +4,10 @@ const HtmlWebpackPlugin = require('html-webpack-plugin')
 
 module.exports = {
   resolve: {
-    extensions: ['', '.js', '.jsx']
+    extensions: ['', '.js', '.jsx'],
+    root: [
+      path.resolve('./src')
+    ]
   },
   entry: [
     `webpack-dev-server/client?http://${process.env.npm_package_config_host}:${process.env.npm_package_config_port}`, 

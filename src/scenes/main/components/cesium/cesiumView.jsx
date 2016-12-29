@@ -33,12 +33,6 @@ import Math from 'cesium/Source/Core/Math';
 
 
 // Consts
-const baseStorageURL = 'http://res.cloudinary.com/dn0ep8uy3/image/upload/v1476363391'
-const images = {
-    // tankURL: baseStorageURL + '/tank_gqfsf8.png',
-    // soldierURL: baseStorageURL + '/soldier_f0cxpf.png',
-    jetURL: baseStorageURL + '/jet_ppnyns.png'
-};
 const ScreenSpaceEventType = { 
     LEFT_UP: 1, 
     LEFT_CLICK: 2, 
