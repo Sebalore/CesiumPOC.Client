@@ -3,6 +3,7 @@ import React, {Component} from 'react';
 //inner components
 import CesiumView from './components/cesium/cesiumView';
 import UpperBar from './components/upperBar/upperBarView';
+
 import {resources} from '../../shared/data/resources.js'; 
 
 // resources import resources
