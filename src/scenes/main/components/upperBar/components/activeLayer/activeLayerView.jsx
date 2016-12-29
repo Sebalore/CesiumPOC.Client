@@ -2,7 +2,7 @@ import React from 'react';
 import Guid from 'guid';
 
 //CONSTS
-const  resources= require('shared/data/resources');
+import {resources} from 'shared/data/resources';
 const componentStyle = {
     color: 'blue',
     display: 'inline-block',

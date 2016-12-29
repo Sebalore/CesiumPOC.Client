@@ -77,6 +77,7 @@ export default class CesiumView extends React.Component {
         this.moveEntity = this.moveEntity.bind(this);
         this.mapDataSources = this.mapDataSources.bind(this);
         this.mapEntitiesArrayToEntityCollection = this.mapEntitiesArrayToEntityCollection.bind(this);
+        this.onDrop = this.onDrop.bind(this);
     }
 
     componentDidMount() {
@@ -299,7 +300,7 @@ export default class CesiumView extends React.Component {
         return (
             <div>
                 <div id="general" ref="general">
-                    <div id="map"className="map" ref="map" onDragOver= { (e) => e.preventDefault() } onDrop={this.onDrop.bind(this)}>
+                    <div id="map"className="map" ref="map" onDragOver= { (e) => e.preventDefault() } onDrop={this.onDrop}>
                     </div>
                 </div>
             </div>

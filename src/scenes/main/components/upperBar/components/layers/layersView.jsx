@@ -1,15 +1,14 @@
 import React from 'react';
 import Guid from 'guid';
-
+import {resources} from '../../../../../../shared/data/resources.js'; 
 
 //CONSTS
-const  resources = require('shared/data/resources');
-const componentStyle = {
-    color: 'GREEN',
-    display: 'inline-block',
-    maxHeight: '50px',
-    maxWidth: '400px'
-};
+// const componentStyle = {
+//     color: 'GREEN',
+//     display: 'inline-block',
+//     maxHeight: '50px',
+//     maxWidth: '400px'
+// };
 
 const imageStyle = {
     maxHeight: resources.IMG.MAX_HEIGHT,
