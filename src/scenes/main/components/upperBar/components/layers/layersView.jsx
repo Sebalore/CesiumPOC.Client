@@ -18,10 +18,11 @@ const componentStyle = {
     }, 
     li : {
         listStyle: 'none',
-        marginRight: '10px',
+        marginRight: '15px',
     },
     ul : {
-         display: 'inline-flex',
+        margin: '7px 0',
+        display: 'inline-flex',
     }
 };
 

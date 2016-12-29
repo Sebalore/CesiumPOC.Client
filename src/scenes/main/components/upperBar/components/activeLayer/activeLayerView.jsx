@@ -19,6 +19,7 @@ const componentStyle = {
     },
     ul : {
          display: 'inline-flex',
+         margin: '7px 0',
     }
 };
 
