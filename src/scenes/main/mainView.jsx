@@ -5,7 +5,63 @@ import CesiumView from './components/cesium/cesiumView';
 import UpperBar from './components/upperBar/upperBarView';
 // import {resources} from './shared/data/resources';
 
+// resources
+import resources from '../../shared/data/resources';
 
+const initialViewState = {
+  activeLayerIndex: 0,
+  layers: [
+    {
+      name: resources.DMA,
+      imgUrl: resources.BASE_IMG_URL + '/tank_gqfsf8.png',
+      actions: [
+        {
+          id: resources.LAYERS[resources.DMA].ACTIONS.ADD.ID,
+          description: resources.LAYERS[resources.DMA].ACTIONS.ADD.DESC
+
+        }
+      ],
+      entities: [
+        {
+          position: {
+            longitude: -75.1668043913917,
+            latitude: 39.90610546720464,
+            height: 1.0
+          },
+          billboard: {
+            image: 'http://res.cloudinary.com/dn0ep8uy3/image/upload/v1476363391/tank_gqfsf8.png',
+            scale: 0.95
+          }
+        }
+      ]
+    }, {
+      name: resources.UAV,
+      imgUrl: resources.BASE_IMG_URL + '/jet_ppnyns.png',
+      actions: [
+        {
+          id: resources.LAYERS[resources.UAV].ACTIONS.ADD.ID,
+          description: resources.LAYERS[resources.UAV].ACTIONS.ADD.DESC
+
+        }
+      ],
+      entities: [
+        {
+          position: {
+            longitude: -75.16617698856817,
+            latitude: 39.90607492083895,
+            height: 1.0
+          },
+          billboard: {
+            image: 'http://res.cloudinary.com/dn0ep8uy3/image/upload/v1476363391/tank_gqfsf8.png',
+            scale: 0.95
+          }
+        }
+      ]
+    }
+  ]
+};
+
+<<<<<<< HEAD
 //resources
 const  resources = require('shared/data/resources');
 const initialViewState = {
@@ -67,6 +123,8 @@ const initialViewState = {
 
 const store = [initialViewState];
 
+=======
+>>>>>>> d2bb99f7da83f841879b231275d2dc8c6217d8b0
 export default class Main extends Component {
 
 
@@ -94,6 +152,7 @@ export default class Main extends Component {
   render() {
     return (
       <div className="mainContainer">
+<<<<<<< HEAD
         <UpperBar 
           layers={initialViewState.layers} 
           activeLayer={initialViewState.layers[initialViewState.activeLayerIndex]}
@@ -106,7 +165,19 @@ export default class Main extends Component {
           onUpdateEntityPosition = {this.onUpdateEntityPosition}
 
         />
+=======
+        
+        <CesiumView
+          layers={initialViewState.layers}
+          activeLayer={initialViewState.layers[initialViewState.activeLayerIndex]}/>
+>>>>>>> d2bb99f7da83f841879b231275d2dc8c6217d8b0
       </div>
     );
   }
 }
+
+/*
+<UpperBar
+          layers={initialViewState.layers}
+          activeLayer={initialViewState.layers[initialViewState.activeLayerIndex]}/>
+*/

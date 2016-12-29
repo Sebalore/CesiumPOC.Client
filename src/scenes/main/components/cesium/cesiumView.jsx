@@ -18,7 +18,6 @@ BuildModuleUrl.setBaseUrl(BUILD_DIR);
 import BingMapsApi from 'cesium/Source/Core/BingMapsApi';
 BingMapsApi.defaultKey = 'ApKtWGAVLWzzHvuvGZFWTRIXrsyLJ5czBuu9MkIGAdWwsQpXz_GiC55jbSnI43Qq';
 
-
 //various Cesium objects
 import CesiumViewer from 'cesium/Source/Widgets/Viewer/Viewer';
 import JulianDate from 'cesium/Source/Core/JulianDate';
@@ -29,10 +28,13 @@ import Rectangle from 'cesium/Source/Core/Rectangle';
 import ScreenSpaceEventHandler from 'cesium/Source/Core/ScreenSpaceEventHandler';
 import 'cesium/Source/Widgets/widgets.css';
 import Math from 'cesium/Source/Core/Math';
+import CustomDataSource from 'cesium/Source/DataSources/CustomDataSource.js';
+import DataSourceCollection from 'cesium/Source/DataSources/DataSourceCollection.js';
+
 // --------------------------------------------------------------------------------------------------------------
 
-
 // Consts
+
 const ScreenSpaceEventType = { 
     LEFT_UP: 1, 
     LEFT_CLICK: 2, 
@@ -64,30 +66,103 @@ const initialViewState = {
     }
 };
 
-
-class CesiumView extends React.Component {
+export default class CesiumView extends React.Component {
 
     constructor(props, context) {
         super(props, context);
-
+        // class members
         this.viewState = initialViewState;
-        
 
+        // class methods
+        this.moveEntity = this.moveEntity.bind(this);
+        this.mapDataSources = this.mapDataSources.bind(this);
+        this.mapEntitiesArrayToEntityCollection = this.mapEntitiesArrayToEntityCollection.bind(this);
     }
 
     componentDidMount() {
 
-        let entity, 
-            selectedEntity,
-            dragging = false,
-            isFirstClick = true;
+        let entity, selectedEntity;
+        const dragging = false, isFirstClick = true;
 
         this.viewer = new CesiumViewer(this.refs.map, this.viewState.options);
-        this.handler = new ScreenSpaceEventHandler(this.viewer.scene.canvas);     
+        this.handler = new ScreenSpaceEventHandler(this.viewer.scene.canvas);  
+
+        // subscribe viewer entities
+        // this.viewer.entities.collectionChanged.addEventListenter( (collection, added, removed, changed) => console.log('entities collection changed!'));
+
+        // map the data sources from the layers
+        this.mapDataSources();
+
         this.setMapEventHandlers(this.viewer, this.handler, entity, selectedEntity, dragging, isFirstClick);
 
         // move to the default map
         this.setNewFocusOnMap(this.viewState.center.x, this.viewState.center.y);
+    }
+
+    /**
+     * move on entity on the map
+     * @param {entityId} String
+     * @param {Object} newEntityPosition
+     */
+    moveEntity(entityId, newEntityPosition) {
+        const entityToMove = this.viewer.entities.getById(entityId);
+        // entityToMove.position = newEntityPosition;
+
+        // TODO: change it to update instead of remove and adding
+        this.viewer.entities.remove(entityToMove);
+        this.viewer.entities.add(this.generateEntity(newEntityPosition.longitude, 
+            newEntityPosition.latitude, newEntityPosition.height, entityToMove.billboard.image, entityToMove.billboard.scale));
+    }
+
+    /**
+     * this function map's the entities from each layer to be data sources for the viwer object
+     */
+    mapDataSources() {
+        for(const layer of this.props.layers) {
+            if(layer.entities.length > 0) { // if there are any entities in that layer
+                // init data source to add
+                const currentDataSourceToAdd = new CustomDataSource(layer.name);
+                // init the data source entities
+                this.mapEntitiesArrayToEntityCollection(layer.entities, currentDataSourceToAdd);
+                // add the data source to the data source collection
+                this.viewer.dataSources.add(currentDataSourceToAdd);
+            }
+        }
+    }
+
+    /**
+     * map given entities array managed by our structure to cesium CustomDataSource object
+     * @param {Array} srcEntities
+     * @param {CustomDataSource} entCollection the collection to enter to
+     */
+    mapEntitiesArrayToEntityCollection(srcEntities, entCollection) {
+        for(const entity of srcEntities) {
+            entCollection.entities.add(this.generateEntity(
+                entity.position.longitude,
+                entity.position.latitude,
+                entity.position.height,
+                entity.billboard.image,
+                entity.billboard.scale
+            ));
+        }
+    }
+
+    /**
+     * generate entity by params
+     * @param {Number} longitude
+     * @param {Number} latitude
+     * @param {Number} height
+     * @param {String} imgSource
+     * @param {Number} imgScale
+     */
+    generateEntity(longitude, latitude, height, imgSource, imgScale) {
+        return {
+                position: Cartesian3.fromDegrees(longitude, latitude, height),
+                billboard: {
+                    image: imgSource,
+                    scale: imgScale   
+                }
+        };
     }
 
     setMapEventHandlers(viewer, handler, entity, selectedEntity, dragging, isFirstClick) {
@@ -156,14 +231,12 @@ class CesiumView extends React.Component {
             }, ScreenSpaceEventType.LEFT_CLICK);
     }
 
-
     defined(object) {
         return (object !== undefined && object !== null);
     }
 
     /** change the map center view - action like fly to given coordinates */
     setNewFocusOnMap(x, y)    {
-
         this.viewer.camera.lookAt(Cartesian3.fromDegrees(x, y), new Cartesian3(0.0, 0.0, this.viewState.zoomHeight));
     }
 
@@ -171,7 +244,7 @@ class CesiumView extends React.Component {
     onDrop(event)    {
 
         // calculate new object drop area
-        const t = this.viewer.entities;
+        // const t = this.viewer.entities;
         const dim = this.refs.map.getClientRects()[0];
         const x = (event.clientX - dim.left);
         const y = (event.clientY - dim.top);
@@ -186,7 +259,7 @@ class CesiumView extends React.Component {
         }
 
      
-        const img = document.getElementById(event.dataTransfer.getData("text"));
+        const img = document.getElementById(event.dataTransfer.getData('text'));
         //console.log(img);
 
         if (cartesian && img) {
@@ -195,6 +268,7 @@ class CesiumView extends React.Component {
             const longitudeString = Math.toDegrees(cartographic.longitude);
             const latitudeString = Math.toDegrees(cartographic.latitude);
 
+            // TODO: use generateEntity()
             const cesiumEntity = {
                 position: Cartesian3.fromDegrees(longitudeString, latitudeString, 1.0),
                 billboard: {
@@ -233,5 +307,8 @@ class CesiumView extends React.Component {
     }
 }
 
-export default CesiumView;
+CesiumView.propTypes = {
+    layers : React.PropTypes.array,
+    activeLayer : React.PropTypes.object
+};
 
