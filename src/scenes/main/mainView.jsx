@@ -6,19 +6,6 @@ import UpperBar from './components/upperBar/upperBarView';
 
 import {resources} from '../../shared/data/resources.js'; 
 
-// resources import resources
-// from '../../shared/data/resources'; const initialViewState = {
-// activeLayerIndex: 0,   layers: [     {       name: resources.DMA,
-// imgUrl: resources.BASE_IMG_URL + '/tank_gqfsf8.png',       actions: [
-// {           id: resources.LAYERS[resources.DMA].ACTIONS.ADD.ID,
-// description: resources.LAYERS[resources.DMA].ACTIONS.ADD.DESC         }
-// ],       entities: [       ]     }, {       name: resources.UAV,
-// imgUrl: resources.BASE_IMG_URL + '/jet_ppnyns.png',       actions: [
-// {           id: resources.LAYERS[resources.UAV].ACTIONS.ADD.ID,
-// description: resources.LAYERS[resources.UAV].ACTIONS.ADD.DESC         }
-// ],       entities: [       ]     }   ] }; resources
-// const resources = require('shared/data/resources');
-
 const initialViewState = {
   activeLayerIndex: 0,
   layers: [
