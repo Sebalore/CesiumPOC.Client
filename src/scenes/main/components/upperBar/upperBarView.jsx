@@ -11,8 +11,14 @@ export default class UpperBar extends React.Component {
     render() {
         return (
              <div style={componentStyle}>
-                <Layers layers={this.props.layers}/>
-                <ActiveLayer layer={this.props.activeLayer}/>
+                <Layers 
+                    layers={this.props.layers} 
+                    actions={this.props.actions}
+                />
+                <ActiveLayer 
+                    layer={this.props.activeLayer}
+                    actions={this.props.actions}
+                />
             </div>
         );
     }

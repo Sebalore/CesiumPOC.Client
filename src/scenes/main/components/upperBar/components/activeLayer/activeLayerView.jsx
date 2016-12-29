@@ -2,7 +2,7 @@ import React from 'react';
 import Guid from 'guid';
 
 //CONSTS
-import {resources} from 'shared/data/resources';
+import {resources} from '../../../../../../shared/data/resources.js';
 const componentStyle = {
     color: 'blue',
     display: 'inline-block',
@@ -19,23 +19,32 @@ const imageStyle = {
 
 export default class ActiveLayer extends React.Component {
     render() {
-        return (
-            <div style = {componentStyle}>
-                <ul>
-                    {this.props.layer.actions.map((action, idx) => 
-                    <li key={idx}>
-                        <img style={imageStyle} 
-                            id = {Guid.create()}
-                            src={action.imgUrl}
-                            draggable='true'
-                            onDragStart={ (e) => { 
-                                e.dataTransfer.setData('text/plain', e.target.id);
-                            }}
-                        />
-                    </li>)}
-                </ul>
-            </div>
-        );
-    }    
-}
+        if (this.props.layer && this.props.layer.actions) {
+            return (
+                <div style={componentStyle}>
+                    <ul>
+                        {this
+                            .props
+                            .layer
+                            .actions
+                            .map((action, idx) => <li key={idx}>
+                                <img
+                                    style={imageStyle}
+                                    id={Guid.create()}
+                                    src={action.imgUrl}
+                                    draggable='true'
+                                    onDragStart={(e) => {
+                                        e.dataTransfer.setData('text/plain', e.target.id);
+                                }}/>
+                            </li>)}
+                    </ul>
+                </div>
+            );
+        } else {
+                <div style={componentStyle}>
+                        .....
+                </div>            
+        }
 
+    }
+}

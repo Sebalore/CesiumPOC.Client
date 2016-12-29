@@ -17,6 +17,7 @@ const imageStyle = {
 };
 
 export default class Layers extends React.Component {
+
     render() {
         return (
             <div>
@@ -26,10 +27,7 @@ export default class Layers extends React.Component {
                         <img style={imageStyle} 
                             id = {Guid.create()}
                             src={layer.imgUrl}
-                            draggable='true'
-                            onDragStart={ (e) => { 
-                                e.dataTransfer.setData('text/plain', e.target.id);
-                            }}
+                            onClick = {() =>  this.props.actions.setActiveLayer(idx)}
                         />
                     </li>)}
                 </ul>
