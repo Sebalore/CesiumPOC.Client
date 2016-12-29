@@ -1,14 +1,25 @@
 import React from 'react';
 import Guid from 'guid';
 
-//CONSTS
+// exported consts
 import {resources} from 'shared/data/resources';
+
+//CONSTS
 const componentStyle = {
-    color: 'blue',
-    display: 'inline-block',
-    float: 'right',
-    maxHeight: '50px',
-    maxWidth: '300px'
+    containerDiv : {
+        color: 'blue',
+        display: 'inline-block',
+        float: 'left',
+        maxHeight: '50px',
+        maxWidth: '300px',
+        listStyle: 'none'
+    }, 
+    li : {
+        listStyle: 'none',
+    },
+    ul : {
+         display: 'inline-flex',
+    }
 };
 
 const imageStyle = {
@@ -20,10 +31,10 @@ const imageStyle = {
 export default class ActiveLayer extends React.Component {
     render() {
         return (
-            <div style = {componentStyle}>
-                <ul>
+            <div style = {componentStyle.containerDiv}>
+                <ul style = {componentStyle.ul}>
                     {this.props.layer.actions.map((action, idx) => 
-                    <li key={idx}>
+                    <li key={idx} style={componentStyle.li}>
                         <img style={imageStyle} 
                             id = {Guid.create()}
                             src={action.imgUrl}

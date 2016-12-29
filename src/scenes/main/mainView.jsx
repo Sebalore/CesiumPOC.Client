@@ -118,16 +118,18 @@ export default class Main extends Component {
 
   render() {
     return (
-      <div className="mainContainer">
+      <div>
         <UpperBar
           layers={initialViewState.layers}
-          activeLayer={initialViewState.layers[initialViewState.activeLayerIndex]}/>
+          activeLayer={initialViewState.layers[initialViewState.activeLayerIndex]}
+        />
         <CesiumView
           layers={initialViewState.layers}
           activeLayer={initialViewState.layers[initialViewState.activeLayerIndex]}
           onAddEntity={this.onAddEntity}
           onRemovEntity={this.onRemovEntity}
-          onUpdateEntityPosition={this.onUpdateEntityPosition}/>
+          onUpdateEntityPosition={this.onUpdateEntityPosition}
+        />
       </div>
     );
   }

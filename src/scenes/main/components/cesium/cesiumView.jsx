@@ -35,6 +35,17 @@ import DataSourceCollection from 'cesium/Source/DataSources/DataSourceCollection
 
 // Consts
 
+const componentStyle = {
+    general: {
+        width: '100vw',
+        height: '94vh', // the upperBarView height is 6 vh.
+    },
+    fullSizeDimentions: {
+        height : '100%',
+        width: '100%',
+    }
+};
+
 const ScreenSpaceEventType = { 
     LEFT_UP: 1, 
     LEFT_CLICK: 2, 
@@ -298,9 +309,9 @@ export default class CesiumView extends React.Component {
     render() {
 
         return (
-            <div>
-                <div id="general" ref="general">
-                    <div id="map"className="map" ref="map" onDragOver= { (e) => e.preventDefault() } onDrop={this.onDrop}>
+            <div style = {componentStyle.general}>
+                <div id="general" ref="general" style = {componentStyle.fullSizeDimentions}>
+                    <div style = {componentStyle.fullSizeDimentions} id="map"className="map" ref="map" onDragOver= { (e) => e.preventDefault() } onDrop={this.onDrop}>
                     </div>
                 </div>
             </div>
