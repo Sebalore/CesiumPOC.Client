@@ -78,18 +78,30 @@ const initialViewState = {
     }
 };
 
+const eLayersType = {
+    Type1: 0,
+    Type2: 1,
+    Type3: 2,
+    Type4: 3,
+    Type5: 4,
+    Type6: 5,
+    Type7: 6,
+};
+
 export default class CesiumView extends React.Component {
 
     constructor(props) {
         super(props);
         // class members
         this.viewState = initialViewState;
+        this.dataSources = [];
 
         // class methods
         this.moveEntity = this.moveEntity.bind(this);
         this.mapDataSources = this.mapDataSources.bind(this);
         this.mapEntitiesArrayToEntityCollection = this.mapEntitiesArrayToEntityCollection.bind(this);
         this.onDrop = this.onDrop.bind(this);
+        this.addDataSourceLayerByType = this.addDataSourceLayerByType.bind(this);
     }
 
     componentDidMount() {
@@ -113,6 +125,38 @@ export default class CesiumView extends React.Component {
     }
 
     /**
+     * add one data source to the viewer by his type
+     * @param {eLayersType} layerType the layer type to add
+     */
+    // TODO: change type to be enumeration by sebastian approch
+    addDataSourceLayerByType(layerType) {
+        this.viewer.dataSources.add(this.dataSources[layerType])
+            .then(() => {
+                // TODO: delete after debuging
+                console.log(`data source ${this.dataSources[layerType].name} was added to the viewer`);
+            });
+    }
+
+    /**
+     * remove one data source to the viewer by his type
+     * @param {eLayersType} layerType the layer type to remove
+     */
+    // TODO: change type to be enumeration by sebastian approch
+    removeDataSourceLayerByType(layerType) {
+        const toDestroyDataSource = false;
+        const isRemoved = this.viewer.dataSources.remove(this.dataSources[layerType], toDestroyDataSource);
+        
+        // TODO: delete after debuging
+        if (isRemoved) {
+            console.log(`data source ${this.dataSources[layerType].name} was removed to the viewer`);
+        }
+        else
+        {
+            console.error('error in remove data source...');
+        }
+    }
+
+    /**
      * move on entity on the map
      * @param {entityId} String
      * @param {Object} newEntityPosition
@@ -129,7 +173,7 @@ export default class CesiumView extends React.Component {
     }
 
     /**
-     * this function map's the entities from each layer to be data sources for the viwer object
+     * this function maps the entities from each layer to be data sources for the viwer object
      */
     mapDataSources() {
         for(const layer of this.props.layers) {
@@ -140,6 +184,8 @@ export default class CesiumView extends React.Component {
                 this.mapEntitiesArrayToEntityCollection(layer.entities, currentDataSourceToAdd);
                 // add the data source to the data source collection
                 this.viewer.dataSources.add(currentDataSourceToAdd);
+                // add the data source locally to hold ALL the data sources. it is required because when we hide layer we actually remove data source from cesium.
+                this.dataSources.push(currentDataSourceToAdd);
             }
         }
     }

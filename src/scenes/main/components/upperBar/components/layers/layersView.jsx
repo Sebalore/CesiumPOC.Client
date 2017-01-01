@@ -13,15 +13,16 @@ const componentStyle = {
     containerDiv : {
         display: 'inline-block',
         float: 'right',
-        maxHeight: '50px',
-        maxWidth: '400px'
+        maxHeight: '100%',
+        maxWidth: '400px',
+        overflow: 'hidden'
     }, 
     li : {
         listStyle: 'none',
         marginRight: '15px',
     },
     ul : {
-        margin: '7px 0',
+        marginTop: '16px',
         display: 'inline-flex',
     }
 };
