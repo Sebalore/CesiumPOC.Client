@@ -142,9 +142,10 @@ export default class CesiumView extends React.Component {
      * add one data source to the viewer by his type
      * @param {Number} layerIdx the layer index to add
      */
-    // TODO: check that we not add twice
     addDataSourceLayerByType(layerIdx) {
-        this.viewer.dataSources.add(this.dataSources[layerIdx]);
+        if(!this.viewer.dataSources.contains(this.dataSources[layerIdx])) {
+            this.viewer.dataSources.add(this.dataSources[layerIdx]);
+        }
     }
 
     /**
