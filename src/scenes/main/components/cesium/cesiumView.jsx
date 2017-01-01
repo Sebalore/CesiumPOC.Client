@@ -59,10 +59,10 @@ const initialViewState = {
     // id: 'af3e91b2-3ff0-4adf-2a29-23649c017542', // Guid.create(),
     activeLayer: null,
     layers: [],
-    zoomHeight: 100,
+    zoomHeight: 20000,
     center: {
-        x: -75.166497,
-        y: 39.9060534
+      x: 34.99249855493725,
+      y:  32.79628841345832,
     },
     options: {
         timeline: false,

@@ -16,23 +16,15 @@ const initialViewState = {
           imgUrl: resources.IMG.BASE_URL + '/tank_gqfsf8.png'
         }
       ],
-      entities: [
-        // {
-        //   position: {
-        //     longitude: -75.1668043913917,
-        //     latitude: 39.90610546720464,
-        //     height: 1.0
-        //   },
-        //   billboard: {
-        //     image: 'http://res.cloudinary.com/dn0ep8uy3/image/upload/v1476363391/tank_gqfsf8.png',
-        //     scale: 0.95
-        //   }
-        // }
+      entities: [// {   position: {     longitude: -75.1668043913917,     latitude:
+        // 39.90610546720464,     height: 1.0   },   billboard: {     image:
+        // 'http://res.cloudinary.com/dn0ep8uy3/image/upload/v1476363391/tank_gqfsf8.png'
+        // ,     scale: 0.95   } }
         {
           id: null, //guid to be provided by cesium
           position: {
-            longitude: -75.16617698856817,
-            latitude: 39.90607492083895,
+            longitude: 34.99249855493725,
+            latitude: 32.79628841345832,
             height: 1.0
           },
           billboard: {
@@ -41,8 +33,7 @@ const initialViewState = {
           }
         }
       ]
-    }, 
-    {
+    }, {
       name: resources.UAV,
       imgUrl: resources.IMG.BASE_URL + '/jet_ppnyns.png',
       active: true,
@@ -65,19 +56,11 @@ const initialViewState = {
             image: resources.IMG.BASE_URL + '/tank_gqfsf8.png',
             scale: 0.95
           }
-        }, 
-        // {
-        //   id: null, //guid to be provided by cesium
-        //   position: {
-        //     longitude: -75.16617698856817,
-        //     latitude: 39.90607492083895,
-        //     height: 1.0
-        //   },
-        //   billboard: {
-        //     image: resources.IMG.BASE_URL + '/tank_gqfsf8.png',
-        //     scale: 0.95
-        //   }
-        // }
+        },
+        // {   id: null, //guid to be provided by cesium   position: {     longitude:
+        // -75.16617698856817,     latitude: 39.90607492083895,     height: 1.0   },
+        // billboard: {     image: resources.IMG.BASE_URL + '/tank_gqfsf8.png',
+        // scale: 0.95   } }
       ]
     }
   ]
@@ -97,9 +80,7 @@ class _store extends EventEmitter {
   update(data) {
     this.data = data
     return Promise.resolve(this.data);
-  }
-
-  ['handle' +  resources.ACTIONS.TOGGLE_LAYER.TYPE](agent, data) {
+  }['handle' + resources.ACTIONS.TOGGLE_LAYER.TYPE](agent, data) {
     return new Promise((resolve, reject) => {
       const layerIndex = data.layerIndex;
       if (layerIndex >= 0 && layerIndex < this.data.layers.length) {
@@ -119,9 +100,10 @@ class _store extends EventEmitter {
     switch (action.type) {
       case 'UPDATE':
         {
-          this.update(action.data)
-              .then(this.emit('change'))
-              .catch();
+          this
+            .update(action.data)
+            .then(this.emit('change'))
+            .catch();
           break;
         }
     }
@@ -129,7 +111,7 @@ class _store extends EventEmitter {
 
   handleContextAwareActions(action) {
     if (resources.ACTIONS[action.type]) {
-      const  eventData = {
+      const eventData = {
         agent: action.agent,
         type: action.type,
         data: action.data,
@@ -137,21 +119,19 @@ class _store extends EventEmitter {
         error: null
       };
       if (typeof this['handle' + action.type] === 'function') {
-          //execute the action if there is a matching function defined in store
-          this['handle' + action.type](action.agent, action.data)
-          .then((actionResult) => {
-            return new Promise((resolve, reject) => {
-              eventData.result = actionResult;
-              console.log(`[action ${action.agent}]:${action.type} store hadler. ${JSON.stringify(eventData)}`);
-              this.emit('contextAwareActionExecuted', null, eventData);
-              resolve(eventData);
-            });
-          })
-          .catch(err => {
-            eventData.error = err;
-            console.error(`[action ${action.agent}]:${action.type} store hadler. ${JSON.stringify(eventData)}`);
-            this.emit('contextAwareActionExecuted', err, eventData);
+        //execute the action if there is a matching function defined in store
+        this['handle' + action.type](action.agent, action.data).then((actionResult) => {
+          return new Promise((resolve, reject) => {
+            eventData.result = actionResult;
+            console.log(`[action ${action.agent}]:${action.type} store hadler. ${JSON.stringify(eventData)}`);
+            this.emit('contextAwareActionExecuted', null, eventData);
+            resolve(eventData);
           });
+        }).catch(err => {
+          eventData.error = err;
+          console.error(`[action ${action.agent}]:${action.type} store hadler. ${JSON.stringify(eventData)}`);
+          this.emit('contextAwareActionExecuted', err, eventData);
+        });
       } else {
         //otherwise just fire the event
         console.warn(`[action ${action.agent}]:${action.type} has no handler in store.`);

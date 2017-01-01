@@ -1,36 +1,33 @@
 {
-    "plugins": 
-    [
+    "plugins": [
         "react-hot-loader/babel",
-        "transform-decorators-legacy"
+        "transform-decorators-legacy", 
+        ["transform-runtime", {
+            "polyfill": false,
+            "regenerator": true
+        }]
     ],
 
-    "ignore" : [
+    "ignore": [
         "node_modules/**",
         "static_data/jquery/**"
     ],
 
-    "presets": 
-    [
+    "presets": [
         "es2015",
         "stage-0",
         "react"
     ],
 
-    "env": 
-    {
-        "production": 
-        {
-            "presets": 
-            [
+    "env": {
+        "production": {
+            "presets": [
                 "react-optimize"
             ]
         },
 
-        "development": 
-        {
-            "plugins": 
-            [
+        "development": {
+            "plugins": [
                 "transform-react-jsx-source"
             ]
         }
