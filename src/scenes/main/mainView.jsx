@@ -96,7 +96,7 @@ export default class Main extends Component {
         const hasLayer = add.LAYERS.find(layer => layer === l.name) !== undefined;
         
         return l.active && hasUserAgent && hasLayer;
-      })
+      });
       return (
         <div className="mainContainer">
           <div style={componentStyle}>
@@ -111,7 +111,8 @@ export default class Main extends Component {
           </div>
           <CesiumView 
             layers={layers} 
-            actions = {actions}           
+            actions = {actions}  
+            store = {store}         
           />
         </div>
       );      

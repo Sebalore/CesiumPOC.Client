@@ -131,6 +131,7 @@ class _store extends EventEmitter {
     if (resources.ACTIONS[action.type]) {
       const  eventData = {
         agent: action.agent,
+        type: action.type,
         data: action.data,
         result: null,
         error: null

@@ -32,33 +32,6 @@ const componentStyle = {
 
 export default class Layers extends React.Component {
 
-    constructor(props) {
-        super(props);
-        this.state = {
-            selectedLayerIndexes: []
-        };
-
-        //bindings
-        this.onLayerClicked = this.onLayerClicked.bind(this);
-    }
-
-    onLayerClicked(layerIndex) {
-        const isNotExist = -1;
-        const layerIndexInSelectedArray = this.state.selectedLayerIndexes.indexOf(layerIndex);
-        const isSelectedLayerWasSelectedBefore = layerIndexInSelectedArray != isNotExist;
-        const updatedSelected = this.state.selectedLayerIndexes;
-        
-        this.props.actions.setActiveLayer(layerIndex);
-        if(isSelectedLayerWasSelectedBefore) {
-            updatedSelected.splice(layerIndexInSelectedArray, 1); // if selected before so remove selection   
-        }
-        else {
-            updatedSelected.push(layerIndex);
-        }
-        
-        this.setState({selectedLayerIndexes: updatedSelected});
-    }
-
     render() {
         return (
             <div style = {componentStyle.containerDiv}>

@@ -33,6 +33,8 @@ import DataSourceCollection from 'cesium/Source/DataSources/DataSourceCollection
 
 import ScreenSpaceEventType from 'cesium/Source/Core/ScreenSpaceEventType.js';
 
+import {resources} from '../../../../shared/data/resources.js'; 
+
 // --------------------------------------------------------------------------------------------------------------
 
 // Consts
@@ -92,6 +94,7 @@ export default class CesiumView extends React.Component {
         this.mapEntitiesArrayToEntityCollection = this.mapEntitiesArrayToEntityCollection.bind(this);
         this.onDrop = this.onDrop.bind(this);
         this.addDataSourceLayerByType = this.addDataSourceLayerByType.bind(this);
+        this.handleChanges = this.handleChanges.bind(this);
     }
 
     componentDidMount() {
@@ -105,6 +108,9 @@ export default class CesiumView extends React.Component {
         // subscribe viewer entities
         // this.viewer.entities.collectionChanged.addEventListenter( (collection, added, removed, changed) => console.log('entities collection changed!'));
 
+        // listen to store changes
+        this.props.store.on('contextAwareActionExecuted', this.handleChanges);
+
         // map the data sources from the layers
         this.mapDataSources();
 
@@ -114,21 +120,40 @@ export default class CesiumView extends React.Component {
         this.setNewFocusOnMap(this.viewState.center.x, this.viewState.center.y);
     }
 
+    handleChanges(error, eventData) {
+        if(!error) {
+            switch (eventData.type) {
+                case resources.ACTIONS.TOGGLE_LAYER.TYPE:
+                {
+                    const layerIdx = eventData.data.layerIndex;
+                    if(this.props.layers[layerIdx].active) {
+                        this.addDataSourceLayerByType(layerIdx);
+                    }
+                    else {
+                        this.removeDataSourceLayerByType(layerIdx);
+                    }
+                    break;   
+                } 
+            }
+        }
+    }
+
     /**
      * add one data source to the viewer by his type
      * @param {Number} layerIdx the layer index to add
      */
-    addDataSourceLayerByType(layerType) {
-        this.viewer.dataSources.add(this.dataSources[layerType]);
+    // TODO: check that we not add twice
+    addDataSourceLayerByType(layerIdx) {
+        this.viewer.dataSources.add(this.dataSources[layerIdx]);
     }
 
     /**
      * remove one data source to the viewer by his type
      * @param {Number} layerIdx the layer index to remove
      */
-    removeDataSourceLayerByType(layerType) {
+    removeDataSourceLayerByType(layerIdx) {
         const toDestroyDataSource = false;
-        this.viewer.dataSources.remove(this.dataSources[layerType], toDestroyDataSource);
+        this.viewer.dataSources.remove(this.dataSources[layerIdx], toDestroyDataSource);
     }
 
     /**
