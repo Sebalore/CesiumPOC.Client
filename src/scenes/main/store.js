@@ -3,42 +3,18 @@ import dispatcher from './dispatcher';
 
 //resources
 import {resources} from '../../shared/data/resources';
+
 const initialViewState = {
   layers: [
     {
       name: resources.DMA,
-      imgUrl: resources.IMG.BASE_URL + '/tank_gqfsf8.png',
+      imgUrl: `${resources.IMG.BASE_URL}${resources.LAYERS[resources.DMA].IMG}`,
       active: true,
       actions: [
         {
           id: resources.LAYERS[resources.DMA].ACTIONS.ADD.ID,
           description: resources.LAYERS[resources.DMA].ACTIONS.ADD.DESC,
-          imgUrl: resources.IMG.BASE_URL + '/tank_gqfsf8.png'
-        }
-      ],
-      entities: [
-        {
-          cesiumId: null, //guid to be provided by cesium
-          position: {
-            longitude: 34.99249855493725,
-            latitude: 32.79628841345832,
-            height: 1.0
-          },
-          billboard: {
-            image: resources.IMG.BASE_URL + '/tank_gqfsf8.png',
-            scale: 0.95
-          }
-        }
-      ]
-    }, {
-      name: resources.UAV,
-      imgUrl: resources.IMG.BASE_URL + '/jet_ppnyns.png',
-      active: true,
-      actions: [
-        {
-          id: resources.LAYERS[resources.UAV].ACTIONS.ADD.ID,
-          description: resources.LAYERS[resources.UAV].ACTIONS.ADD.DESC,
-          imgUrl: resources.IMG.BASE_URL + '/jet_ppnyns.png'
+          imgUrl: `${resources.IMG.BASE_URL}${resources.LAYERS[resources.DMA].IMG}`
         }
       ],
       entities: [
@@ -50,7 +26,32 @@ const initialViewState = {
             height: 1.0
           },
           billboard: {
-            image: resources.IMG.BASE_URL + '/tank_gqfsf8.png',
+            image: `${resources.IMG.BASE_URL}${resources.LAYERS[resources.DMA].IMG}`,
+            scale: 0.95
+          }
+        }
+      ]
+    }, {
+      name: resources.UAV,
+      imgUrl: `${resources.IMG.BASE_URL}${resources.LAYERS[resources.UAV].IMG}`,
+      active: true,
+      actions: [
+        {
+          id: resources.LAYERS[resources.UAV].ACTIONS.ADD.ID,
+          description: resources.LAYERS[resources.UAV].ACTIONS.ADD.DESC,
+          imgUrl: `${resources.IMG.BASE_URL}${resources.LAYERS[resources.UAV].IMG}`
+        }
+      ],
+      entities: [
+        {
+          cesiumId: null, //guid to be provided by cesium
+          position: {
+            longitude: 34.99249855493725,
+            latitude: 32.79628841345832,
+            height: 1.0
+          },
+          billboard: {
+            imgUrl: `${resources.IMG.BASE_URL}${resources.LAYERS[resources.UAV].IMG}`,
             scale: 0.95
           }
         }
@@ -71,7 +72,10 @@ class _store extends EventEmitter {
  * @returns {Array} string array of names
  */
   getAllExistLayersName() {
-    return this.data.layers.map((currentLayer) => currentLayer.name);
+    return this
+      .data
+      .layers
+      .map((currentLayer) => currentLayer.name);
   }
 
   /**
@@ -81,22 +85,22 @@ class _store extends EventEmitter {
    * @returns {Object} the entity index and the layer index
    */
   getEntityIndexById(cesiumEntityId, layerName) {
-    for(let layerIndex = 0 ; layerIndex < this.data.layers.length ; layerIndex++) {
+    for (let layerIndex = 0; layerIndex < this.data.layers.length; layerIndex++) {
       const currentLayer = this.data.layers[layerIndex];
-      
-      if(currentLayer.name !== layerName) {
+
+      if (currentLayer.name !== layerName) {
         continue;
       }
 
-      for(let entityIndex = 0; entityIndex < currentLayer.entities.length; entityIndex++) {
+      for (let entityIndex = 0; entityIndex < currentLayer.entities.length; entityIndex++) {
         const currentEntity = currentLayer.entities[entityIndex];
-        if(currentEntity.cesiumId && currentEntity.cesiumId === cesiumEntityId) {
-          return { entityIndex , layerIndex };
+        if (currentEntity.cesiumId && currentEntity.cesiumId === cesiumEntityId) {
+          return {entityIndex, layerIndex};
         }
       }
     }
 
-    return {entityIndex: -1 , layerIndex: -1};
+    return {entityIndex: -1, layerIndex: -1};
   }
 
   getData() {
@@ -106,9 +110,7 @@ class _store extends EventEmitter {
   update(data) {
     this.data = data;
     return Promise.resolve(this.data);
-  }
-  
-  ['handle' + resources.ACTIONS.TOGGLE_LAYER.TYPE](agent, data) {
+  }['handle' + resources.ACTIONS.TOGGLE_LAYER.TYPE](agent, data) {
     return new Promise((resolve, reject) => {
       const layerIndex = data.layerIndex;
 
@@ -122,59 +124,61 @@ class _store extends EventEmitter {
         reject(msg);
       }
     });
-  }
-
-  ['handle' +  resources.ACTIONS.ADD.TYPE](agent, data) {
+  }['handle' + resources.ACTIONS.ADD.TYPE](agent, data) {
     return new Promise((resolve, reject) => {
       const layerName = data.layerName;
-      const layerIndex = this.getAllExistLayersName().indexOf(layerName);
+      const layerIndex = this
+        .getAllExistLayersName()
+        .indexOf(layerName);
 
       // TODO: if layer does not exist, add new layer to layers array
       if (layerName !== '' && layerIndex !== -1) {
-        this.data.layers[layerIndex].entities.push(data.entityToAdd);
+        this
+          .data
+          .layers[layerIndex]
+          .entities
+          .push(data.entityToAdd);
         this.emit('change', this.data);
         resolve(this.data.layers[layerIndex]);
-      } 
-      else {
+      } else {
         const msg = `Layer index ${layerIndex} was not found in store.`;
         // console.error(msg);
         reject(msg);
       }
     });
-  }
-
-  ['handle' +  resources.ACTIONS.SET_ENTITY_ID.TYPE](agent, data) {
+  }['handle' + resources.ACTIONS.SET_ENTITY_ID.TYPE](agent, data) {
     return new Promise((resolve, reject) => {
 
       const layerName = data.layerName;
-      const layerIndex = this.getAllExistLayersName().indexOf(layerName);
+      const layerIndex = this
+        .getAllExistLayersName()
+        .indexOf(layerName);
 
       // TODO: if layer does not exist, add new layer to layers array
       if (layerName !== '' && layerIndex !== -1) {
         this.data.layers[layerIndex].entities[data.entityIdx].cesiumId = data.cesiumId;
         this.emit('change', this.data);
         resolve(this.data.layers[layerIndex]);
-      } 
-      else {
+      } else {
         const msg = `Layer index ${layerIndex} was not found in store.`;
         // console.error(msg);
         reject(msg);
       }
     });
-  }
-  
-  ['handle' +  resources.ACTIONS.DELETE.TYPE](agent, data) {
+  }['handle' + resources.ACTIONS.DELETE.TYPE](agent, data) {
     return new Promise((resolve, reject) => {
-      const layerName = data.layerName,
-        {entityIndex , layerIndex } = this.getEntityIndexById(data.cesiumId, layerName);
+      const layerName = data.layerName, {entityIndex, layerIndex} = this.getEntityIndexById(data.cesiumId, layerName);
 
       // TODO: if layer does not exist, add new layer to layers array
       if (layerName !== '' && layerIndex !== -1) {
-        this.data.layers[layerIndex].entities.splice(entityIndex, 1);
+        this
+          .data
+          .layers[layerIndex]
+          .entities
+          .splice(entityIndex, 1);
         this.emit('change', this.data);
         resolve(this.data.layers[layerIndex]);
-      } 
-      else {
+      } else {
         const msg = `Layer index ${layerIndex} was not found in store.`;
         // console.error(msg);
         reject(msg);
