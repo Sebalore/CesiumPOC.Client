@@ -106,7 +106,9 @@ class _store extends EventEmitter {
   update(data) {
     this.data = data;
     return Promise.resolve(this.data);
-  }['handle' + resources.ACTIONS.TOGGLE_LAYER.TYPE](agent, data) {
+  }
+  
+  ['handle' + resources.ACTIONS.TOGGLE_LAYER.TYPE](agent, data) {
     return new Promise((resolve, reject) => {
       const layerIndex = data.layerIndex;
 
@@ -169,6 +171,25 @@ class _store extends EventEmitter {
       // TODO: if layer does not exist, add new layer to layers array
       if (layerName !== '' && layerIndex !== -1) {
         this.data.layers[layerIndex].entities.splice(entityIndex, 1);
+        this.emit('change', this.data);
+        resolve(this.data.layers[layerIndex]);
+      } 
+      else {
+        const msg = `Layer index ${layerIndex} was not found in store.`;
+        // console.error(msg);
+        reject(msg);
+      }
+    });
+  }
+
+  ['handle' +  resources.ACTIONS.UPDATE_POSITION.TYPE](agent, data) {
+    return new Promise((resolve, reject) => {
+      const layerName = data.layerName,
+        {entityIndex , layerIndex } = this.getEntityIndexById(data.cesiumId, layerName);
+
+      // TODO: if layer does not exist, add new layer to layers array
+      if (layerName !== '' && layerIndex !== -1) {
+        this.data.layers[layerIndex].entities[entityIndex].position = data.position;
         this.emit('change', this.data);
         resolve(this.data.layers[layerIndex]);
       } 
