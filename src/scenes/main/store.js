@@ -186,6 +186,25 @@ class _store extends EventEmitter {
     });
   }
 
+  ['handle' +  resources.ACTIONS.UPDATE_POSITION.TYPE](agent, data) {
+    return new Promise((resolve, reject) => {
+      const layerName = data.layerName,
+        {entityIndex , layerIndex } = this.getEntityIndexById(data.cesiumId, layerName);
+
+      // TODO: if layer does not exist, add new layer to layers array
+      if (layerName !== '' && layerIndex !== -1) {
+        this.data.layers[layerIndex].entities[entityIndex].position = data.position;
+        this.emit('change', this.data);
+        resolve(this.data.layers[layerIndex]);
+      } 
+      else {
+        const msg = `Layer index ${layerIndex} was not found in store.`;
+        // console.error(msg);
+        reject(msg);
+      }
+    });
+  }
+
   handleActions(action) {
 
     switch (action.type) {
