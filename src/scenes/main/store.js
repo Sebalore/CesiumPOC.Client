@@ -16,12 +16,9 @@ const initialViewState = {
           imgUrl: resources.IMG.BASE_URL + '/tank_gqfsf8.png'
         }
       ],
-      entities: [// {   position: {     longitude: -75.1668043913917,     latitude:
-        // 39.90610546720464,     height: 1.0   },   billboard: {     image:
-        // 'http://res.cloudinary.com/dn0ep8uy3/image/upload/v1476363391/tank_gqfsf8.png'
-        // ,     scale: 0.95   } }
+      entities: [
         {
-          id: null, //guid to be provided by cesium
+          cesiumId: null, //guid to be provided by cesium
           position: {
             longitude: 34.99249855493725,
             latitude: 32.79628841345832,
@@ -46,7 +43,7 @@ const initialViewState = {
       ],
       entities: [
         {
-          id: null, //guid to be provided by cesium
+          cesiumId: null, //guid to be provided by cesium
           position: {
             longitude: -75.1668043913917,
             latitude: 39.90610546720464,
@@ -56,11 +53,7 @@ const initialViewState = {
             image: resources.IMG.BASE_URL + '/tank_gqfsf8.png',
             scale: 0.95
           }
-        },
-        // {   id: null, //guid to be provided by cesium   position: {     longitude:
-        // -75.16617698856817,     latitude: 39.90607492083895,     height: 1.0   },
-        // billboard: {     image: resources.IMG.BASE_URL + '/tank_gqfsf8.png',
-        // scale: 0.95   } }
+        }
       ]
     }
   ]
@@ -73,6 +66,14 @@ class _store extends EventEmitter {
     this.data = initialViewState;
   }
 
+  /**
+ * get all layers names that avialable in the store
+ * @returns {Array} string array of names
+ */
+  getAllExistLayersName() {
+    return this.data.layers.map((currentLayer) => currentLayer.name);
+  }
+
   getData() {
     return this.data;
   }
@@ -83,6 +84,7 @@ class _store extends EventEmitter {
   }['handle' + resources.ACTIONS.TOGGLE_LAYER.TYPE](agent, data) {
     return new Promise((resolve, reject) => {
       const layerIndex = data.layerIndex;
+
       if (layerIndex >= 0 && layerIndex < this.data.layers.length) {
         this.data.layers[layerIndex].active = !this.data.layers[layerIndex].active;
         this.emit('change', this.data);
@@ -94,6 +96,66 @@ class _store extends EventEmitter {
       }
     });
   }
+
+  ['handle' +  resources.ACTIONS.ADD.TYPE](agent, data) {
+    return new Promise((resolve, reject) => {
+      const layerName = data.layerName;
+      const layerIndex = this.getAllExistLayersName().indexOf(layerName);
+
+      // TODO: if layer does not exist, add new layer to layers array
+      if (layerName !== '' && layerIndex !== -1) {
+        this.data.layers[layerIndex].entities.push(data.entityToAdd);
+        this.emit('change', this.data);
+        resolve(this.data.layers[layerIndex]);
+      } 
+      else {
+        const msg = `Layer index ${layerIndex} was not found in store.`;
+        // console.error(msg);
+        reject(msg);
+      }
+    });
+  }
+
+  ['handle' +  resources.ACTIONS.SET_ENTITY_ID.TYPE](agent, data) {
+    return new Promise((resolve, reject) => {
+
+      const layerName = data.layerName;
+      const layerIndex = this.getAllExistLayersName().indexOf(layerName);
+
+      // TODO: if layer does not exist, add new layer to layers array
+      if (layerName !== '' && layerIndex !== -1) {
+        this.data.layers[layerIndex].entities[data.entityIdx].cesiumId = data.cesiumId;
+        this.emit('change', this.data);
+        resolve(this.data.layers[layerIndex]);
+      } 
+      else {
+        const msg = `Layer index ${layerIndex} was not found in store.`;
+        // console.error(msg);
+        reject(msg);
+      }
+    });
+  }
+  
+
+  // ['handle' +  resources.ACTIONS.DELETE.TYPE](agent, data) {
+  //   return new Promise((resolve, reject) => {
+  //     // const layerIndex = data.layerIndex;
+  //     const layerName = data.layerName;
+  //     const layerIndex = this.getAllExistLayersName().indexOf(layerName);
+
+  //     // TODO: if layer does not exist, add new layer to layers array
+  //     if (layerName !== '' && layerIndex !== -1) {
+  //       this.data.layers[layerIndex].entities.push(data.entityToAdd);
+  //       this.emit('change', this.data);
+  //       resolve(this.data.layers[layerIndex]);
+  //     } 
+  //     else {
+  //       const msg = `Layer index ${layerIndex} was not found in store.`;
+  //       // console.error(msg);
+  //       reject(msg);
+  //     }
+  //   });
+  // }
 
   handleActions(action) {
 
