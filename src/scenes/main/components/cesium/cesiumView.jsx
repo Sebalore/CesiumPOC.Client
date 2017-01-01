@@ -78,16 +78,6 @@ const initialViewState = {
     }
 };
 
-const eLayersType = {
-    Type1: 0,
-    Type2: 1,
-    Type3: 2,
-    Type4: 3,
-    Type5: 4,
-    Type6: 5,
-    Type7: 6,
-};
-
 export default class CesiumView extends React.Component {
 
     constructor(props) {
@@ -126,34 +116,19 @@ export default class CesiumView extends React.Component {
 
     /**
      * add one data source to the viewer by his type
-     * @param {eLayersType} layerType the layer type to add
+     * @param {Number} layerIdx the layer index to add
      */
-    // TODO: change type to be enumeration by sebastian approch
     addDataSourceLayerByType(layerType) {
-        this.viewer.dataSources.add(this.dataSources[layerType])
-            .then(() => {
-                // TODO: delete after debuging
-                console.log(`data source ${this.dataSources[layerType].name} was added to the viewer`);
-            });
+        this.viewer.dataSources.add(this.dataSources[layerType]);
     }
 
     /**
      * remove one data source to the viewer by his type
-     * @param {eLayersType} layerType the layer type to remove
+     * @param {Number} layerIdx the layer index to remove
      */
-    // TODO: change type to be enumeration by sebastian approch
     removeDataSourceLayerByType(layerType) {
         const toDestroyDataSource = false;
-        const isRemoved = this.viewer.dataSources.remove(this.dataSources[layerType], toDestroyDataSource);
-        
-        // TODO: delete after debuging
-        if (isRemoved) {
-            console.log(`data source ${this.dataSources[layerType].name} was removed to the viewer`);
-        }
-        else
-        {
-            console.error('error in remove data source...');
-        }
+        this.viewer.dataSources.remove(this.dataSources[layerType], toDestroyDataSource);
     }
 
     /**
