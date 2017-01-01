@@ -116,27 +116,6 @@ export default class CesiumView extends React.Component {
 
         // move to the default map
         this.setNewFocusOnMap(this.viewState.center.x, this.viewState.center.y);
-
-        // TODO: remove this after debuging
-        setTimeout(() => {
-            this.props.actions[resources.ACTIONS.ADD.TYPE](
-                resources.AGENTS.API,
-                {
-                    layerName: resources.DMA, 
-                    entityToAdd: {
-                        cesiumId: null, //guid to be provided by cesium
-                        position: {
-                            longitude: -76.16617698856817,
-                            latitude: 40.0,
-                            height: 2.0
-                        },
-                        billboard: {
-                            image: resources.IMG.BASE_URL + '/tank_gqfsf8.png',
-                            scale: 0.95
-                        }
-                    }
-                });
-        }, 5000);
     }
 
     handleContextAwareActions(error, eventData) {
@@ -176,10 +155,18 @@ export default class CesiumView extends React.Component {
                                 cesiumId: addedEntity.id
                             });
                     }
+
                     break;
                 }
                 case resources.ACTIONS.DELETE.TYPE:
                 {
+                    if(eventData.agent === resources.AGENTS.USER) {
+                        const layerIndex = this.getDataSourceIndexByLayerName(eventData.data.layerName);
+                        const concreteDataSource = this.viewer.dataSources.get(layerIndex);
+
+                        concreteDataSource.entities.removeById(eventData.data.cesiumId);
+                    }
+
                     break;
                 }
                 case resources.ACTIONS.UPDATE_POSITION.TYPE:
