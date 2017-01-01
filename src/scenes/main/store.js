@@ -81,7 +81,9 @@ class _store extends EventEmitter {
   update(data) {
     this.data = data
     return Promise.resolve(this.data);
-  }['handle' + resources.ACTIONS.TOGGLE_LAYER.TYPE](agent, data) {
+  }
+  
+  ['handle' + resources.ACTIONS.TOGGLE_LAYER.TYPE](agent, data) {
     return new Promise((resolve, reject) => {
       const layerIndex = data.layerIndex;
 
