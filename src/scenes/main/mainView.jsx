@@ -1,4 +1,5 @@
 import React, {Component} from 'react';
+import Guid from 'guid';
 
 //inner components
 import actions from './actions'; 
@@ -106,11 +107,33 @@ export default class Main extends Component {
     const velocity = {
       longitude: 0.0000000000001,
       latitude: 0.0000000000002,
-      height: 50.0
+      height: 400.0
     };
     const coordinatesGenerator = linearCoordinatesGenerator(initial, dest, velocity);
     window.coGen = coordinatesGenerator; 
     //----------------------------------------------------------------------------------------------
+
+    setInterval(() => {
+      const cords = coordinatesGenerator.next();
+        if(!cords.done) {
+          actions[resources.ACTIONS.ADD.TYPE](
+                          resources.AGENTS.API,
+                          {
+                              id: Guid.create(),
+                              layerName: 'DynamicMissionArea',
+                              position: cords.value,
+                              billboard: {
+                                image: `${resources.IMG.BASE_URL}${resources.LAYERS[resources.DMA].IMG}`,
+                                scale: 0.95
+                              }                              
+                          });
+        }
+        else
+        {
+          console.log('generator done.');
+        }
+    }, 6000);
+
   }
 
   componentWillUnmount() {

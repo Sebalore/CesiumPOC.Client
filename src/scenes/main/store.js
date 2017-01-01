@@ -1,5 +1,6 @@
 import {EventEmitter} from 'events';
 import dispatcher from './dispatcher';
+import Guid from 'guid';
 
 //resources
 import {resources} from '../../shared/data/resources';
@@ -19,10 +20,11 @@ const initialViewState = {
       ],
       entities: [
         {
+          id: Guid.create(),
           cesiumId: null, //guid to be provided by cesium
           position: {
-            longitude: -75.1668043913917,
-            latitude: 39.90610546720464,
+            longitude: 34.99249855493725,
+            latitude: 32.79628841345832,
             height: 1.0
           },
           billboard: {
@@ -44,6 +46,7 @@ const initialViewState = {
       ],
       entities: [
         {
+          id: Guid.create(),
           cesiumId: null, //guid to be provided by cesium
           position: {
             longitude: 34.99249855493725,
@@ -67,16 +70,6 @@ class _store extends EventEmitter {
     this.data = initialViewState;
   }
 
-  /**
- * get all layers names that avialable in the store
- * @returns {Array} string array of names
- */
-  getAllExistLayersName() {
-    return this
-      .data
-      .layers
-      .map((currentLayer) => currentLayer.name);
-  }
 
   /**
    * get the index of entity in the store by generated cesium id
@@ -110,7 +103,9 @@ class _store extends EventEmitter {
   update(data) {
     this.data = data;
     return Promise.resolve(this.data);
-  }['handle' + resources.ACTIONS.TOGGLE_LAYER.TYPE](agent, data) {
+  }
+  
+  ['handle' + resources.ACTIONS.TOGGLE_LAYER.TYPE](agent, data) {
     return new Promise((resolve, reject) => {
       const layerIndex = data.layerIndex;
 
@@ -124,48 +119,37 @@ class _store extends EventEmitter {
         reject(msg);
       }
     });
-  }['handle' + resources.ACTIONS.ADD.TYPE](agent, data) {
+  }
+  
+  ['handle' + resources.ACTIONS.ADD.TYPE](agent, data) {
     return new Promise((resolve, reject) => {
       const layerName = data.layerName;
-      const layerIndex = this
-        .getAllExistLayersName()
-        .indexOf(layerName);
+      const layerIndex = this.data.layers.findIndex(l => l.name===layerName);
 
-      // TODO: if layer does not exist, add new layer to layers array
-      if (layerName !== '' && layerIndex !== -1) {
-        this
-          .data
-          .layers[layerIndex]
-          .entities
-          .push(data.entityToAdd);
-        this.emit('change', this.data);
-        resolve(this.data.layers[layerIndex]);
-      } else {
-        const msg = `Layer index ${layerIndex} was not found in store.`;
-        // console.error(msg);
-        reject(msg);
-      }
+      this.data.layers[layerIndex].entities.push(data);
+      this.emit('change', this.data);
+      resolve(data);
+
     });
-  }['handle' + resources.ACTIONS.SET_ENTITY_ID.TYPE](agent, data) {
+  }
+  
+  ['handle' + resources.ACTIONS.SET_ENTITY_ID.TYPE](agent, data) {
     return new Promise((resolve, reject) => {
 
       const layerName = data.layerName;
-      const layerIndex = this
-        .getAllExistLayersName()
-        .indexOf(layerName);
+      const layerIndex = this.data.layers.findIndex(l => l.name===layerName);
+      
+      const entityIndex = this.data.layers[layerIndex].entities.findIndex(e => e.id===data.entityId);
+      this.data.layers[layerIndex].entities[entityIndex].cesiumId = data.cesiumId;
+      
+      this.emit('change', this.data);
+      
+      resolve(this.data.layers[layerIndex].entities[entityIndex]);
 
-      // TODO: if layer does not exist, add new layer to layers array
-      if (layerName !== '' && layerIndex !== -1) {
-        this.data.layers[layerIndex].entities[data.entityIdx].cesiumId = data.cesiumId;
-        this.emit('change', this.data);
-        resolve(this.data.layers[layerIndex]);
-      } else {
-        const msg = `Layer index ${layerIndex} was not found in store.`;
-        // console.error(msg);
-        reject(msg);
-      }
     });
-  }['handle' + resources.ACTIONS.DELETE.TYPE](agent, data) {
+  }
+  
+  ['handle' + resources.ACTIONS.DELETE.TYPE](agent, data) {
     return new Promise((resolve, reject) => {
       const layerName = data.layerName, {entityIndex, layerIndex} = this.getEntityIndexById(data.cesiumId, layerName);
 
@@ -239,7 +223,7 @@ class _store extends EventEmitter {
           });
         }).catch(err => {
           eventData.error = err;
-          console.error(`[action ${action.agent}]:${action.type} store hadler. ${JSON.stringify(eventData)}`);
+          console.error(`[action ${action.agent}]:${action.type} store hadler. ${JSON.stringify(err)}`);
           this.emit('contextAwareActionExecuted', err, eventData);
         });
       } else {

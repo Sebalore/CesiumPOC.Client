@@ -7,7 +7,7 @@ export function * linearCoordinatesGenerator(origin, destination, velocity) {
         console.log(JSON.stringify(currentPosition));
         currentPosition = {
             longitude: currentPosition.longitude + velocity.longitude,
-            altitude: currentPosition.altitude + velocity.altitude,
+            latitude: currentPosition.latitude + velocity.latitude,
             height: currentPosition.height + velocity.height
         };
         yield currentPosition;
