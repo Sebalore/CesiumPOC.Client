@@ -29,7 +29,8 @@ const initialViewState = {
           }
         }
       ]
-    }, {
+    }, 
+    {
       name: resources.UAV,
       imgUrl: resources.IMG.BASE_URL + '/jet_ppnyns.png',
       actions: [
@@ -63,6 +64,62 @@ const initialViewState = {
             scale: 0.95
           }
         }
+      ]
+    },
+        {
+      name: resources.UAV,
+      imgUrl: 'http://downloadicons.net/sites/default/files/home-home-icon-90085.png', //resources.IMG.BASE_URL + '/jet_ppnyns.png',
+      actions: [
+        {
+          id: resources.LAYERS[resources.UAV].ACTIONS.ADD.ID,
+          description: resources.LAYERS[resources.UAV].ACTIONS.ADD.DESC,
+          imgUrl: resources.IMG.BASE_URL + '/jet_ppnyns.png'
+        }
+      ],
+      entities: [
+
+      ]
+    },
+        {
+      name: resources.UAV,
+      imgUrl: 'http://4.bp.blogspot.com/--ddYKXz6fpc/Uh1NrRYLtVI/AAAAAAAAAPA/Bd16ChUzC2Q/s1600/home-icon.png',
+      actions: [
+        {
+          id: resources.LAYERS[resources.UAV].ACTIONS.ADD.ID,
+          description: resources.LAYERS[resources.UAV].ACTIONS.ADD.DESC,
+          imgUrl: resources.IMG.BASE_URL + '/jet_ppnyns.png'
+        }
+      ],
+      entities: [
+  
+      ]
+    },
+    {
+      name: resources.UAV,
+      imgUrl: resources.IMG.BASE_URL + '/jet_ppnyns.png',
+      actions: [
+        {
+          id: resources.LAYERS[resources.UAV].ACTIONS.ADD.ID,
+          description: resources.LAYERS[resources.UAV].ACTIONS.ADD.DESC,
+          imgUrl: resources.IMG.BASE_URL + '/jet_ppnyns.png'
+        }
+      ],
+      entities: [
+  
+      ]
+    },
+    {
+      name: resources.UAV,
+      imgUrl: resources.IMG.BASE_URL + '/jet_ppnyns.png',
+      actions: [
+        {
+          id: resources.LAYERS[resources.UAV].ACTIONS.ADD.ID,
+          description: resources.LAYERS[resources.UAV].ACTIONS.ADD.DESC,
+          imgUrl: resources.IMG.BASE_URL + '/jet_ppnyns.png'
+        }
+      ],
+      entities: [
+  
       ]
     }
   ]
