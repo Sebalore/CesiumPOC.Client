@@ -94,7 +94,8 @@ export default class CesiumView extends React.Component {
         this.mapEntitiesArrayToEntityCollection = this.mapEntitiesArrayToEntityCollection.bind(this);
         this.onDrop = this.onDrop.bind(this);
         this.addDataSourceLayerByType = this.addDataSourceLayerByType.bind(this);
-        this.handleChanges = this.handleContextAwareActions.bind(this);
+        this.handleContextAwareActions = this.handleContextAwareActions.bind(this);
+        this.getDataSourceIndexByLayerName = this.getDataSourceIndexByLayerName.bind(this);
     }
 
     componentDidMount() {
@@ -107,9 +108,6 @@ export default class CesiumView extends React.Component {
 
         // subscribe viewer entities
         // this.viewer.entities.collectionChanged.addEventListenter( (collection, added, removed, changed) => console.log('entities collection changed!'));
-
-        // listen to store changes
-        //this.props.store.on('contextAwareActionExecuted', this.handleContextAwareActions);
 
         // map the data sources from the layers
         this.mapDataSources();
@@ -125,6 +123,7 @@ export default class CesiumView extends React.Component {
             switch (eventData.type) {
                 case resources.ACTIONS.TOGGLE_LAYER.TYPE:
                 {
+                    // TODO: use layer name instead.
                     const layerIdx = eventData.data.layerIndex;
                     if(this.props.layers[layerIdx].active) {
                         this.addDataSourceLayerByType(layerIdx);
@@ -134,8 +133,52 @@ export default class CesiumView extends React.Component {
                     }
                     break;   
                 } 
+                case resources.ACTIONS.ADD.TYPE:
+                {
+                    if(eventData.agent === resources.AGENTS.API) {
+                        const layerIndex = this.getDataSourceIndexByLayerName(eventData.data.layerName);
+                        const concreteDataSource = this.viewer.dataSources.get(layerIndex);
+                        
+                        concreteDataSource.entities.add(this.generateEntity(
+                            eventData.data.entityToAdd.position.longitude,
+                            eventData.data.entityToAdd.position.latitude,
+                            eventData.data.entityToAdd.position.height,
+                            eventData.data.entityToAdd.billboard.image,
+                            eventData.data.entityToAdd.billboard.scale
+                        ));
+                    }
+                    break;
+                }
+                case resources.ACTIONS.DELETE.TYPE:
+                {
+                    break;
+                }
+                case resources.ACTIONS.UPDATE_POSITION.TYPE:
+                {
+                    break;
+                }
             }
         }
+    }
+
+    /**
+     * get DataSource index from the cesium viewer object by given layer name
+     * @param {layerName} layerName the search field
+     * @returns {Number} -1 if not exist
+     */
+    getDataSourceIndexByLayerName(layerName) {
+        let layerIdxToReturn = -1;
+
+        for(let i = 0 ; i < this.viewer.dataSources.length ; i++) {
+            const currentDataSource = this.viewer.dataSources.get(i);
+
+            if(currentDataSource.name === layerName) {
+                layerIdxToReturn = i;
+                break;
+            }
+        }
+
+        return layerIdxToReturn;
     }
 
     /**
@@ -215,6 +258,7 @@ export default class CesiumView extends React.Component {
      * @param {Number} height
      * @param {String} imgSource
      * @param {Number} imgScale
+     * @returns {Object} an object that can be added to cesium entities collection
      */
     generateEntity(longitude, latitude, height, imgSource, imgScale) {
         return {
