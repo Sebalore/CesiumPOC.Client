@@ -80,10 +80,20 @@ export default class Main extends Component {
     this.setState({
       layers: store.data.layers
     });    
-    store.on('change', (data) =>{
-      this.setState({
-        layers: store.data.layers
-      });
+    store.on('change', this.setLayers.bind(this));
+  }
+
+  componentDidMount() {
+    store.on('contextAwareActionExecuted', this.refs.cesium.handleContextAwareActions.bind(this.refs.cesium))
+  }
+
+  componentWillUnmount() {
+    store.removeListener('change', this.setLayers);
+  }
+
+  setLayers(data) {
+    this.setState({
+      layers: store.data.layers
     });
   }
 
@@ -112,7 +122,7 @@ export default class Main extends Component {
           <CesiumView 
             layers={layers} 
             actions = {actions}  
-            store = {store}         
+            ref='cesium'         
           />
         </div>
       );      

@@ -94,7 +94,7 @@ export default class CesiumView extends React.Component {
         this.mapEntitiesArrayToEntityCollection = this.mapEntitiesArrayToEntityCollection.bind(this);
         this.onDrop = this.onDrop.bind(this);
         this.addDataSourceLayerByType = this.addDataSourceLayerByType.bind(this);
-        this.handleChanges = this.handleChanges.bind(this);
+        this.handleChanges = this.handleContextAwareActions.bind(this);
     }
 
     componentDidMount() {
@@ -109,7 +109,7 @@ export default class CesiumView extends React.Component {
         // this.viewer.entities.collectionChanged.addEventListenter( (collection, added, removed, changed) => console.log('entities collection changed!'));
 
         // listen to store changes
-        this.props.store.on('contextAwareActionExecuted', this.handleChanges);
+        //this.props.store.on('contextAwareActionExecuted', this.handleContextAwareActions);
 
         // map the data sources from the layers
         this.mapDataSources();
@@ -120,7 +120,7 @@ export default class CesiumView extends React.Component {
         this.setNewFocusOnMap(this.viewState.center.x, this.viewState.center.y);
     }
 
-    handleChanges(error, eventData) {
+    handleContextAwareActions(error, eventData) {
         if(!error) {
             switch (eventData.type) {
                 case resources.ACTIONS.TOGGLE_LAYER.TYPE:
