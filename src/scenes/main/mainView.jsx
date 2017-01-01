@@ -6,8 +6,11 @@ import store from './store';
 import CesiumView from './components/cesium/cesiumView';
 import Layers from './components/layers/layersView';
 import AddEntity from './components/addEntity/addEntityView';
-import {resources} from '../../shared/data/resources.js'; 
+import {resources} from '../../shared/data/resources'; 
+import { linearCoordinatesGenerator } from './services';
+
 /*
+
 const initialViewState = {
   addEntityIndex: 0,
   layers: [
@@ -84,11 +87,35 @@ export default class Main extends Component {
   }
 
   componentDidMount() {
-    store.on('contextAwareActionExecuted', this.refs.cesium.handleContextAwareActions.bind(this.refs.cesium))
+    store.on('contextAwareActionExecuted', this.refs.cesium.handleContextAwareActions.bind(this.refs.cesium));
+
+
+    //---- for testing movement ------------------------------------------------------------------- 
+    const initial = {
+      longitude: 34.99249855493725,
+      latitude:  32.79628841345832,
+      height: 1.0
+    };
+
+    const dest = {
+      longitude: -75.16617698856817,
+      latitude: 39.90607492083895,
+      height: 1000.0
+    };
+
+    const velocity = {
+      longitude: 0.0000000000001,
+      latitude: 0.0000000000002,
+      height: 50.0
+    };
+    const coordinatesGenerator = linearCoordinatesGenerator(initial, dest, velocity);
+    window.coGen = coordinatesGenerator; 
+    //----------------------------------------------------------------------------------------------
   }
 
   componentWillUnmount() {
     store.removeListener('change', this.setLayers);
+    store.removeListener('contextAwareActionExecuted', this.refs.cesium.handleContextAwareActions);
   }
 
   setLayers(data) {
