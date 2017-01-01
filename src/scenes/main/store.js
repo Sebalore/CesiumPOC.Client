@@ -18,7 +18,7 @@ const initialViewState = {
       ],
       entities: [
         {
-          id: null, //guid to be provided by cesium
+          cesiumId: null, //guid to be provided by cesium
           position: {
             longitude: -75.16617698856817,
             latitude: 39.90607492083895,
@@ -44,7 +44,7 @@ const initialViewState = {
       ],
       entities: [
         {
-          id: null, //guid to be provided by cesium
+          cesiumId: null, //guid to be provided by cesium
           position: {
             longitude: -75.1668043913917,
             latitude: 39.90610546720464,
@@ -100,9 +100,8 @@ class _store extends EventEmitter {
     });
   }
 
-    ['handle' +  resources.ACTIONS.ADD.TYPE](agent, data) {
+  ['handle' +  resources.ACTIONS.ADD.TYPE](agent, data) {
     return new Promise((resolve, reject) => {
-      // const layerIndex = data.layerIndex;
       const layerName = data.layerName;
       const layerIndex = this.getAllExistLayersName().indexOf(layerName);
 
@@ -119,6 +118,47 @@ class _store extends EventEmitter {
       }
     });
   }
+
+  ['handle' +  resources.ACTIONS.SET_ENTITY_ID.TYPE](agent, data) {
+    return new Promise((resolve, reject) => {
+
+      const layerName = data.layerName;
+      const layerIndex = this.getAllExistLayersName().indexOf(layerName);
+
+      // TODO: if layer does not exist, add new layer to layers array
+      if (layerName !== '' && layerIndex !== -1) {
+        this.data.layers[layerIndex].entities[data.entityIdx].cesiumId = data.cesiumId;
+        this.emit('change', this.data);
+        resolve(this.data.layers[layerIndex]);
+      } 
+      else {
+        const msg = `Layer index ${layerIndex} was not found in store.`;
+        // console.error(msg);
+        reject(msg);
+      }
+    });
+  }
+  
+
+  // ['handle' +  resources.ACTIONS.DELETE.TYPE](agent, data) {
+  //   return new Promise((resolve, reject) => {
+  //     // const layerIndex = data.layerIndex;
+  //     const layerName = data.layerName;
+  //     const layerIndex = this.getAllExistLayersName().indexOf(layerName);
+
+  //     // TODO: if layer does not exist, add new layer to layers array
+  //     if (layerName !== '' && layerIndex !== -1) {
+  //       this.data.layers[layerIndex].entities.push(data.entityToAdd);
+  //       this.emit('change', this.data);
+  //       resolve(this.data.layers[layerIndex]);
+  //     } 
+  //     else {
+  //       const msg = `Layer index ${layerIndex} was not found in store.`;
+  //       // console.error(msg);
+  //       reject(msg);
+  //     }
+  //   });
+  // }
 
   handleActions(action) {
 

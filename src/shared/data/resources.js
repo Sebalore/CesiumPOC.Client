@@ -7,6 +7,7 @@ const DELETE = 'DELETE';
 const UPDATE_POSITION = 'UPDATE_POSITION';
 const MAP_CENTER = 'MAP_CENTER';
 const TOGGLE_LAYER = 'TOGGLE_LAYER';
+const SET_ENTITY_ID = 'SET_ENTITY_ID';
 //--------------------------------- ------ AGENTS ------------------
 const USER = 'USER';
 const API = 'API';
@@ -77,6 +78,14 @@ export const resources = {
         MAP_CENTER: {
             TYPE: MAP_CENTER,
             DESC: 'Change map camera view to center on the entity',
+            LAYERS: [
+                DMA, UAV
+            ],
+            AGENTS: [USER]
+        },
+        SET_ENTITY_ID : {
+            TYPE: SET_ENTITY_ID,
+            DESC: 'add generated cesiumId to added object in the store',
             LAYERS: [
                 DMA, UAV
             ],

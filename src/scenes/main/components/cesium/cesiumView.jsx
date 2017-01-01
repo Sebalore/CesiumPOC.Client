@@ -116,6 +116,27 @@ export default class CesiumView extends React.Component {
 
         // move to the default map
         this.setNewFocusOnMap(this.viewState.center.x, this.viewState.center.y);
+
+        // TODO: remove this after debuging
+        setTimeout(() => {
+            this.props.actions[resources.ACTIONS.ADD.TYPE](
+                resources.AGENTS.API,
+                {
+                    layerName: resources.DMA, 
+                    entityToAdd: {
+                        cesiumId: null, //guid to be provided by cesium
+                        position: {
+                            longitude: -76.16617698856817,
+                            latitude: 40.0,
+                            height: 2.0
+                        },
+                        billboard: {
+                            image: resources.IMG.BASE_URL + '/tank_gqfsf8.png',
+                            scale: 0.95
+                        }
+                    }
+                });
+        }, 5000);
     }
 
     handleContextAwareActions(error, eventData) {
@@ -139,13 +160,21 @@ export default class CesiumView extends React.Component {
                         const layerIndex = this.getDataSourceIndexByLayerName(eventData.data.layerName);
                         const concreteDataSource = this.viewer.dataSources.get(layerIndex);
                         
-                        concreteDataSource.entities.add(this.generateEntity(
+                        const addedEntity = concreteDataSource.entities.add(this.generateEntity(
                             eventData.data.entityToAdd.position.longitude,
                             eventData.data.entityToAdd.position.latitude,
                             eventData.data.entityToAdd.position.height,
                             eventData.data.entityToAdd.billboard.image,
                             eventData.data.entityToAdd.billboard.scale
                         ));
+
+                        this.props.actions[resources.ACTIONS.SET_ENTITY_ID.TYPE](
+                            resources.AGENTS.USER,
+                            {
+                                layerName: concreteDataSource.name,
+                                entityIdx: concreteDataSource.entities.values.length - 1,
+                                cesiumId: addedEntity.id
+                            });
                     }
                     break;
                 }
@@ -240,14 +269,23 @@ export default class CesiumView extends React.Component {
      * @param {CustomDataSource} entCollection the collection to enter to
      */
     mapEntitiesArrayToEntityCollection(srcEntities, entCollection) {
-        for(const entity of srcEntities) {
-            entCollection.entities.add(this.generateEntity(
+        for(let i = 0 ; i < srcEntities.length ; i++) {
+            const entity = srcEntities[i];
+            const addedEntity = entCollection.entities.add(this.generateEntity(
                 entity.position.longitude,
                 entity.position.latitude,
                 entity.position.height,
                 entity.billboard.image,
                 entity.billboard.scale
             ));
+
+            this.props.actions[resources.ACTIONS.SET_ENTITY_ID.TYPE](
+                            resources.AGENTS.USER,
+                            {
+                                layerName: entCollection.name,
+                                entityIdx: i,
+                                cesiumId: addedEntity.id
+                            });
         }
     }
 
