@@ -4,11 +4,11 @@ import dispatcher from './dispatcher';
 //resources
 import {resources} from '../../shared/data/resources';
 const initialViewState = {
-  activeLayerIndex: 0,
   layers: [
     {
       name: resources.DMA,
       imgUrl: resources.IMG.BASE_URL + '/tank_gqfsf8.png',
+      active: true,
       actions: [
         {
           id: resources.LAYERS[resources.DMA].ACTIONS.ADD.ID,
@@ -32,6 +32,7 @@ const initialViewState = {
     }, {
       name: resources.UAV,
       imgUrl: resources.IMG.BASE_URL + '/jet_ppnyns.png',
+      active: true,
       actions: [
         {
           id: resources.LAYERS[resources.UAV].ACTIONS.ADD.ID,
@@ -84,10 +85,11 @@ class _store extends EventEmitter {
     return Promise.resolve(this.data);
   }
 
-  setActiveLayer(layerIndex) {
+  ['handle' +  resources.ACTIONS.TOGGLE_LAYER.TYPE](agent, data) {
     return new Promise((resolve, reject) => {
-      if (layerIndex>=0) {
-        this.data.activeLayerIndex = layerIndex;
+      const layerIndex = data.layerIndex;
+      if (layerIndex >= 0 && layerIndex < this.data.layers.length) {
+        this.data.layers[layerIndex].active = !this.data.layers[layerIndex].active;
         resolve(this.data.layers[layerIndex]);
       } else {
         const msg = `Layer index ${layerIndex} was not found in store.`;
@@ -103,39 +105,46 @@ class _store extends EventEmitter {
       case 'UPDATE':
         {
           this.update(action.data)
-          .then(this.emit('change'))
-          .catch()
+              .then(this.emit('change'))
+              .catch();
           break;
         }
-      case 'SET_ACTIVE_LAYER':
-        {
-          this.setActiveLayer(action.layerIndex)
-          .then((newActiveLayer) => {
-            this.emit('activeLayerChanged', null, newActiveLayer);
+    }
+  }
+
+  handleContextAwareActions(action) {
+    if (resources.ACTIONS[action.type]) {
+      const  eventData = {
+        agent: action.agent,
+        data: action.data,
+        result: null,
+        error: null
+      };
+      if (typeof this['handle' + action.type] === 'function') {
+          //execute the action if there is a matching function defined in store
+          this['handle' + action.type](action.agent, action.data)
+          .then((actionResult) => {
+            eventData.result = actionResult;
+            console.log(`[action ${action.agent}]:${action.type} store hadler returned ${JSON.stringify(actionResult)}`);
+            this.emit('contextAwareActionExecuted', null, eventData);
           })
-          .catch((err) => {
-               this.emit('activeLayerChanged', err);
-          })
-          break;
-        }
+          .catch(err => {
+            eventData.error = err;
+            console.error(`[action ${action.agent}]:${action.type} storehadler returned ${JSON.stringify(actionResult)}`);
+            this.emit('contextAwareActionExecuted', err, eventData);
+          });
+      } else {
+        //otherwise just fire the event
+        console.warn(`[action ${action.agent}]:${action.type} has no handler in store.`);
+        this.emit('contextAwareActionExecuted', null, eventData);
+      }
     }
   }
 }
 
 const store = new _store;
 dispatcher.register(store.handleActions.bind(store));
+dispatcher.register(store.handleContextAwareActions.bind(store));
 window.dispatcher = dispatcher;
+window.store = store;
 export default store;
-
-// onAddEntity = (entity, layerName) => {   store[0]     .layers[layerName]
-// .entities     .push(entiy);   console.log(`${entity.id} added to ${layerName}
-// layer.`); }; onRemovEntity = (entity, layerName) => {
-// store[0].layers[layerName].entities = store[0]     .layers[layerName]
-// .entities     .filter(e => !e.id || e.id !== entity.id);
-// console.log(`${entity.id} removed from ${layerName} layer.`); };
-// onUpdateEntityPosition = (entity, layerName) => {   const idx = store[0]
-// .layers[layerName]     .entities     .findIndex(e => e.id === entiy.id);   if
-// (idx) {     store[0].layers[layerName].entities[idx].position =
-// entity.position;     console.log(`${entity.id} of ${layerName} layer had
-// changed position to ${entity.position}.`);   } else {
-// console.erroror(`${entity.id} was not found in ${layerName} layer.`);   } };

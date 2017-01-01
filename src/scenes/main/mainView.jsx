@@ -4,12 +4,13 @@ import React, {Component} from 'react';
 import actions from './actions'; 
 import store from './store';
 import CesiumView from './components/cesium/cesiumView';
-import UpperBar from './components/upperBar/upperBarView';
+import Layers from './components/layers/layersView';
+import AddEntity from './components/addEntity/addEntityView';
 
 import {resources} from '../../shared/data/resources.js'; 
 /*
 const initialViewState = {
-  activeLayerIndex: 0,
+  addEntityIndex: 0,
   layers: [
     {
       name: resources.DMA,
@@ -77,15 +78,14 @@ const initialViewState = {
 export default class Main extends Component {
 
   componentWillMount() {
-    window.store = store;
     this.setState({
-      layers: store.data.layers,
-      activeLayer: store.data.layers[store.data.activeLayerIndex]
+      layers: store.data.layers
     });    
-    store.on('activeLayerChanged', (err, activeLayer) =>{
+    store.on('change', (data) =>{
       if (!err) {
+        store.data = data;
         this.setState({
-          activeLayer: activeLayer
+          layers: store.data.layers
         });
       } else {
         console.error(err);
@@ -101,18 +101,27 @@ export default class Main extends Component {
   render() {
     if (this.state && this.state.layers) {
       const layers = this.state.layers;
-      const activeLayer = this.state.activeLayer;
-      const { update, setActiveLayer } = actions;
+      const addableEntityLayers = this.state.layers.filter(l => {
+        const add = resources.ACTIONS.ADD;
+        const hasUserAgent = add.AGENTS.find(agent => agent === resources.AGENTS.USER) !== undefined;
+        const hasLayer = add.LAYERS.find(layer => layer === l.name) !== undefined;
+        
+        return l.active && hasUserAgent && hasLayer;
+      })
       return (
         <div className="mainContainer">
-          <UpperBar 
-            layers={layers} 
-            activeLayer={activeLayer}
-            actions = {actions}
-          />
+          <div style={componentStyle}>
+              <Layers 
+                  layers={layers} 
+                  actions={actions}
+              />
+              <AddEntity 
+                  layers={addableEntityLayers} 
+                  actions={actions}
+              />
+          </div>
           <CesiumView 
             layers={layers} 
-            activeLayer={activeLayer}
             actions = {actions}           
           />
         </div>
@@ -122,3 +131,12 @@ export default class Main extends Component {
     }
   }
 }
+
+const componentStyle = {
+    top: '0',
+    left: '0',
+    fontSize: '30px',
+    backgroundColor: '#47494c',
+    width: '100vw',
+    height: '6vh',
+};
