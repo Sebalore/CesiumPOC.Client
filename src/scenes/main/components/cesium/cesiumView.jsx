@@ -42,7 +42,7 @@ import {resources} from '../../../../shared/data/resources.js';
 const componentStyle = {
     general: {
         width: '100vw',
-        height: '93vh', // the upperBarView height is 6 vh.
+        height: '95vh', // the upperBarView height is 6 vh.
     },
     fullSizeDimentions: {
         height : '95%',
@@ -61,8 +61,8 @@ const componentStyle = {
         background: 'white',
         border: '1px solid #47494c',
         borderRadius: '5px',
-        top: '-92vh',
-        left: '-15vw',
+        top: '-110vh',
+        left: '-1vw',
         marginLeft: '300px',
         visibility: 'hidden',
         textAlign: 'center',
@@ -260,24 +260,24 @@ export default class CesiumView extends React.Component {
         }
     }
 
-    // /**
-    //  * generate entity by params
-    //  * @param {Number} longitude
-    //  * @param {Number} latitude
-    //  * @param {Number} height
-    //  * @param {String} imgSource
-    //  * @param {Number} imgScale
-    //  * @returns {Object} an object that can be added to cesium entities collection
-    //  */
-    // _generateEntity(longitude, latitude, height, imgSource, imgScale) {
-    //     return {
-    //             position: Cartesian3.fromDegrees(longitude, latitude, height),
-    //             billboard: {
-    //                 image: imgSource,
-    //                 scale: imgScale   
-    //             }
-    //     };
-    // }
+        // /**
+        //  * generate entity by params
+        //  * @param {Number} longitude
+        //  * @param {Number} latitude
+        //  * @param {Number} height
+        //  * @param {String} imgSource
+        //  * @param {Number} imgScale
+        //  * @returns {Object} an object that can be added to cesium entities collection
+        //  */
+        // _generateEntity(longitude, latitude, height, imgSource, imgScale) {
+        //     return {
+        //             position: Cartesian3.fromDegrees(longitude, latitude, height),
+        //             billboard: {
+        //                 image: imgSource,
+        //                 scale: imgScale   
+        //             }
+        //     };
+        // }
 
     /**
      * generate entity by params
@@ -369,6 +369,19 @@ export default class CesiumView extends React.Component {
                 }   // end if !dragging
 
             }, ScreenSpaceEventType.LEFT_CLICK);
+
+            // left click on entity handler
+            handler.setInputAction( click => 
+            {
+                const pickedObject = viewer.scene.pick(click.position);
+                
+                if (this.defined(pickedObject)) 
+                {
+                    entity = pickedObject.id;
+                    console.log('you right click on ', entity);
+                }
+
+            }, ScreenSpaceEventType.RIGHT_DOWN);
     }
 
     defined(object) {
