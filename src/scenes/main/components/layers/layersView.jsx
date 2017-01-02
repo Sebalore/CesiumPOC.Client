@@ -53,7 +53,6 @@ export default class Layers extends React.Component {
         return (
             <div style = {componentStyle.containerDiv}>
                 <ul style = {componentStyle.ul}>
-
                     <li style = {componentStyle.li} ref="li_16">
                         <div
                             ref = "svg16"
@@ -122,8 +121,6 @@ export default class Layers extends React.Component {
                             onClick = {() =>  this.onStaticListItemClicked(10)}
                         />
                     </li>
-
- 
                 </ul>
             </div>
         );
