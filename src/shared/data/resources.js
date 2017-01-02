@@ -17,7 +17,7 @@ export const resources = {
     UAV: UAV,
     DMA: DMA,
     IMG: {
-        BASE_URL: 'http://res.cloudinary.com/dn0ep8uy3/image/upload/v1476363391',
+        BASE_URL: 'src/shared/images/',
         SCALE: '25%',
         MAX_WIDTH: '65px',
         MAX_HEIGHT: '45px'
@@ -28,6 +28,7 @@ export const resources = {
     },
     LAYERS: {
         [DMA]: {
+            IMG: 'icon_9.svg',
             ACTIONS: {
                 ADD: {
                     ID: 'Add',
@@ -36,6 +37,7 @@ export const resources = {
             }
         },
         [UAV]: {
+            IMG: 'icon_5.svg',
             ACTIONS: {
                 ADD: {
                     ID: 'Add',
@@ -54,7 +56,7 @@ export const resources = {
             AGENTS: [
                 USER, API
             ], //WHOS CAN PERFORM ACTION
-            IMG: 'LAYER'
+            IMG: 'layer'
         },
         DELETE: {
             TYPE: DELETE,
@@ -65,7 +67,7 @@ export const resources = {
             AGENTS: [
                 USER, API
             ],
-            IMG: 'X'
+            IMG: 'icon_7.svg'
         },
         UPDATE_POSITION: {
             TYPE: UPDATE_POSITION,

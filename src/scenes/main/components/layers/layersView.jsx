@@ -6,7 +6,8 @@ import {resources} from '../../../../shared/data/resources';
 const imageStyle = {
     maxHeight: resources.IMG.MAX_HEIGHT,
     width: 'auto',
-    height: 'auto'
+    height: 'auto',
+    color: '4e4e4e'
 };
 
 const componentStyle = {

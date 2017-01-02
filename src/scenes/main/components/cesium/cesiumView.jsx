@@ -140,18 +140,18 @@ export default class CesiumView extends React.Component {
                         const concreteDataSource = this.viewer.dataSources.get(layerIndex);
                         
                         const addedEntity = concreteDataSource.entities.add(this.generateEntity(
-                            eventData.data.entityToAdd.position.longitude,
-                            eventData.data.entityToAdd.position.latitude,
-                            eventData.data.entityToAdd.position.height,
-                            eventData.data.entityToAdd.billboard.image,
-                            eventData.data.entityToAdd.billboard.scale
+                            eventData.data.position.longitude,
+                            eventData.data.position.latitude,
+                            eventData.data.position.height,
+                            eventData.data.billboard.image,
+                            eventData.data.billboard.scale
                         ));
 
                         this.props.actions[resources.ACTIONS.SET_ENTITY_ID.TYPE](
                             resources.AGENTS.USER,
                             {
-                                layerName: concreteDataSource.name,
-                                entityIdx: concreteDataSource.entities.values.length - 1,
+                                layerName: eventData.data.layerName,
+                                entityId: eventData.data.id,
                                 cesiumId: addedEntity.id
                             });
                     }
@@ -277,7 +277,7 @@ export default class CesiumView extends React.Component {
                             resources.AGENTS.USER,
                             {
                                 layerName: entCollection.name,
-                                entityIdx: i,
+                                entityId: entity.id,
                                 cesiumId: addedEntity.id
                             });
         }
