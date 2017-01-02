@@ -13,6 +13,7 @@ const componentStyle = {
         border: '2px solid black',
         width: '57vw',
         overflow: 'hidden',
+        marginRight: '14px',
     }, 
     li : {
         width: '2vw',

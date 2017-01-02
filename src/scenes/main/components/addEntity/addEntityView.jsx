@@ -9,19 +9,23 @@ const componentStyle = {
         display: 'inline-block',
         float: 'left',
         maxHeight: '100%',
-        width: '33.56vw',
+        width: '32.7vw',
+        marginLeft: '1px',
         listStyle: 'none',
         backgroundColor: '#47494c',
         border: '2px solid black',
     },
     li: {
-        width: '6vw',
-        listStyle: 'none'
+        width: '2vw',
+        listStyle: 'none',
+        marginLeft: '25px',
     },
     ul: {
         display: 'inline-flex',
         margin: '0',
-        marginTop: '8px'
+        marginTop: '8px',
+        float: 'right',
+        marginRight: '14px',
     },
     image: {
         maxHeight: resources.IMG.MAX_HEIGHT,
