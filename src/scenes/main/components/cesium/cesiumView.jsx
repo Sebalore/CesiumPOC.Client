@@ -140,7 +140,7 @@ export default class CesiumView extends React.Component {
                 const layerDataSource = ds.get(Array.from(ds).findIndex((fuckThis, i) => ds.get(i).name===eventData.data.layerName));                               
                 switch (eventData.type) {
                     case resources.ACTIONS.TOGGLE_LAYER.TYPE: {
-                        const layerIdx = this.props.layers.findIndex(l => l.name===eventData.data.layer.name);
+                        const layerIdx = this.props.layers.findIndex(l => l.name === eventData.data.layerName);
                         if(this.props.layers[layerIdx].active) {
                             this.addDataSourceLayerByType(layerIdx);
                         }
@@ -158,7 +158,7 @@ export default class CesiumView extends React.Component {
                     case resources.ACTIONS.ADD.TYPE:
                     case resources.ACTIONS.UPDATE_POSITION.TYPE: {
                         if(eventData.agent === resources.AGENTS.API) {
-                            if (eventData.type===resources.ACTIONS.UPDATE_POSITION.TYPE) {
+                            if (eventData.type === resources.ACTIONS.UPDATE_POSITION.TYPE) {
                                 const entityToUpdate = layerDataSource.entities.getById(eventData.result.cesiumId);
                                 layerDataSource.entities.remove(entityToUpdate);                                
                             }
@@ -291,7 +291,7 @@ export default class CesiumView extends React.Component {
                 billboard
         };
     }
-    
+
     setMapEventHandlers(viewer, handler, entity, selectedEntity, dragging, isFirstClick) {
             
             // Drag & Drop 
