@@ -104,10 +104,7 @@ export default class CesiumView extends React.Component {
 
         // class methods
         this.moveEntity = this.moveEntity.bind(this);
-        this.mapDataSources = this.mapDataSources.bind(this);
-        this.mapEntitiesArrayToEntityCollection = this.mapEntitiesArrayToEntityCollection.bind(this);
         this.onDrop = this.onDrop.bind(this);
-        this.addDataSourceLayerByType = this.addDataSourceLayerByType.bind(this);
         this.handleContextAwareActions = this.handleContextAwareActions.bind(this);
     }
 
@@ -117,18 +114,17 @@ export default class CesiumView extends React.Component {
         const dragging = false, isFirstClick = true;
 
         this.viewer = new CesiumViewer(this.refs.map, this.viewState.options);
+        this.setNewFocusOnMap(this.viewState.center.x, this.viewState.center.y);
+
         this.handler = new ScreenSpaceEventHandler(this.viewer.scene.canvas);  
 
         // subscribe viewer entities
         // this.viewer.entities.collectionChanged.addEventListenter( (collection, added, removed, changed) => console.log('entities collection changed!'));
 
         // map the data sources from the layers
-        this.mapDataSources();
+        this.props.layers.forEach(layer => this.createLayerDataSource(layer));
 
         this.setMapEventHandlers(this.viewer, this.handler, entity, selectedEntity, dragging, isFirstClick);
-
-        // move to the default map
-        this.setNewFocusOnMap(this.viewState.center.x, this.viewState.center.y);
     }
 
     handleContextAwareActions(error, eventData) {
@@ -137,27 +133,34 @@ export default class CesiumView extends React.Component {
                 reject(error);
             } else {
                 const ds = this.viewer.dataSources;
-                const layerDataSource = ds.get(Array.from(ds).findIndex((fuckThis, i) => ds.get(i).name===eventData.data.layerName));                               
+                const layerIdx = this.props.layers.findIndex(l => l.name === eventData.data.layerName);
+                const layerIsActive = layerIdx> -1 && this.props.layers[layerIdx].active;               
+                const layerDataSource = ds.get(Array.from(ds).findIndex((fuckThis, i) => ds.get(i).name===eventData.data.layerName));
                 switch (eventData.type) {
                     case resources.ACTIONS.TOGGLE_LAYER.TYPE: {
-                        const layerIdx = this.props.layers.findIndex(l => l.name === eventData.data.layerName);
-                        if(this.props.layers[layerIdx].active) {
-                            this.addDataSourceLayerByType(layerIdx);
+                        if(layerIsActive) {
+                            this.viewer.dataSources.add(this.createLayerDataSource(this.props.layers[layerIdx]));
                         }
                         else {
-                            this.removeDataSourceLayerByType(layerIdx);
+                            if(layerDataSource && this.viewer.dataSources.contains(layerDataSource)) {
+                                this.viewer.dataSources.remove(layerDataSource, true);
+                            }
                         }
                         break;   
                     } 
                     case resources.ACTIONS.DELETE.TYPE: {
-                        if(eventData.agent === resources.AGENTS.USER) {
-                            layerDataSource.entities.removeById(eventData.data.cesiumId);
+                        if (layerIsActive) {
+                            if(eventData.agent === resources.AGENTS.USER) {
+                                if (layerDataSource && layerDataSource.entities) {
+                                    layerDataSource.entities.removeById(eventData.data.cesiumId);
+                                }
+                            }
                         }
                         break;
                     }                    
                     case resources.ACTIONS.ADD.TYPE:
                     case resources.ACTIONS.UPDATE_POSITION.TYPE: {
-                        if(eventData.agent === resources.AGENTS.API) {
+                        if (layerIsActive) {
                             if (eventData.type === resources.ACTIONS.UPDATE_POSITION.TYPE) {
                                 const entityToUpdate = layerDataSource.entities.getById(eventData.result.cesiumId);
                                 layerDataSource.entities.remove(entityToUpdate);                                
@@ -183,25 +186,6 @@ export default class CesiumView extends React.Component {
     }
 
     /**
-     * add one data source to the viewer by his type
-     * @param {Number} layerIdx the layer index to add
-     */
-    addDataSourceLayerByType(layerIdx) {
-        if(!this.viewer.dataSources.contains(this.dataSources[layerIdx])) {
-            this.viewer.dataSources.add(this.dataSources[layerIdx]);
-        }
-    }
-
-    /**
-     * remove one data source to the viewer by his type
-     * @param {Number} layerIdx the layer index to remove
-     */
-    removeDataSourceLayerByType(layerIdx) {
-        const toDestroyDataSource = false;
-        this.viewer.dataSources.remove(this.dataSources[layerIdx], toDestroyDataSource);
-    }
-
-    /**
      * move on entity on the map
      * @param {entityId} String
      * @param {Object} newEntityPosition
@@ -216,68 +200,24 @@ export default class CesiumView extends React.Component {
     }
 
     /**
-     * this function maps the entities from each layer to be data sources for the viwer object
+     * maps the entities array of a layer to a newly created cesium CustomDataSource object
+     * @param {layer} the layer object
      */
-    mapDataSources() {
-        for(const layer of this.props.layers) {
-            if(layer.entities.length > 0) { // if there are any entities in that layer
-                // init data source to add
-                const currentDataSourceToAdd = new CustomDataSource(layer.name);
-                // init the data source entities
-                this.mapEntitiesArrayToEntityCollection(layer.entities, currentDataSourceToAdd);
-                // add the data source to the data source collection
-                this.viewer.dataSources.add(currentDataSourceToAdd);
-                // add the data source locally to hold ALL the data sources. it is required because when we hide layer we actually remove data source from cesium.
-                this.dataSources.push(currentDataSourceToAdd);
-            }
-        }
-    }
-
-    /**
-     * map given entities array managed by our structure to cesium CustomDataSource object
-     * @param {Array} srcEntities
-     * @param {CustomDataSource} entCollection the collection to enter to
-     */
-    mapEntitiesArrayToEntityCollection(srcEntities, entCollection) {
-        for(let i = 0 ; i < srcEntities.length ; i++) {
-            const entity = srcEntities[i];
-            const addedEntity = entCollection.entities.add(this.generateEntity(entity.position, entity.billboard));
-
-            if(entity.hasOwnProperty('label') && entity.label && entity.label !== 'undefined') {
-                addedEntity.label = new LabelGraphics({
-                    text: entity.label,
-                    show: false
-                });
-            }
-
+    createLayerDataSource(layer) {
+        const layerDataSource = new CustomDataSource(layer.name);
+        layer.entities.map(e => {
+            const cesiumEntity = layerDataSource.entities.add(this.generateEntity(e.position, e.billboard, {label: new LabelGraphics({text: e.label || 'nothing here', show: false})})); 
             this.props.actions[resources.ACTIONS.SET_ENTITY_CESIUM_ID.TYPE](
                 resources.AGENTS.USER, {
-                    layerName: entCollection.name,
-                    entityId: entity.id,
-                    cesiumId: addedEntity.id
+                    layerName: layer.name,
+                    entityId: e.id,
+                    cesiumId: cesiumEntity.id
                 }
-            );
-        }
+            );                                       
+        })
+        this.viewer.dataSources.add(layerDataSource);
+        return layerDataSource;       
     }
-
-    // /**
-    //  * generate entity by params
-    //  * @param {Number} longitude
-    //  * @param {Number} latitude
-    //  * @param {Number} height
-    //  * @param {String} imgSource
-    //  * @param {Number} imgScale
-    //  * @returns {Object} an object that can be added to cesium entities collection
-    //  */
-    // _generateEntity(longitude, latitude, height, imgSource, imgScale) {
-    //     return {
-    //             position: Cartesian3.fromDegrees(longitude, latitude, height),
-    //             billboard: {
-    //                 image: imgSource,
-    //                 scale: imgScale   
-    //             }
-    //     };
-    // }
 
     /**
      * generate entity by params
@@ -285,10 +225,11 @@ export default class CesiumView extends React.Component {
      * @param {billboard} billboard object
      * @returns {Object} an object that can be added to cesium entities collection
      */
-    generateEntity(position, billboard) {
+    generateEntity(position, billboard, ...others) {
         return {
                 position: Cartesian3.fromDegrees(position.longitude, position.latitude, position.height),
-                billboard
+                billboard,
+                ...others
         };
     }
 
@@ -382,7 +323,6 @@ export default class CesiumView extends React.Component {
 
     /** the function handle droping entities from this combobox to the map */
     onDrop(event)    {
-
         // calculate new object drop area
         // const t = this.viewer.entities;
         const dim = this.refs.map.getClientRects()[0];
@@ -397,38 +337,22 @@ export default class CesiumView extends React.Component {
             cartesian = this.viewer.camera
             .pickEllipsoid(mousePosition, this.viewer.scene.globe.ellipsoid); // maybe the problem here!!
         }
-
      
         const img = document.getElementById(event.dataTransfer.getData('text'));
+        const layer = this.props.layers.find(l => l.name===img.getAttribute('data-layerName'));
         //console.log(img);
 
-        if (cartesian && img) {
-            const cartographic =  this.viewer.scene.globe.ellipsoid
-                                    .cartesianToCartographic(cartesian);
+        if (cartesian && img && layer) {
+            const cartographic =  this.viewer.scene.globe.ellipsoid.cartesianToCartographic(cartesian);
             const longitudeString = Math.toDegrees(cartographic.longitude);
             const latitudeString = Math.toDegrees(cartographic.latitude);
 
-            // TODO: use generateEntity()
-            const cesiumEntity = {
-                position: Cartesian3.fromDegrees(longitudeString, latitudeString, 1.0),
-                billboard: {
-                    image: img.src,
-                    scale: img.clientHeight /100   
-                }
-            };
-
-            // add the entity to the map
-            this.viewer.entities.add(cesiumEntity);
-
-            this.setState({entities: this.viewer.entities.values.map((entity) => {
-                return {
-                        position: entity.position.getValue(JulianDate.now()),
-                        billboard: {
-                        image: entity.billboard.image.getValue(),
-                        scale: entity.billboard.scale.getValue() 
-                    }  
-                };
-            })});
+            this.props.actions[resources.ACTIONS.ADD.TYPE](
+                resources.AGENTS.USER,
+                {
+                    layerName: layer.name,
+                    position: cartographic
+                });
         } else {
             console.log('CesiumView::onDrop(event) : something went wrong.');
         }

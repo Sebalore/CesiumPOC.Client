@@ -21,20 +21,20 @@ const initialViewState = {
         }
       ],
       entities: [
-        {
-          id: Guid.create(),
-          cesiumId: null, //guid to be provided by cesium
-          label: `${resources.DMA}: Yossi`,
-          position: {
-            longitude: 34.99249855493725,
-            latitude: 32.79628841345832,
-            height: 1.0
-          },
-          billboard: {
-            image: `${resources.IMG.BASE_URL}${resources.LAYERS[resources.DMA].IMG}`,
-            scale: 0.95
-          }
-        }
+        // {
+        //   id: Guid.create(),
+        //   cesiumId: null, //guid to be provided by cesium
+        //   label: `${resources.DMA}: Yossi`,
+        //   position: {
+        //     longitude: 34.99249855493725,
+        //     latitude: 32.79628841345832,
+        //     height: 1.0
+        //   },
+        //   billboard: {
+        //     image: `${resources.IMG.BASE_URL}${resources.LAYERS[resources.DMA].IMG}`,
+        //     scale: 0.95
+        //   }
+        // }
       ]
     }, {
       name: resources.UAV,
@@ -58,7 +58,7 @@ const initialViewState = {
             height: 1.0
           },
           billboard: {
-            imgUrl: `${resources.IMG.BASE_URL}${resources.LAYERS[resources.UAV].IMG}`,
+            image: `${resources.IMG.BASE_URL}${resources.LAYERS[resources.UAV].IMG}`,
             scale: 0.95
           }
         }
@@ -96,6 +96,17 @@ class _store extends EventEmitter {
     return new Promise((resolve) => {
       const layerName = data.layerName;
       const layerIndex = this.data.layers.findIndex(l => l.name===layerName);
+      if (agent===resources.AGENTS.USER) {
+        data =  {
+          id: Guid.create(),
+          layerName: layerName,
+          position: data.position,
+          billboard: {
+            image: `${resources.IMG.BASE_URL}${resources.LAYERS[layerName].IMG}`,
+            scale: 0.95
+          }
+        }         
+      }
       this.data.layers[layerIndex].entities.push(data);
       resolve(data);
     });
@@ -203,8 +214,8 @@ class _store extends EventEmitter {
                   type: resources.ACTIONS.UPDATE_POSITION.TYPE,
                   agent: resources.AGENTS.API,
                   data: {
-                      entityId: initialViewState.layers[0].entities[0].id,
-                      layerName: 'DynamicMissionArea',
+                      entityId: initialViewState.layers[1].entities[0].id,
+                      layerName: resources.UAV,
                       position: cords.value
                   }                              
                 });                
