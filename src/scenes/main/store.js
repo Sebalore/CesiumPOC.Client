@@ -22,6 +22,7 @@ const initialViewState = {
         {
           id: Guid.create(),
           cesiumId: null, //guid to be provided by cesium
+          label: `${resources.DMA}: Yossi`,
           position: {
             longitude: 34.99249855493725,
             latitude: 32.79628841345832,
@@ -48,6 +49,7 @@ const initialViewState = {
         {
           id: Guid.create(),
           cesiumId: null, //guid to be provided by cesium
+          label: `${resources.UAV}: Sebastian`,
           position: {
             longitude: 34.99249855493725,
             latitude: 32.79628841345832,

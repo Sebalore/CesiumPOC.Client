@@ -30,6 +30,7 @@ import 'cesium/Source/Widgets/widgets.css';
 import Math from 'cesium/Source/Core/Math';
 import CustomDataSource from 'cesium/Source/DataSources/CustomDataSource.js';
 import DataSourceCollection from 'cesium/Source/DataSources/DataSourceCollection.js';
+import LabelGraphics from 'cesium/Source/DataSources/LabelGraphics.js';
 
 import ScreenSpaceEventType from 'cesium/Source/Core/ScreenSpaceEventType.js';
 
@@ -288,13 +289,20 @@ export default class CesiumView extends React.Component {
                 entity.billboard.scale
             ));
 
+            if(entity.hasOwnProperty('label') && entity.label && entity.label !== 'undefined') {
+                addedEntity.label = new LabelGraphics({
+                    text: entity.label,
+                    show: false
+                });
+            }
+            
             this.props.actions[resources.ACTIONS.SET_ENTITY_ID.TYPE](
-                            resources.AGENTS.USER,
-                            {
-                                layerName: entCollection.name,
-                                entityId: entity.id,
-                                cesiumId: addedEntity.id
-                            });
+                resources.AGENTS.USER,
+                {
+                    layerName: entCollection.name,
+                    entityId: entity.id,
+                    cesiumId: addedEntity.id
+                });
         }
     }
 
@@ -348,7 +356,7 @@ export default class CesiumView extends React.Component {
                     if (this.defined(pickedObject)) {
                         
                         tooltipInfo.style.visibility = 'visible';
-
+                        tooltipInfo.innerHTML = pickedObject.id.label !== 'undefined' ? pickedObject.id.label.text._value : 'This is a mock basic details about this entity';
                     }
                     else {
                         tooltipInfo.style.visibility = 'hidden';
