@@ -8,11 +8,11 @@ const componentStyle = {
         display: 'inline-block',
         float: 'right',
         maxHeight: '100%',
-        maxWidth: '400px',
+        // maxWidth: '70%',
+        backgroundColor: '#47494c',
+        border: '2px solid black',
+        width: '57vw',
         overflow: 'hidden',
-        // border: '2px solid black',
-        // marginTop: '-2px',
-        // marginRight: '-2px'
     }, 
     li : {
         width: '6vw',
@@ -25,6 +25,7 @@ const componentStyle = {
         margin: '0',
         marginTop: '8px',
         display: 'inline-flex',
+        float: 'right',
     }
 };
 

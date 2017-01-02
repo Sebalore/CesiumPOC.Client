@@ -6,12 +6,13 @@ import {resources} from '../../../../shared/data/resources';
 
 const componentStyle = {
     containerDiv: {
-        color: 'blue',
         display: 'inline-block',
         float: 'left',
-        maxHeight: '50px',
-        maxWidth: '300px',
-        listStyle: 'none'
+        maxHeight: '100%',
+        width: '33.56vw',
+        listStyle: 'none',
+        backgroundColor: '#47494c',
+        border: '2px solid black',
     },
     li: {
         width: '6vw',

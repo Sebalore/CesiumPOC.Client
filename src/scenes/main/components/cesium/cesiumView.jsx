@@ -42,7 +42,7 @@ import {resources} from '../../../../shared/data/resources.js';
 const componentStyle = {
     general: {
         width: '100vw',
-        height: '93vh', // the upperBarView height is 6 vh.
+        height: '95vh', // the upperBarView height is 6 vh.
     },
     fullSizeDimentions: {
         height : '95%',
@@ -61,8 +61,8 @@ const componentStyle = {
         background: 'white',
         border: '1px solid #47494c',
         borderRadius: '5px',
-        top: '-92vh',
-        left: '-15vw',
+        top: '-110vh',
+        left: '-1vw',
         marginLeft: '300px',
         visibility: 'hidden',
         textAlign: 'center',
@@ -310,6 +310,19 @@ export default class CesiumView extends React.Component {
                 }   // end if !dragging
 
             }, ScreenSpaceEventType.LEFT_CLICK);
+
+            // left click on entity handler
+            handler.setInputAction( click => 
+            {
+                const pickedObject = viewer.scene.pick(click.position);
+                
+                if (this.defined(pickedObject)) 
+                {
+                    entity = pickedObject.id;
+                    console.log('you right click on ', entity);
+                }
+
+            }, ScreenSpaceEventType.RIGHT_DOWN);
     }
 
     defined(object) {

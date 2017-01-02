@@ -56,8 +56,8 @@ export default class Main extends Component {
         return l.active && hasUserAgent && hasLayer;
       });
       return (
-        <div className="mainContainer">
-          <div style={componentStyle}>
+        <div className="mainContainer" style={componentStyle}>
+          <div style={componentStyle.mainComponentSon}>
               <Layers 
                   layers={layers} 
                   actions={actions}
@@ -83,19 +83,25 @@ export default class Main extends Component {
 }
 
 const componentStyle = {
+  
+    position: 'fixed',
+    height: '100%',
+    width: '100%',
+    top: '0',
+    left:'0',
+  mainComponentSon : {
     top: '0',
     left: '0',
     fontSize: '30px',
-    backgroundColor: '#47494c',
-    width: '100vw',
+    width: '91%',
     height: '6vh',
-    border: '2px solid black',
+    marginLeft: '93px',
+  },
+    
     icon : {
       width: '48px',
       height: '48px',
       display: 'inline-block',
-      WebkitMask: `url(${resources.IMG.BASE_URL}icon_7.svg) no-repeat 50% 50%`,
-      mask: `url(${resources.IMG.BASE_URL}icon_7.svg) no-repeat 50% 50%`,
       WebkitMaskSize: 'cover',
       maskSize: 'cover',
       backgroundColor: 'white'
