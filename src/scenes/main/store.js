@@ -217,7 +217,7 @@ class _store extends EventEmitter {
         this['handle' + action.type](action.agent, action.data).then((actionResult) => {
           return new Promise((resolve, reject) => {
             eventData.result = actionResult;
-            console.log(`[action ${action.agent}]:${action.type} store hadler. ${JSON.stringify(eventData)}`);
+            // console.log(`[action ${action.agent}]:${action.type} store hadler. ${JSON.stringify(eventData)}`);
             this.emit('contextAwareActionExecuted', null, eventData);
             resolve(eventData);
           });

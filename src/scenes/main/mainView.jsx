@@ -37,8 +37,8 @@ export default class Main extends Component {
     };
 
     const velocity = {
-      longitude: 0.000000000001,
-      latitude: 0.000000000002,
+      longitude: 0.0000000001,
+      latitude: 0.0000000002,
       height: 50.0
     };
     const coordinatesGenerator = linearCoordinatesGenerator(initial, dest, velocity);

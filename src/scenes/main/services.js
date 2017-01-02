@@ -1,14 +1,12 @@
 
 export function * linearCoordinatesGenerator(origin, destination, velocity) {
     var currentPosition = origin;
-    // console.log(JSON.stringify(currentPosition));
-    // console.log(JSON.stringify(destination));
-    while (currentPosition.height <= destination.height) {
-        console.log(JSON.stringify(currentPosition));
+
+    for(let i = 0 ; i < 5 ; i ++) {
         currentPosition = {
-            longitude: currentPosition.longitude + velocity.longitude,
-            latitude: currentPosition.latitude + velocity.latitude,
-            height: currentPosition.height + velocity.height
+            longitude: currentPosition.longitude + velocity.longitude * 100000000,
+            latitude: currentPosition.latitude + velocity.latitude * 100000000,
+            height: currentPosition.height
         };
         yield currentPosition;
     }
