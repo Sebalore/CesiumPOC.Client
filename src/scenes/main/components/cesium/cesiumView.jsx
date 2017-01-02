@@ -116,20 +116,6 @@ export default class CesiumView extends React.Component {
 
         // move to the default map
         this.setNewFocusOnMap(this.viewState.center.x, this.viewState.center.y);
-
-        setTimeout(() => {
-            this.props.actions[resources.ACTIONS.UPDATE_POSITION.TYPE](
-                resources.AGENTS.USER,
-                {
-                    layerName: 'DynamicMissionArea',
-                    cesiumId: '12345',
-                    position: {
-                        longitude: 35.0,
-                        latitude: 32.79628841345832,
-                        height: 1.0
-                    }
-                });
-        }, 10000);
     }
 
     handleContextAwareActions(error, eventData) {
@@ -190,10 +176,6 @@ export default class CesiumView extends React.Component {
                         const concreteDataSource = this.viewer.dataSources.get(layerIndex);
                         const entityToUpdate = concreteDataSource.entities.getById(eventData.data.cesiumId);
 
-                        entityToUpdate.position = new Cartesian3.fromDegrees(
-                            eventData.data.position.longitude, 
-                            eventData.data.position.latitude, 
-                            eventData.data.position.height);
                     }
                     
                     break;
