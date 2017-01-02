@@ -7,7 +7,7 @@ const DELETE = 'DELETE';
 const UPDATE_POSITION = 'UPDATE_POSITION';
 const MAP_CENTER = 'MAP_CENTER';
 const TOGGLE_LAYER = 'TOGGLE_LAYER';
-const SET_ENTITY_ID = 'SET_ENTITY_ID';
+const SET_ENTITY_CESIUM_ID = 'SET_ENTITY_CESIUM_ID';
 //--------------------------------- ------ AGENTS ------------------
 const USER = 'USER';
 const API = 'API';
@@ -85,8 +85,8 @@ export const resources = {
             ],
             AGENTS: [USER]
         },
-        SET_ENTITY_ID : {
-            TYPE: SET_ENTITY_ID,
+        SET_ENTITY_CESIUM_ID : {
+            TYPE: SET_ENTITY_CESIUM_ID,
             DESC: 'add generated cesiumId to added object in the store',
             LAYERS: [
                 DMA, UAV

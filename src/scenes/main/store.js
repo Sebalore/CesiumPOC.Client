@@ -1,6 +1,8 @@
 import {EventEmitter} from 'events';
-import dispatcher from './dispatcher';
 import Guid from 'guid';
+
+import dispatcher from './dispatcher';
+import { linearCoordinatesGenerator } from './services';
 
 //resources
 import {resources} from '../../shared/data/resources';
@@ -72,32 +74,6 @@ class _store extends EventEmitter {
     this.data = initialViewState;
   }
 
-
-  /**
-   * get the index of entity in the store by generated cesium id
-   * @param {String} cesiumEntityId
-   * @param {String} layerName
-   * @returns {Object} the entity index and the layer index
-   */
-  getEntityIndexById(cesiumEntityId, layerName) {
-    for (let layerIndex = 0; layerIndex < this.data.layers.length; layerIndex++) {
-      const currentLayer = this.data.layers[layerIndex];
-
-      if (currentLayer.name !== layerName) {
-        continue;
-      }
-
-      for (let entityIndex = 0; entityIndex < currentLayer.entities.length; entityIndex++) {
-        const currentEntity = currentLayer.entities[entityIndex];
-        if (currentEntity.cesiumId && currentEntity.cesiumId === cesiumEntityId) {
-          return {entityIndex, layerIndex};
-        }
-      }
-    }
-
-    return {entityIndex: -1, layerIndex: -1};
-  }
-
   getData() {
     return this.data;
   }
@@ -108,101 +84,51 @@ class _store extends EventEmitter {
   }
   
   ['handle' + resources.ACTIONS.TOGGLE_LAYER.TYPE](agent, data) {
-    return new Promise((resolve, reject) => {
-      const layerIndex = data.layerIndex;
-
-      if (layerIndex >= 0 && layerIndex < this.data.layers.length) {
-        this.data.layers[layerIndex].active = !this.data.layers[layerIndex].active;
-        this.emit('change', this.data);
-        resolve(this.data.layers[layerIndex]);
-      } else {
-        const msg = `Layer index ${layerIndex} was not found in store.`;
-        // console.error(msg);
-        reject(msg);
-      }
+    return new Promise((resolve) => {
+      const layerName = data.layerName;
+      const layerIndex = this.data.layers.findIndex(l => l.name===layerName);
+      this.data.layers[layerIndex].active = !this.data.layers[layerIndex].active;
+      resolve(this.data.layers[layerIndex]);
     });
   }
   
   ['handle' + resources.ACTIONS.ADD.TYPE](agent, data) {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       const layerName = data.layerName;
       const layerIndex = this.data.layers.findIndex(l => l.name===layerName);
-
       this.data.layers[layerIndex].entities.push(data);
-      this.emit('change', this.data);
       resolve(data);
-
     });
   }
   
-  ['handle' + resources.ACTIONS.SET_ENTITY_ID.TYPE](agent, data) {
-    return new Promise((resolve, reject) => {
-
+  ['handle' + resources.ACTIONS.SET_ENTITY_CESIUM_ID.TYPE](agent, data) {
+    return new Promise((resolve) => {
       const layerName = data.layerName;
       const layerIndex = this.data.layers.findIndex(l => l.name===layerName);
-      
       const entityIndex = this.data.layers[layerIndex].entities.findIndex(e => e.id===data.entityId);
       this.data.layers[layerIndex].entities[entityIndex].cesiumId = data.cesiumId;
-      
-      this.emit('change', this.data);
-      
       resolve(this.data.layers[layerIndex].entities[entityIndex]);
-
     });
   }
   
   ['handle' + resources.ACTIONS.DELETE.TYPE](agent, data) {
-    return new Promise((resolve, reject) => {
-      const layerName = data.layerName, {entityIndex, layerIndex} = this.getEntityIndexById(data.cesiumId, layerName);
-
-      // TODO: if layer does not exist, add new layer to layers array
-      if (layerName !== '' && layerIndex !== -1) {
-        this
-          .data
-          .layers[layerIndex]
-          .entities
-          .splice(entityIndex, 1);
-        this.emit('change', this.data);
-        resolve(this.data.layers[layerIndex]);
-      } else {
-        const msg = `Layer index ${layerIndex} was not found in store.`;
-        // console.error(msg);
-        reject(msg);
-      }
+      return new Promise((resolve) => {
+      const layerName = data.layerName;
+      const layerIndex = this.data.layers.findIndex(l => l.name===layerName);
+      const entityIndex = this.data.layers[layerIndex].entities.findIndex(e => e.id===data.entityId);
+      this.data.layers[layerIndex].entities.splice(entityIndex, 1);   
+      resolve(true);
     });
   }
 
   ['handle' +  resources.ACTIONS.UPDATE_POSITION.TYPE](agent, data) {
-    return new Promise((resolve, reject) => {
-      const layerName = data.layerName,
-        {entityIndex , layerIndex } = this.getEntityIndexById(data.cesiumId, layerName);
-
-      // TODO: if layer does not exist, add new layer to layers array
-      if (layerName !== '' && layerIndex !== -1) {
-        this.data.layers[layerIndex].entities[entityIndex].position = data.position;
-        this.emit('change', this.data);
-        resolve(this.data.layers[layerIndex]);
-      } 
-      else {
-        const msg = `Layer index ${layerIndex} was not found in store.`;
-        // console.error(msg);
-        reject(msg);
-      }
+      return new Promise((resolve) => {
+      const layerName = data.layerName;
+      const layerIndex = this.data.layers.findIndex(l => l.name===layerName);
+      const entityIndex = this.data.layers[layerIndex].entities.findIndex(e => e.id===data.entityId);
+      this.data.layers[layerIndex].entities[entityIndex].position = data.position;
+      resolve(this.data.layers[layerIndex].entities[entityIndex]);
     });
-  }
-
-  handleActions(action) {
-
-    switch (action.type) {
-      case 'UPDATE':
-        {
-          this
-            .update(action.data)
-            .then(this.emit('change'))
-            .catch();
-          break;
-        }
-    }
   }
 
   handleContextAwareActions(action) {
@@ -216,14 +142,18 @@ class _store extends EventEmitter {
       };
       if (typeof this['handle' + action.type] === 'function') {
         //execute the action if there is a matching function defined in store
-        this['handle' + action.type](action.agent, action.data).then((actionResult) => {
-          return new Promise((resolve, reject) => {
-            eventData.result = actionResult;
-            // console.log(`[action ${action.agent}]:${action.type} store hadler. ${JSON.stringify(eventData)}`);
-            this.emit('contextAwareActionExecuted', null, eventData);
-            resolve(eventData);
-          });
-        }).catch(err => {
+        this['handle' + action.type](action.agent, action.data)
+        .then((actionResult) => {
+            this.emit('change', this.data);
+            return Promise.resolve(actionResult);
+        })
+        .then((actionResult) => {
+          eventData.result = actionResult;
+          // console.log(`[action ${action.agent}]:${action.type} store hadler. ${JSON.stringify(eventData)}`);
+          this.emit('contextAwareActionExecuted', null, eventData);          
+          return Promise.resolve(eventData);
+        })
+        .catch(err => {
           eventData.error = err;
           console.error(`[action ${action.agent}]:${action.type} store hadler. ${JSON.stringify(err)}`);
           this.emit('contextAwareActionExecuted', err, eventData);
@@ -233,6 +163,70 @@ class _store extends EventEmitter {
         console.warn(`[action ${action.agent}]:${action.type} has no handler in store.`);
         this.emit('contextAwareActionExecuted', null, eventData);
       }
+    }
+  }
+
+  handleActions(action) {
+    switch (action.type) {
+      case 'UPDATE':
+        {
+          this.update(action.data).then(this.emit('change')).catch();
+          break;
+        }
+      case 'DEBUG_1':
+        {
+          //---- for testing movement ------------------------------------------------------------------- 
+          const initial = {
+            longitude: 34.99249855493725,
+            latitude:  32.79628841345832,
+            height: 1.0
+          };
+
+          const dest = {
+            longitude: -75.16617698856817,
+            latitude: 39.90607492083895,
+            height: 1000.0
+          };
+
+          const velocity = {
+            longitude: 0.006,
+            latitude: 0.004,
+            height: 50.0
+          };
+          //----------------------------------------------------------------------------------------------
+          const coordinatesGenerator = linearCoordinatesGenerator(initial, dest, velocity);
+          window.coGen = coordinatesGenerator; 
+          setInterval(() => {
+            const cords = coordinatesGenerator.next();
+              if(!cords.done) {
+                dispatcher.dispatch({
+                  type: resources.ACTIONS.UPDATE_POSITION.TYPE,
+                  agent: resources.AGENTS.API,
+                  data: {
+                      entityId: initialViewState.layers[0].entities[0].id,
+                      layerName: 'DynamicMissionArea',
+                      position: cords.value
+                  }                              
+                });                
+                // dispatcher.dispatch({
+                //   type: resources.ACTIONS.ADD.TYPE,
+                //   agent: resources.AGENTS.API,
+                //   data: {
+                //       id: Guid.create(),
+                //       layerName: 'DynamicMissionArea',
+                //       position: cords.value,
+                //       billboard: {
+                //         image: `${resources.IMG.BASE_URL}${resources.LAYERS[resources.DMA].IMG}`,
+                //         scale: 0.95
+                //       }
+                //   }                              
+                // });
+              } else {
+                console.log('generator done.');
+              }
+          }, 3000);
+          break;
+        }
     }
   }
 }

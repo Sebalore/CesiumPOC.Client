@@ -36,11 +36,12 @@ export default class Layers extends React.Component {
                 <ul style = {componentStyle.ul}>
                     {this.props.layers.map((layer, idx) => 
                     <li key={idx} style = {componentStyle.li}>
+
                         <div 
                             id={Guid.create()} 
                             style={this.props.setIconStyle(layer.imgUrl)} 
                             draggable='false' 
-                            onClick = {() =>  this.props.actions[resources.ACTIONS.TOGGLE_LAYER.TYPE](resources.AGENTS.USER,{layerIndex: idx})}
+                            onClick = {() =>  this.props.actions[resources.ACTIONS.TOGGLE_LAYER.TYPE](resources.AGENTS.USER,{layerName: layer.name})}
                         />
                     </li>)}
                 </ul>
