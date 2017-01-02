@@ -153,7 +153,7 @@ export default class CesiumView extends React.Component {
                 switch (eventData.type) {
                     case resources.ACTIONS.TOGGLE_LAYER.TYPE: {
                         if(layerIsActive) {
-                            this.viewer.dataSources.add(this.createLayerDataSource(this.props.layers[layerIdx]));
+                            this.createLayerDataSource(this.props.layers[layerIdx]);
                         }
                         else {
                             if(layerDataSource && this.viewer.dataSources.contains(layerDataSource)) {
@@ -215,7 +215,7 @@ export default class CesiumView extends React.Component {
 
     /**
      * maps the entities array of a layer to a newly created cesium CustomDataSource object
-     * @param {layer} the layer object
+     * @param {Object} layer the layer object
      */
     createLayerDataSource(layer) {
         const layerDataSource = new CustomDataSource(layer.name);
@@ -228,9 +228,9 @@ export default class CesiumView extends React.Component {
                     cesiumId: cesiumEntity.id
                 }
             );                                       
-        })
+        });
+
         this.viewer.dataSources.add(layerDataSource);
-        return layerDataSource;       
     }
 
     /**
