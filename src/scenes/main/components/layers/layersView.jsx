@@ -42,7 +42,7 @@ export default class Layers extends React.Component {
                         <img style={imageStyle} 
                             id = {Guid.create()}
                             src={layer.imgUrl}
-                            onClick = {() =>  this.props.actions[resources.ACTIONS.TOGGLE_LAYER.TYPE](resources.AGENTS.USER,{layerIndex: idx})}
+                            onClick = {() =>  this.props.actions[resources.ACTIONS.TOGGLE_LAYER.TYPE](resources.AGENTS.USER,{layerName: layer.name})}
                         />
                     </li>)}
                 </ul>

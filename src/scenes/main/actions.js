@@ -11,7 +11,7 @@ export default {
     [resources.ACTIONS.ADD.TYPE]: (agent, data) => dispatcher.dispatch({type: resources.ACTIONS.ADD.TYPE, agent, data}),
     [resources.ACTIONS.DELETE.TYPE]: (agent, data) => dispatcher.dispatch({type: resources.ACTIONS.DELETE.TYPE, agent, data}),
     [resources.ACTIONS.UPDATE_POSITION.TYPE]: (agent, data) => dispatcher.dispatch({type: resources.ACTIONS.UPDATE_POSITION.TYPE,  agent, data}),
-    [resources.ACTIONS.SET_ENTITY_ID.TYPE]: (agent, data) => dispatcher.dispatch({type: resources.ACTIONS.SET_ENTITY_ID.TYPE,  agent, data}),
+    [resources.ACTIONS.SET_ENTITY_CESIUM_ID.TYPE]: (agent, data) => dispatcher.dispatch({type: resources.ACTIONS.SET_ENTITY_CESIUM_ID.TYPE,  agent, data}),
     
     // map actions
     [resources.ACTIONS.MAP_CENTER.TYPE]: (agent, data) => dispatcher.dispatch({type: resources.ACTIONS.MAP_CENTER.TYPE,  agent, data}),

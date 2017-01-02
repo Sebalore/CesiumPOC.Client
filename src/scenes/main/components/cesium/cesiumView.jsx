@@ -95,7 +95,6 @@ export default class CesiumView extends React.Component {
         this.onDrop = this.onDrop.bind(this);
         this.addDataSourceLayerByType = this.addDataSourceLayerByType.bind(this);
         this.handleContextAwareActions = this.handleContextAwareActions.bind(this);
-        this.getDataSourceIndexByLayerName = this.getDataSourceIndexByLayerName.bind(this);
     }
 
     componentDidMount() {
@@ -117,108 +116,57 @@ export default class CesiumView extends React.Component {
         // move to the default map
         this.setNewFocusOnMap(this.viewState.center.x, this.viewState.center.y);
 
-        // setTimeout(() => {
-        //     this.props.actions[resources.ACTIONS.ADD.TYPE](
-        //         resources.AGENTS.API,
-        //         {
-        //             layerName: 'DynamicMissionArea',
-        //             cesiumId: null,
-        //             position: {
-        //                 longitude: 35.0,
-        //                 latitude: 32.79628841345832,
-        //                 height: 1.0
-        //             }
-        //         });
-        // }, 10000);
     }
 
     handleContextAwareActions(error, eventData) {
-        if(!error) {
-            switch (eventData.type) {
-                case resources.ACTIONS.TOGGLE_LAYER.TYPE:
-                {
-                    // TODO: use layer name instead.
-                    const layerIdx = eventData.data.layerIndex;
-                    if(this.props.layers[layerIdx].active) {
-                        this.addDataSourceLayerByType(layerIdx);
-                    }
-                    else {
-                        this.removeDataSourceLayerByType(layerIdx);
-                    }
-                    break;   
-                } 
-                case resources.ACTIONS.ADD.TYPE:
-                {
-                    if(eventData.agent === resources.AGENTS.API) {
-                        const layerIndex = this.getDataSourceIndexByLayerName(eventData.data.layerName);
-                        const concreteDataSource = this.viewer.dataSources.get(layerIndex);
-                        
-                        const addedEntity = concreteDataSource.entities.add(this.generateEntity(
-                            eventData.data.position.longitude,
-                            eventData.data.position.latitude,
-                            eventData.data.position.height,
-                            eventData.data.billboard.image,
-                            eventData.data.billboard.scale
-                        ));
-                        
-                        console.log(`Added new entity at : ${JSON.stringify(addedEntity.position.getValue(JulianDate.now()))}`);
+        return new Promise((resolve, reject) => {
+            if (error) {
+                reject(error);
+            } else {
+                const ds = this.viewer.dataSources;
+                const layerDataSource = ds.get(Array.from(ds).findIndex((fuckThis, i) => ds.get(i).name===eventData.data.layerName));                               
+                switch (eventData.type) {
+                    case resources.ACTIONS.TOGGLE_LAYER.TYPE: {
+                        const layerIdx = this.props.layers.findIndex(l => l.name===eventData.data.layer.name);
+                        if(this.props.layers[layerIdx].active) {
+                            this.addDataSourceLayerByType(layerIdx);
+                        }
+                        else {
+                            this.removeDataSourceLayerByType(layerIdx);
+                        }
+                        break;   
+                    } 
+                    case resources.ACTIONS.DELETE.TYPE: {
+                        if(eventData.agent === resources.AGENTS.USER) {
+                            layerDataSource.entities.removeById(eventData.data.cesiumId);
+                        }
+                        break;
+                    }                    
+                    case resources.ACTIONS.ADD.TYPE:
+                    case resources.ACTIONS.UPDATE_POSITION.TYPE: {
+                        if(eventData.agent === resources.AGENTS.API) {
+                            if (eventData.type===resources.ACTIONS.UPDATE_POSITION.TYPE) {
+                                const entityToUpdate = layerDataSource.entities.getById(eventData.result.cesiumId);
+                                layerDataSource.entities.remove(entityToUpdate);                                
+                            }
+                            const addedEntity = layerDataSource.entities.add(this.generateEntity(eventData.result.position, eventData.result.billboard));
+                            
+                            console.log(`Added new entity at : ${JSON.stringify(addedEntity.position.getValue(JulianDate.now()))}`);
 
-                        this.props.actions[resources.ACTIONS.SET_ENTITY_ID.TYPE](
-                            resources.AGENTS.USER,
-                            {
-                                layerName: eventData.data.layerName,
-                                entityId: eventData.data.id,
-                                cesiumId: addedEntity.id
-                            });
+                            this.props.actions[resources.ACTIONS.SET_ENTITY_CESIUM_ID.TYPE](
+                                resources.AGENTS.USER,
+                                {
+                                    layerName: eventData.data.layerName,
+                                    entityId: eventData.result.id,
+                                    cesiumId: addedEntity.id
+                                });
+                        }
+                        break;
                     }
-
-                    break;
                 }
-                case resources.ACTIONS.DELETE.TYPE:
-                {
-                    if(eventData.agent === resources.AGENTS.USER) {
-                        const layerIndex = this.getDataSourceIndexByLayerName(eventData.data.layerName);
-                        const concreteDataSource = this.viewer.dataSources.get(layerIndex);
-
-                        concreteDataSource.entities.removeById(eventData.data.cesiumId);
-                    }
-
-                    break;
-                }
-                case resources.ACTIONS.UPDATE_POSITION.TYPE:
-                {
-                    if(eventData.agent === resources.AGENTS.USER) {
-                        const layerIndex = this.getDataSourceIndexByLayerName(eventData.data.layerName);
-                        const concreteDataSource = this.viewer.dataSources.get(layerIndex);
-                        const entityToUpdate = concreteDataSource.entities.getById(eventData.data.cesiumId);
-
-                        // entityToUpdate.position = eventData.data;
-                    }
-                    
-                    break;
-                }
-            }
-        }
-    }
-
-    /**
-     * get DataSource index from the cesium viewer object by given layer name
-     * @param {layerName} layerName the search field
-     * @returns {Number} -1 if not exist
-     */
-    getDataSourceIndexByLayerName(layerName) {
-        let layerIdxToReturn = -1;
-
-        for(let i = 0 ; i < this.viewer.dataSources.length ; i++) {
-            const currentDataSource = this.viewer.dataSources.get(i);
-
-            if(currentDataSource.name === layerName) {
-                layerIdxToReturn = i;
-                break;
-            }
-        }
-
-        return layerIdxToReturn;
+                resolve(eventData);
+            } 
+        });
     }
 
     /**
@@ -252,8 +200,7 @@ export default class CesiumView extends React.Component {
 
         
         this.viewer.entities.remove(entityToMove);
-        this.viewer.entities.add(this.generateEntity(newEntityPosition.longitude, 
-            newEntityPosition.latitude, newEntityPosition.height, entityToMove.billboard.image, entityToMove.billboard.scale));
+        this.viewer.entities.add(this.generateEntity(newEntityPosition, entityToMove.billboard));
     }
 
     /**
@@ -282,43 +229,49 @@ export default class CesiumView extends React.Component {
     mapEntitiesArrayToEntityCollection(srcEntities, entCollection) {
         for(let i = 0 ; i < srcEntities.length ; i++) {
             const entity = srcEntities[i];
-            const addedEntity = entCollection.entities.add(this.generateEntity(
-                entity.position.longitude,
-                entity.position.latitude,
-                entity.position.height,
-                entity.billboard.image,
-                entity.billboard.scale
-            ));
+            const addedEntity = entCollection.entities.add(this.generateEntity(entity.position, entity.billboard));
 
-            this.props.actions[resources.ACTIONS.SET_ENTITY_ID.TYPE](
-                            resources.AGENTS.USER,
-                            {
-                                layerName: entCollection.name,
-                                entityId: entity.id,
-                                cesiumId: addedEntity.id
-                            });
+            this.props.actions[resources.ACTIONS.SET_ENTITY_CESIUM_ID.TYPE](
+                resources.AGENTS.USER, {
+                    layerName: entCollection.name,
+                    entityId: entity.id,
+                    cesiumId: addedEntity.id
+                }
+            );
         }
     }
 
+    // /**
+    //  * generate entity by params
+    //  * @param {Number} longitude
+    //  * @param {Number} latitude
+    //  * @param {Number} height
+    //  * @param {String} imgSource
+    //  * @param {Number} imgScale
+    //  * @returns {Object} an object that can be added to cesium entities collection
+    //  */
+    // _generateEntity(longitude, latitude, height, imgSource, imgScale) {
+    //     return {
+    //             position: Cartesian3.fromDegrees(longitude, latitude, height),
+    //             billboard: {
+    //                 image: imgSource,
+    //                 scale: imgScale   
+    //             }
+    //     };
+    // }
+
     /**
      * generate entity by params
-     * @param {Number} longitude
-     * @param {Number} latitude
-     * @param {Number} height
-     * @param {String} imgSource
-     * @param {Number} imgScale
+     * @param {position} a position object containinf longitude and latitude in degrees (or radians?) and height in meters
+     * @param {billboard} billboard object
      * @returns {Object} an object that can be added to cesium entities collection
      */
-    generateEntity(longitude, latitude, height, imgSource, imgScale) {
+    generateEntity(position, billboard) {
         return {
-                position: Cartesian3.fromDegrees(longitude, latitude, height),
-                billboard: {
-                    image: imgSource,
-                    scale: imgScale   
-                }
+                position: Cartesian3.fromDegrees(position.longitude, position.latitude, position.height),
+                billboard
         };
     }
-
     setMapEventHandlers(viewer, handler, entity, selectedEntity, dragging, isFirstClick) {
             
             // Drag & Drop 
