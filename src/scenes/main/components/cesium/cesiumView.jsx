@@ -52,6 +52,18 @@ const componentStyle = {
         position: 'relative',
         top: '-70vh',
         marginLeft: '120px'
+    },
+    tooltip : {
+        position: 'relative',
+        width: '188px',
+        height: '43px',
+        background: 'white',
+        border: '1px solid #47494c',
+        borderRadius: '5px',
+        top: '-92vh',
+        marginLeft: '300px',
+        visibility: 'hidden',
+        textAlign: 'center',
     }
 };
 
@@ -116,20 +128,6 @@ export default class CesiumView extends React.Component {
 
         // move to the default map
         this.setNewFocusOnMap(this.viewState.center.x, this.viewState.center.y);
-
-        // setTimeout(() => {
-        //     this.props.actions[resources.ACTIONS.ADD.TYPE](
-        //         resources.AGENTS.API,
-        //         {
-        //             layerName: 'DynamicMissionArea',
-        //             cesiumId: null,
-        //             position: {
-        //                 longitude: 35.0,
-        //                 latitude: 32.79628841345832,
-        //                 height: 1.0
-        //             }
-        //         });
-        // }, 10000);
     }
 
     handleContextAwareActions(error, eventData) {
@@ -338,9 +336,23 @@ export default class CesiumView extends React.Component {
             // dragging handler
             handler.setInputAction( movement => 
             {
+                const tooltipInfo = this.refs.movementToolTip;
+
                 if (dragging) 
                 {
                     entity.position = viewer.camera.pickEllipsoid(movement.endPosition);
+                }
+                else {
+                    const pickedObject = viewer.scene.pick(movement.endPosition);
+
+                    if (this.defined(pickedObject)) {
+                        
+                        tooltipInfo.style.visibility = 'visible';
+
+                    }
+                    else {
+                        tooltipInfo.style.visibility = 'hidden';
+                    }
                 }
 
             }, ScreenSpaceEventType.MOUSE_MOVE);
@@ -457,6 +469,7 @@ export default class CesiumView extends React.Component {
                     </div>
                 </div>
                 <img style = {componentStyle.altimeter} src="https://s27.postimg.org/op4ssy0ur/altimeter.png" alt="altimeter"/>
+                <div style = {componentStyle.tooltip} ref="movementToolTip" id="movementToolTip"/>
             </div>
         );
     }

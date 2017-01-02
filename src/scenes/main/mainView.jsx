@@ -45,28 +45,6 @@ export default class Main extends Component {
     window.coGen = coordinatesGenerator; 
 
     //----------------------------------------------------------------------------------------------
-
-    setInterval(() => {
-      const cords = coordinatesGenerator.next();
-        if(!cords.done) {
-          actions[resources.ACTIONS.ADD.TYPE](
-                          resources.AGENTS.API,
-                          {
-                              id: Guid.create(),
-                              layerName: 'DynamicMissionArea',
-                              position: cords.value,
-                              billboard: {
-                                image: `${resources.IMG.BASE_URL}${resources.LAYERS[resources.DMA].IMG}`,
-                                scale: 0.95
-                              }                              
-                          });
-        }
-        else
-        {
-          console.log('generator done.');
-        }
-    }, 6000);
-
   }
 
   componentWillUnmount() {
