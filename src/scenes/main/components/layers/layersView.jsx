@@ -3,30 +3,27 @@ import Guid from 'guid';
 import {resources} from '../../../../shared/data/resources'; 
 
 //CONSTS
-const imageStyle = {
-    maxHeight: resources.IMG.MAX_HEIGHT,
-    width: 'auto',
-    height: 'auto',
-    color: '4e4e4e'
-};
-
 const componentStyle = {
     containerDiv : {
         display: 'inline-block',
         float: 'right',
         maxHeight: '100%',
         maxWidth: '400px',
-        overflow: 'hidden'
+        overflow: 'hidden',
+        // border: '2px solid black',
+        // marginTop: '-2px',
+        // marginRight: '-2px'
     }, 
     li : {
+        width: '6vw',
         listStyle: 'none',
-        marginRight: '15px',
     },
     liSelected : {
         border: '1px solid white'
     },
     ul : {
-        marginTop: '16px',
+        margin: '0',
+        marginTop: '8px',
         display: 'inline-flex',
     }
 };
@@ -39,9 +36,10 @@ export default class Layers extends React.Component {
                 <ul style = {componentStyle.ul}>
                     {this.props.layers.map((layer, idx) => 
                     <li key={idx} style = {componentStyle.li}>
-                        <img style={imageStyle} 
-                            id = {Guid.create()}
-                            src={layer.imgUrl}
+                        <div 
+                            id={Guid.create()} 
+                            style={this.props.setIconStyle(layer.imgUrl)} 
+                            draggable='false' 
                             onClick = {() =>  this.props.actions[resources.ACTIONS.TOGGLE_LAYER.TYPE](resources.AGENTS.USER,{layerIndex: idx})}
                         />
                     </li>)}

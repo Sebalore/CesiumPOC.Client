@@ -80,6 +80,18 @@ export default class Main extends Component {
     });
   }
 
+  setIconStyle(imgName) {
+    const lastSlash = imgName.lastIndexOf("/");
+    const parsedImage =  imgName.substring(lastSlash + 1, imgName.length);   
+    const newStyle = JSON.parse(JSON.stringify(componentStyle.icon));       // deep cloning
+    const concreteDisplay = `url(${resources.IMG.BASE_URL}${parsedImage}) no-repeat 50% 50%`;
+
+    newStyle.WebkitMask = concreteDisplay;
+    newStyle.mask = concreteDisplay;
+
+    return newStyle;
+  }
+
   render() {
     if (this.state && this.state.layers) {
       const layers = this.state.layers;
@@ -96,10 +108,12 @@ export default class Main extends Component {
               <Layers 
                   layers={layers} 
                   actions={actions}
+                  setIconStyle = {this.setIconStyle}
               />
               <AddEntity 
                   layers={addableEntityLayers} 
                   actions={actions}
+                  setIconStyle = {this.setIconStyle}
               />
           </div>
           <CesiumView 
@@ -122,4 +136,15 @@ const componentStyle = {
     backgroundColor: '#47494c',
     width: '100vw',
     height: '6vh',
+    border: '2px solid black',
+    icon : {
+      width: '48px',
+      height: '48px',
+      display: 'inline-block',
+      WebkitMask: `url(${resources.IMG.BASE_URL}icon_7.svg) no-repeat 50% 50%`,
+      mask: `url(${resources.IMG.BASE_URL}icon_7.svg) no-repeat 50% 50%`,
+      WebkitMaskSize: 'cover',
+      maskSize: 'cover',
+      backgroundColor: 'white'
+    }
 };
