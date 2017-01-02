@@ -66,7 +66,21 @@ const componentStyle = {
         marginLeft: '300px',
         visibility: 'hidden',
         textAlign: 'center',
-    }
+    },
+    editEntityForm: {
+        width: '234px',
+        top: '-671px',
+        left: '221px',
+        height: '200px',
+        backgroundColor: '#aaaaaa',
+        position: 'relative',
+        visibility: 'hidden',
+  },
+  formH1: {
+    background: '#615a5a',
+    borderBottom: '1px solid black',
+    textAlign: 'center'
+  }
 };
 
 const initialViewState = {
@@ -377,8 +391,16 @@ export default class CesiumView extends React.Component {
                 
                 if (this.defined(pickedObject)) 
                 {
-                    entity = pickedObject.id;
-                    console.log('you right click on ', entity);
+                    const editForm = this.refs.entityEditionForm;
+                    const pickedObject = viewer.scene.pick(click.position);
+
+                    if (this.defined(pickedObject)) {
+                        
+                        editForm.style.visibility = 'visible';
+                        
+                        this.refs.entityNameInput.value = pickedObject.id.hasOwnProperty('label') &&  pickedObject.id.label &&  pickedObject.id.label !== 'undefined' ? 
+                            pickedObject.id.label.text._value : 'This is a mock basic details about this entity';
+                    }
                 }
 
             }, ScreenSpaceEventType.RIGHT_DOWN);
@@ -457,6 +479,14 @@ export default class CesiumView extends React.Component {
                 </div>
                 <img style = {componentStyle.altimeter} src="https://s27.postimg.org/op4ssy0ur/altimeter.png" alt="altimeter"/>
                 <div style = {componentStyle.tooltip} ref="movementToolTip" id="movementToolTip" onClick = {() => {this.refs.movementToolTip.style.visibility = 'hidden';}}/>
+                <form style={componentStyle.editEntityForm} ref="entityEditionForm" id="entityEditionForm" >
+                    <h1 style={componentStyle.formH1}>Create some circle</h1>
+                    <h2>Name:</h2>
+                    <input type="text" name="Name" defaultValue="Name" ref="entityNameInput"/>
+                    <br/><br/>
+                    <input type="button" value="OK" onClick = {(e) => {e.preventDefault(); this.refs.entityEditionForm.style.visibility = 'hidden';}} />
+                    <input type="button" value="Cancle" onClick = {(e) => {e.preventDefault(); this.refs.entityEditionForm.style.visibility = 'hidden';}} />
+                </form >
             </div>
         );
     }
