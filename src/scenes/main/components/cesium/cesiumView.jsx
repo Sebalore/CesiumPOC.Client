@@ -179,10 +179,12 @@ export default class CesiumView extends React.Component {
                                 const entityToUpdate = layerDataSource.entities.getById(eventData.result.cesiumId);
                                 layerDataSource.entities.remove(entityToUpdate);                                
                             }
-                            const addedEntity = layerDataSource.entities.add(this.generateEntity(eventData.result.position, eventData.result.billboard));
+                            const addedEntity = layerDataSource.entities.add(this.generateEntity(eventData.result.position, eventData.result.billboard, {
+                                label: new LabelGraphics({
+                                    text: eventData.result.label || '...', 
+                                    show: false
+                            })}));
                             
-                            console.log(`Added new entity at : ${JSON.stringify(addedEntity.position.getValue(JulianDate.now()))}`);
-
                             this.props.actions[resources.ACTIONS.SET_ENTITY_CESIUM_ID.TYPE](
                                 resources.AGENTS.USER,
                                 {
@@ -239,12 +241,13 @@ export default class CesiumView extends React.Component {
      * @param {billboard} billboard object
      * @returns {Object} an object that can be added to cesium entities collection
      */
-    generateEntity(position, billboard, ...others) {
-        return {
+    generateEntity(position, billboard, others) {
+        const cesiumEntity =  {
                 position: Cartesian3.fromDegrees(position.longitude, position.latitude, position.height),
                 billboard,
                 ...others
         };
+        return cesiumEntity;
     }
 
     setMapEventHandlers(viewer, handler, entity, selectedEntity, dragging, isFirstClick) {
@@ -280,7 +283,7 @@ export default class CesiumView extends React.Component {
                         tooltipInfo.style.visibility = 'visible';
                         
                         tooltipInfo.innerHTML = pickedObject.hasOwnProperty('label') && pickedObject.label && pickedObject.label !== 'undefined' ? 
-                            pickedObject.id.label.text._value : 'This is a mock basic details about this entity';
+                            pickedObject.id.label.text._value : '... add a toolptip for this object';
                     }
                 }
 
@@ -340,7 +343,7 @@ export default class CesiumView extends React.Component {
                         editForm.style.visibility = 'visible';
                         
                         this.refs.entityNameInput.value = pickedObject.id.hasOwnProperty('label') &&  pickedObject.id.label &&  pickedObject.id.label !== 'undefined' ? 
-                            pickedObject.id.label.text._value : 'This is a mock basic details about this entity';
+                            pickedObject.id.label.text._value : '... add a toolptip for this object';
                     }
                 }
 

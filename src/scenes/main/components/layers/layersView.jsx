@@ -98,14 +98,6 @@ export default class Layers extends React.Component {
                             onClick = {() =>  this.onStaticListItemClicked(13)}
                         />
                     </li>
-                   <li style = {componentStyle.li} ref="li_12">
-                        <div
-                            ref = "svg12"
-                            style={this.props.setIconStyle('../../../../shared/images/icon_3.svg')} 
-                            draggable='false' 
-                            onClick = {() =>  this.onStaticListItemClicked(12)}
-                        />
-                    </li>
                     <li style = {componentStyle.li} ref="li_11">
                         <div
                             ref = "svg11"

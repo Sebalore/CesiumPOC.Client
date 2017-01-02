@@ -77,6 +77,7 @@ const initialViewState = {
           },
           billboard: {
             image: `${resources.IMG.BASE_URL}${resources.LAYERS[resources.UAV].IMG}`,
+            rotation: -90,
             scale: 0.95
           },
           gen:  createLinearCoordinatesGenerator({
@@ -95,6 +96,7 @@ const initialViewState = {
           },
           billboard: {
             image: `${resources.IMG.BASE_URL}${resources.LAYERS[resources.UAV].IMG}`,
+            rotation: 90,
             scale: 0.95
           },
           gen:  createLinearCoordinatesGenerator({
@@ -312,7 +314,7 @@ class _store extends EventEmitter {
                     }                              
                   });                
                 }
-            }, 3000);            
+            }, 2000);            
           })
           
           initialViewState.layers.find(l => l.name===resources.HELICOPTERS).entities.forEach(e =>{
@@ -330,7 +332,7 @@ class _store extends EventEmitter {
                     }                              
                   });                
                 }
-            }, 5000);            
+            }, 2000);            
           })
 
           break;
