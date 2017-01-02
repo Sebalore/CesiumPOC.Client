@@ -2,7 +2,7 @@ import {EventEmitter} from 'events';
 import Guid from 'guid';
 
 import dispatcher from './dispatcher';
-import { linearCoordinatesGenerator } from './services';
+import { createLinearCoordinatesGenerator } from './services';
 
 //resources
 import {resources} from '../../shared/data/resources';
@@ -51,16 +51,107 @@ const initialViewState = {
         {
           id: Guid.create(),
           cesiumId: null, //guid to be provided by cesium
-          label: `${resources.UAV}: Sebastian`,
+          label: `${resources.UAV}: 001`,
           position: {
-            longitude: 34.99249855493725,
-            latitude: 32.79628841345832,
-            height: 1.0
+            longitude: resources.MAP_CENTER.longitude - 0.075,
+            latitude: resources.MAP_CENTER.latitude - 0.04,
+            height: 1000.0
           },
           billboard: {
             image: `${resources.IMG.BASE_URL}${resources.LAYERS[resources.UAV].IMG}`,
             scale: 0.95
-          }
+          },
+          gen:  createLinearCoordinatesGenerator({
+            longitude: 0.002,
+            latitude: 0.001,
+            height: 1000
+          })
+        } , {
+          id: Guid.create(),
+          cesiumId: null, //guid to be provided by cesium
+          label: `${resources.UAV}: 002`,
+          position: {
+            longitude: resources.MAP_CENTER.longitude - 0.05,
+            latitude: resources.MAP_CENTER.latitude + 0.03,
+            height: 1500.0
+          },
+          billboard: {
+            image: `${resources.IMG.BASE_URL}${resources.LAYERS[resources.UAV].IMG}`,
+            scale: 0.95
+          },
+          gen:  createLinearCoordinatesGenerator({
+            longitude: 0.001,
+            latitude: -0.002,
+            height: 1000
+          })
+        }, {
+          id: Guid.create(),
+          cesiumId: null, //guid to be provided by cesium
+          label: `${resources.UAV}: 003`,
+          position: {
+            longitude: resources.MAP_CENTER.longitude + 0.085,
+            latitude: resources.MAP_CENTER.latitude + 0.02,
+            height: 750.0
+          },
+          billboard: {
+            image: `${resources.IMG.BASE_URL}${resources.LAYERS[resources.UAV].IMG}`,
+            scale: 0.95
+          },
+          gen:  createLinearCoordinatesGenerator({
+            longitude: -0.001,
+            latitude: -0.00002,
+            height: 1000
+          })
+        }
+      ]
+    }, {
+      name: resources.HELICOPTERS,
+      imgUrl: `${resources.IMG.BASE_URL}${resources.LAYERS[resources.HELICOPTERS].IMG}`,
+      active: true,
+      actions: [
+        {
+          id: resources.LAYERS[resources.HELICOPTERS].ACTIONS.ADD.ID,
+          description: resources.LAYERS[resources.HELICOPTERS].ACTIONS.ADD.DESC,
+          imgUrl: `${resources.IMG.BASE_URL}${resources.LAYERS[resources.HELICOPTERS].IMG}`
+        }
+      ],
+      entities: [
+        {
+          id: Guid.create(),
+          cesiumId: null, //guid to be provided by cesium
+          label: `${resources.HELICOPTERS}: 001`,
+          position: {
+            longitude: resources.MAP_CENTER.longitude, // + 0.065,
+            latitude: resources.MAP_CENTER.latitude, // - 0.085,
+            height: 69.0
+          },
+          billboard: {
+            image: `${resources.IMG.BASE_URL}${resources.LAYERS[resources.HELICOPTERS].IMG}`,
+            scale: 0.95
+          },
+          gen:  createLinearCoordinatesGenerator({
+            longitude: -0.00001,
+            latitude: 0.0001,
+            height: 1000
+          })
+        } , {
+          id: Guid.create(),
+          cesiumId: null, //guid to be provided by cesium
+          label: `${resources.HELICOPTERS}: 002`,
+          position: {
+            longitude: resources.MAP_CENTER.longitude  + 0.0065,
+            latitude: resources.MAP_CENTER.latitude - 0.0085,
+            height: 250.0
+          },
+          billboard: {
+            image: `${resources.IMG.BASE_URL}${resources.LAYERS[resources.HELICOPTERS].IMG}`,
+            scale: 0.95
+          },
+          gen:  createLinearCoordinatesGenerator({
+            longitude: 0.00001,
+            latitude: -0.0001,
+            height: 1000
+          })
         }
       ]
     }
@@ -187,55 +278,61 @@ class _store extends EventEmitter {
       case 'DEBUG_1':
         {
           //---- for testing movement ------------------------------------------------------------------- 
-          const initial = {
-            longitude: 34.99249855493725,
-            latitude:  32.79628841345832,
-            height: 1.0
-          };
+          // const initial = {
+          //   longitude: 34.99249855493725,
+          //   latitude:  32.79628841345832,
+          //   height: 1.0
+          // };
 
-          const dest = {
-            longitude: -75.16617698856817,
-            latitude: 39.90607492083895,
-            height: 1000.0
-          };
+          // const dest = {
+          //   longitude: -75.16617698856817,
+          //   latitude: 39.90607492083895,
+          //   height: 1000.0
+          // };
 
           const velocity = {
-            longitude: 0.006,
-            latitude: 0.004,
+            longitude: 0.000,
+            latitude: 0.000,
             height: 50.0
           };
           //----------------------------------------------------------------------------------------------
-          const coordinatesGenerator = linearCoordinatesGenerator(initial, dest, velocity);
-          window.coGen = coordinatesGenerator; 
-          setInterval(() => {
-            const cords = coordinatesGenerator.next();
-              if(!cords.done) {
-                dispatcher.dispatch({
-                  type: resources.ACTIONS.UPDATE_POSITION.TYPE,
-                  agent: resources.AGENTS.API,
-                  data: {
-                      entityId: initialViewState.layers[1].entities[0].id,
-                      layerName: resources.UAV,
-                      position: cords.value
-                  }                              
-                });                
-                // dispatcher.dispatch({
-                //   type: resources.ACTIONS.ADD.TYPE,
-                //   agent: resources.AGENTS.API,
-                //   data: {
-                //       id: Guid.create(),
-                //       layerName: 'DynamicMissionArea',
-                //       position: cords.value,
-                //       billboard: {
-                //         image: `${resources.IMG.BASE_URL}${resources.LAYERS[resources.DMA].IMG}`,
-                //         scale: 0.95
-                //       }
-                //   }                              
-                // });
-              } else {
-                console.log('generator done.');
-              }
-          }, 3000);
+          
+          initialViewState.layers.find(l => l.name===resources.UAV).entities.forEach(e =>{
+            const gen = e.gen(e.position);
+            setInterval(() => {
+              const cords = gen.next();
+                if(!cords.done) {
+                  dispatcher.dispatch({
+                    type: resources.ACTIONS.UPDATE_POSITION.TYPE,
+                    agent: resources.AGENTS.API,
+                    data: {
+                        layerName: resources.UAV,
+                        entityId: e.id,
+                        position: cords.value
+                    }                              
+                  });                
+                }
+            }, 3000);            
+          })
+          
+          initialViewState.layers.find(l => l.name===resources.HELICOPTERS).entities.forEach(e =>{
+            const gen = e.gen(e.position);
+            setInterval(() => {
+              const cords = gen.next();
+                if(!cords.done) {
+                  dispatcher.dispatch({
+                    type: resources.ACTIONS.UPDATE_POSITION.TYPE,
+                    agent: resources.AGENTS.API,
+                    data: {
+                        layerName: resources.HELICOPTERS,
+                        entityId: e.id,
+                        position: cords.value
+                    }                              
+                  });                
+                }
+            }, 5000);            
+          })
+
           break;
         }
     }

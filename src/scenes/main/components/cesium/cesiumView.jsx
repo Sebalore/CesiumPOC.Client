@@ -89,8 +89,8 @@ const initialViewState = {
     layers: [],
     zoomHeight: 20000,
     center: {
-      x: 34.99249855493725,
-      y:  32.79628841345832,
+      x: resources.MAP_CENTER.longitude,
+      y: resources.MAP_CENTER.latitude,
     },
     options: {
         timeline: false,

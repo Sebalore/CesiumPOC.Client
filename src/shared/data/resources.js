@@ -1,5 +1,6 @@
 //------ LAYER NAMES --------------
 const UAV = 'UAV';
+const HELICOPTERS = 'Helicopters';
 const DMA = 'DynamicMissionArea';
 //--------------------------------- ------- ACTION NAMES ------------
 const ADD = 'ADD';
@@ -14,8 +15,14 @@ const API = 'API';
 //--------------------------------
 
 export const resources = {
-    UAV: UAV,
     DMA: DMA,
+    UAV: UAV,
+    HELICOPTERS: HELICOPTERS,
+    MAP_CENTER: {
+        longitude: 34.99249855493725,
+        latitude:  32.79628841345832,
+        height: 1.0
+    },
     IMG: {
         BASE_URL: 'src/shared/images/',
         SCALE: '25%',
@@ -44,14 +51,23 @@ export const resources = {
                     DESC: 'Add a new UAV'
                 }
             }
-        }
+        },
+        [HELICOPTERS]: {
+            IMG: 'icon_3.svg',
+            ACTIONS: {
+                ADD: {
+                    ID: 'Add',
+                    DESC: 'Add a new helicopter'
+                }
+            }
+        }        
     },
     ACTIONS: {
         ADD: {
             TYPE: ADD,
             DESC: 'Add a new entity',
             LAYERS: [
-                DMA, UAV
+                DMA, UAV, HELICOPTERS
             ], //ON WHAT LAYERS CAN THIS ACTION BE PERFORMED
             AGENTS: [
                 USER, API
@@ -62,7 +78,7 @@ export const resources = {
             TYPE: DELETE,
             DESC: 'Delete an entity',
             LAYERS: [
-                DMA, UAV
+                DMA, UAV, HELICOPTERS
             ],
             AGENTS: [
                 USER, API
@@ -73,7 +89,7 @@ export const resources = {
             TYPE: UPDATE_POSITION,
             DESC: 'Change position coordinates (and rotation?) of entity',
             LAYERS: [
-                DMA, UAV
+                DMA, UAV, HELICOPTERS
             ],
             AGENTS: [USER, API]
         },
@@ -81,7 +97,7 @@ export const resources = {
             TYPE: MAP_CENTER,
             DESC: 'Change map camera view to center on the entity',
             LAYERS: [
-                DMA, UAV
+                DMA, UAV, HELICOPTERS
             ],
             AGENTS: [USER]
         },
@@ -89,7 +105,7 @@ export const resources = {
             TYPE: SET_ENTITY_CESIUM_ID,
             DESC: 'add generated cesiumId to added object in the store',
             LAYERS: [
-                DMA, UAV
+                DMA, UAV, HELICOPTERS
             ],
             AGENTS: [USER]
         },
@@ -97,7 +113,7 @@ export const resources = {
             TYPE: TOGGLE_LAYER,
             DESC: 'Torn on/off layer on the map',
             LAYERS: [
-                DMA, UAV
+                DMA, UAV, HELICOPTERS
             ],
             AGENTS: [USER]
         }
