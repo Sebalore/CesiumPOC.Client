@@ -136,7 +136,7 @@ export default class CesiumView extends React.Component {
         const dragging = false, isFirstClick = true;
 
         this.viewer = new CesiumViewer(this.refs.map, this.viewState.options);
-        this.setNewFocusOnMap(this.viewState.center.x, this.viewState.center.y);
+        this.viewer.camera.lookAt(Cartesian3.fromDegrees(this.viewState.center.x, this.viewState.center.y), new Cartesian3(0.0, 0.0, this.viewState.zoomHeight));
 
         this.handler = new ScreenSpaceEventHandler(this.viewer.scene.canvas);  
 
@@ -300,7 +300,7 @@ export default class CesiumView extends React.Component {
                         tooltipInfo.style.left = (x - 20) + 'px';                          
                         tooltipInfo.innerHTML = pickedObject.id.label ? pickedObject.id.label.text._value : '... add a toolptip for this object';
 
-                        setTimeout(() => tooltipInfo.style.visibility = 'hidden', 3000);
+                        setTimeout(() => tooltipInfo.style.visibility = 'hidden', 7000);
                     }
                 }
 
@@ -363,17 +363,17 @@ export default class CesiumView extends React.Component {
                             pickedObject.id.label.text._value : '... add a toolptip for this object';
                     }
                 }
+            }, ScreenSpaceEventType.RIGHT_DOWN);
 
-            }, ScreenSpaceEventType.RIGHT_DOWN);          
+            // left click on map
+            handler.setInputAction( click => {
+                 const cartesian = this.viewer.camera.pickEllipsoid( click.position, this.viewer.scene.globe.ellipsoid);
+                 this.viewer.camera.lookAt(cartesian, new Cartesian3(0.0, 0.0, this.viewState.zoomHeight));
+            }, ScreenSpaceEventType.RIGHT_UP);         
     }
 
     defined(object) {
         return (object !== undefined && object !== null);
-    }
-
-    /** change the map center view - action like fly to given coordinates */
-    setNewFocusOnMap(x, y)    {
-        this.viewer.camera.lookAt(Cartesian3.fromDegrees(x, y), new Cartesian3(0.0, 0.0, this.viewState.zoomHeight));
     }
 
     /** the function handle droping entities from this combobox to the map */
