@@ -44,11 +44,6 @@ export default class AddEntity extends React.PureComponent {
 
     }
 
-    // shouldComponentUpdate(nextProps) {
-
-    //     return shallowCompare(this, nextProps);
-    // }
-
     render() {
         if (this.props.layersInfo) {
             return (
@@ -60,13 +55,12 @@ export default class AddEntity extends React.PureComponent {
                         <li style={componentStyle.li}>
                             <div style={this.props.setIconStyle('icon_8.svg')} draggable='false'/>
                         </li>
-                        {this.props.layersInfo.map((layerInfo, idx) => <li key={idx} style={componentStyle.li}>
+                        {this.props.layersInfo.map((layer, idx) => <li key={idx} style={componentStyle.li}>
                                 <div 
                                     id={Guid.create()} 
-                                    data-layerName = {layerInfo.name}
-                                    style={this.props.setIconStyle(layerInfo.imgUrl)} 
+                                    style={this.props.setIconStyle(layer.imgUrl)} 
                                     draggable='true' 
-                                    onDragStart={(e) => { e.dataTransfer.setData('text/plain', e.target.id); }}
+                                    onDragStart={(e) => { e.dataTransfer.setData('text', layer.name); }}
                                 />
                             </li>)}
                     </ul>

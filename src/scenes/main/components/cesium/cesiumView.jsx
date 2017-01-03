@@ -371,11 +371,11 @@ export default class CesiumView extends React.Component {
             cartesian = this.viewer.camera.pickEllipsoid(mousePosition, this.viewer.scene.globe.ellipsoid); // maybe the problem here!!
         }
      
-        const img = document.getElementById(event.dataTransfer.getData('text'));
-        const layer = this.props.layers.find(l => l.name===img.getAttribute('data-layerName'));
-        //console.log(img);
+        const layerName = event.dataTransfer.getData('text');
+        const layer = this.props.layers.find(l => l.name === layerName);
+        //console.log(layerName);
 
-        if (cartesian && img && layer) {
+        if (cartesian && layerName && layer) {
             const cartographic =  this.viewer.scene.globe.ellipsoid.cartesianToCartographic(cartesian);
             const longitudeString = Math.toDegrees(cartographic.longitude);
             const latitudeString = Math.toDegrees(cartographic.latitude);
@@ -383,8 +383,13 @@ export default class CesiumView extends React.Component {
             this.props.actions[resources.ACTIONS.ADD.TYPE](
                 resources.AGENTS.USER,
                 {
-                    layerName: layer.name,
-                    position: cartographic
+                    layer: layerName,
+                    label: `${layerName}-New-Added`,
+                    position: { 
+                        height : 1000.0,            // TODO: change it 
+                        latitude : latitudeString,
+                        longitude : longitudeString,
+                    }
                 });
         } else {
             console.log('CesiumView::onDrop(event) : something went wrong.');
