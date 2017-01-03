@@ -55,15 +55,17 @@ const componentStyle = {
         marginLeft: '120px'
     },
     tooltip : {
-        position: 'relative',
+        display: 'block',
+        position: 'fixed',
+        overflow: 'hidden',
         width: '188px',
         height: '43px',
         background: 'white',
         border: '1px solid #47494c',
         borderRadius: '5px',
-        top: '-110vh',
-        left: '-1vw',
-        marginLeft: '300px',
+        // top: '-110vh',
+        // left: '-1vw',
+        //marginLeft: '300px',
         visibility: 'hidden',
         textAlign: 'center',
     },
@@ -252,6 +254,13 @@ export default class CesiumView extends React.Component {
 
     setMapEventHandlers(viewer, handler, entity, selectedEntity, dragging, isFirstClick) {
             
+            // Get mouse position on scree (unrelated to Cesium viewer object)
+            let x, y;
+            window.onmousemove = function (e) {
+                x = e.clientX;
+                y = e.clientY;
+            };                    
+
             // Drag & Drop 
             handler.setInputAction( click => 
             {
@@ -281,9 +290,11 @@ export default class CesiumView extends React.Component {
                     if (this.defined(pickedObject)) {
                         
                         tooltipInfo.style.visibility = 'visible';
-                        
-                        tooltipInfo.innerHTML = pickedObject.id.hasOwnProperty('_label') && pickedObject.id.label && pickedObject.id.label !== 'undefined' ? 
-                            pickedObject.id.label.text._value : '... add a toolptip for this object';
+                        tooltipInfo.style.top = (y - 70) + 'px';
+                        tooltipInfo.style.left = (x - 20) + 'px';                          
+                        tooltipInfo.innerHTML = pickedObject.id.label ? pickedObject.id.label.text._value : '... add a toolptip for this object';
+
+                        setTimeout(() => tooltipInfo.style.visibility = 'hidden', 3000);
                     }
                 }
 
@@ -405,7 +416,7 @@ export default class CesiumView extends React.Component {
                     </div>
                 </div>
                 <img style = {componentStyle.altimeter} src="https://s27.postimg.org/op4ssy0ur/altimeter.png" alt="altimeter"/>
-                <div style = {componentStyle.tooltip} ref="movementToolTip" id="movementToolTip" onClick = {() => {this.refs.movementToolTip.style.visibility = 'hidden';}}/>
+                <div style = {componentStyle.tooltip} ref="movementToolTip" id="movementToolTip" /*onClick = {() => {this.refs.movementToolTip.style.visibility = 'hidden';}}*//>
                 <form style={componentStyle.editEntityForm} ref="entityEditionForm" id="entityEditionForm" >
                     <h1 style={componentStyle.formH1}>Create some circle</h1>
                     <h2>Name:</h2>
