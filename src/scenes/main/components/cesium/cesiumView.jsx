@@ -24,7 +24,6 @@ import CesiumViewer from 'cesium/Source/Widgets/Viewer/Viewer';
 //import Entity from 'cesium/Source/DataSources/Entity';
 import Cartesian2 from 'cesium/Source/Core/Cartesian2';
 import Cartesian3 from 'cesium/Source/Core/Cartesian3';
-//import Rectangle from 'cesium/Source/Core/Rectangle';
 import ScreenSpaceEventHandler from 'cesium/Source/Core/ScreenSpaceEventHandler';
 import 'cesium/Source/Widgets/widgets.css';
 import Math from 'cesium/Source/Core/Math';
@@ -116,7 +115,6 @@ export default class CesiumView extends React.Component {
         super(props);
         // class members
         this.viewState = initialViewState;
-        this.dataSources = [];
 
         // class methods
         this.onDrop = this.onDrop.bind(this);
@@ -178,7 +176,15 @@ export default class CesiumView extends React.Component {
                         if (layerIsActive) {
                             if (eventData.type === resources.ACTIONS.UPDATE_POSITION.TYPE) {
                                 const entityToUpdate = layerDataSource.entities.getById(eventData.result.cesiumId);
-                                layerDataSource.entities.remove(entityToUpdate);                                
+                                layerDataSource.entities.remove(entityToUpdate);   
+
+                                // real update
+                                // TODO: uncomment when we have replay from cesium forum
+
+                                // console.log('------------------------change entity position------------------');
+                                // console.log('before: ', entityToUpdate.position);
+                                // entityToUpdate.position = Cartesian3.fromDegrees(eventData.data.position.latitude, eventData.data.position.longitude, 1000);                           
+                                // console.log('after: ', entityToUpdate.position);                             
                             }
                             const addedEntity = layerDataSource.entities.add(this.generateEntity(eventData.result.position, eventData.result.billboard, {
                                 label: new LabelGraphics({
