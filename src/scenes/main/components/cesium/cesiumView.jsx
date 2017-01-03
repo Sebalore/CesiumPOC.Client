@@ -387,8 +387,8 @@ export default class CesiumView extends React.Component {
             .pickEllipsoid(mousePosition, this.viewer.scene.globe.ellipsoid); // maybe the problem here!!
         }
      
-        const img = document.getElementById(event.dataTransfer.getData('text'));
-        const layer = this.props.layers.find(l => l.name===img.getAttribute('data-layerName'));
+        const img = event.dataTransfer.getData('text');
+        const layer = this.props.layers.find(l => l.name===img);
         //console.log(img);
 
         if (cartesian && img && layer) {

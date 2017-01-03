@@ -52,10 +52,9 @@ export default class AddEntity extends React.Component {
                         {this.props.layers.map((layer, idx) => <li key={idx} style={componentStyle.li}>
                                 <div 
                                     id={Guid.create()} 
-                                    data-layerName = {layer.name}
                                     style={this.props.setIconStyle(layer.imgUrl)} 
                                     draggable='true' 
-                                    onDragStart={(e) => { e.dataTransfer.setData('text/plain', e.target.id); }}
+                                    onDragStart={(e) => { e.dataTransfer.setData('text', layer.name); }}
                                 />
                             </li>)}
                     </ul>
