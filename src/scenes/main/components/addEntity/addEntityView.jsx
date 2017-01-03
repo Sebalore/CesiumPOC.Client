@@ -37,9 +37,15 @@ const componentStyle = {
     }
 };
 
-export default class AddEntity extends React.Component {
+export default class AddEntity extends React.PureComponent {
+
+    constructor(props) {
+        super(props);
+
+    }
+
     render() {
-        if (this.props.layers) {
+        if (this.props.layersInfo) {
             return (
                 <div style={componentStyle.containerDiv}>
                     <ul style={componentStyle.ul}>
@@ -49,7 +55,7 @@ export default class AddEntity extends React.Component {
                         <li style={componentStyle.li}>
                             <div style={this.props.setIconStyle('icon_8.svg')} draggable='false'/>
                         </li>
-                        {this.props.layers.map((layer, idx) => <li key={idx} style={componentStyle.li}>
+                        {this.props.layersInfo.map((layer, idx) => <li key={idx} style={componentStyle.li}>
                                 <div 
                                     id={Guid.create()} 
                                     style={this.props.setIconStyle(layer.imgUrl)} 

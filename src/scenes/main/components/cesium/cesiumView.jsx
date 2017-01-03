@@ -119,7 +119,6 @@ export default class CesiumView extends React.Component {
         this.dataSources = [];
 
         // class methods
-        this.moveEntity = this.moveEntity.bind(this);
         this.onDrop = this.onDrop.bind(this);
         this.handleContextAwareActions = this.handleContextAwareActions.bind(this);
     }
@@ -201,20 +200,6 @@ export default class CesiumView extends React.Component {
                 resolve(eventData);
             } 
         });
-    }
-
-    /**
-     * move on entity on the map
-     * @param {entityId} String
-     * @param {Object} newEntityPosition
-     */
-    // TODO: change it to update instead of remove and adding
-    moveEntity(entityId, newEntityPosition) {
-        const entityToMove = this.viewer.entities.getById(entityId);
-        // entityToMove.position = newEntityPosition;
-        
-        this.viewer.entities.remove(entityToMove);
-        this.viewer.entities.add(this.generateEntity(newEntityPosition, entityToMove.billboard));
     }
 
     /**
@@ -383,8 +368,7 @@ export default class CesiumView extends React.Component {
         let cartesian = mousePosition;
         if (this.viewer.scene.mode === 3) {
             //Cesium.SceneMode.SCENE3D 
-            cartesian = this.viewer.camera
-            .pickEllipsoid(mousePosition, this.viewer.scene.globe.ellipsoid); // maybe the problem here!!
+            cartesian = this.viewer.camera.pickEllipsoid(mousePosition, this.viewer.scene.globe.ellipsoid); // maybe the problem here!!
         }
      
         const img = event.dataTransfer.getData('text');

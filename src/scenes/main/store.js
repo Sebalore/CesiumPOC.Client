@@ -181,6 +181,7 @@ class _store extends EventEmitter {
       const layerName = data.layerName;
       const layerIndex = this.data.layers.findIndex(l => l.name===layerName);
       this.data.layers[layerIndex].active = !this.data.layers[layerIndex].active;
+      this.emit('activeLayersChanged', this.data.layers);
       resolve(this.data.layers[layerIndex]);
     });
   }
@@ -248,7 +249,7 @@ class _store extends EventEmitter {
         //execute the action if there is a matching function defined in store
         this['handle' + action.type](action.agent, action.data)
         .then((actionResult) => {
-            this.emit('change', this.data);
+            this.emit('layersChanged', this.data.layers);
             return Promise.resolve(actionResult);
         })
         .then((actionResult) => {
