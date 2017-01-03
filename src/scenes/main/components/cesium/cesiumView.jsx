@@ -149,16 +149,10 @@ export default class CesiumView extends React.Component {
                 const layerIdx = this.props.layers.findIndex(l => l.name === eventData.data.layerName);
                 const layerIsActive = layerIdx> -1 && this.props.layers[layerIdx].active;               
                 const layerDataSource = ds.get(Array.from(ds).findIndex((fuckThis, i) => ds.get(i).name===eventData.data.layerName));
+
                 switch (eventData.type) {
                     case resources.ACTIONS.TOGGLE_LAYER.TYPE: {
-                        if(layerIsActive) {
-                            this.createLayerDataSource(this.props.layers[layerIdx]);
-                        }
-                        else {
-                            if(layerDataSource && this.viewer.dataSources.contains(layerDataSource)) {
-                                this.viewer.dataSources.remove(layerDataSource, true);
-                            }
-                        }
+                        layerDataSource.show = !layerDataSource.show;
                         break;   
                     } 
                     case resources.ACTIONS.DELETE.TYPE: {
@@ -203,6 +197,7 @@ export default class CesiumView extends React.Component {
                         break;
                     }
                 }
+
                 resolve(eventData);
             } 
         });
