@@ -15,5 +15,6 @@ export default {
     
     // map actions
     [resources.ACTIONS.MAP_CENTER.TYPE]: (agent, data) => dispatcher.dispatch({type: resources.ACTIONS.MAP_CENTER.TYPE,  agent, data}),
-    [resources.ACTIONS.TOGGLE_LAYER.TYPE]: (agent, data) => dispatcher.dispatch({type: resources.ACTIONS.TOGGLE_LAYER.TYPE,  agent, data})
+    [resources.ACTIONS.TOGGLE_LAYER.TYPE]: (agent, data) => dispatcher.dispatch({type: resources.ACTIONS.TOGGLE_LAYER.TYPE,  agent, data}),
+    [resources.ACTIONS.TOGGLE_BEST_FIT_DISPLAY.TYPE]: (agent, data) => dispatcher.dispatch({type: resources.ACTIONS.TOGGLE_BEST_FIT_DISPLAY.TYPE,  agent, data})
 }

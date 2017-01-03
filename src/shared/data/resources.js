@@ -10,6 +10,7 @@ const UPDATE_POSITION = 'UPDATE_POSITION';
 const MAP_CENTER = 'MAP_CENTER';
 const TOGGLE_LAYER = 'TOGGLE_LAYER';
 const SET_ENTITY_CESIUM_ID = 'SET_ENTITY_CESIUM_ID';
+const TOGGLE_BEST_FIT_DISPLAY = 'TOGGLE_BEST_FIT_DISPLAY';
 //--------------------------------- ------ AGENTS ------------------
 const USER = 'USER';
 const API = 'API';
@@ -42,7 +43,8 @@ export const resources = {
                 ADD: {
                     ID: 'Add',
                     DESC: 'Add a new flight circle.',
-                    IMG: 'icon_11.svg'
+                    IMG: 'icon_11.svg',
+                    SCALE: 2
                 }
             }
         },
@@ -51,7 +53,8 @@ export const resources = {
             ACTIONS: {
                 ADD: {
                     ID: 'Add',
-                    DESC: 'Add a new destination point'
+                    DESC: 'Add a new destination point',
+                    IMG: 'icon_9.svg'
                 }
             }
         },
@@ -60,7 +63,8 @@ export const resources = {
             ACTIONS: {
                 ADD: {
                     ID: 'Add',
-                    DESC: 'Add a new UAV'
+                    DESC: 'Add a new UAV',
+                    IMG: 'icon_5.svg'
                 }
             }
         },
@@ -69,7 +73,8 @@ export const resources = {
             ACTIONS: {
                 ADD: {
                     ID: 'Add',
-                    DESC: 'Add a new helicopter'
+                    DESC: 'Add a new helicopter',
+                    IMG: 'icon_3.svg'
                 }
             }
         }        
@@ -123,9 +128,17 @@ export const resources = {
         },
         TOGGLE_LAYER: {
             TYPE: TOGGLE_LAYER,
-            DESC: 'Torn on/off layer on the map',
+            DESC: 'Turn on/off layer on the map',
             LAYERS: [
                 DMA, UAV, HELICOPTERS, FLIGHT_CIRCLE
+            ],
+            AGENTS: [USER]
+        },
+        TOGGLE_BEST_FIT_DISPLAY: {
+            TYPE: TOGGLE_BEST_FIT_DISPLAY,
+            DESC: 'Turn on/off best fit zoom on object',
+            LAYERS: [
+                DMA, FLIGHT_CIRCLE
             ],
             AGENTS: [USER]
         }

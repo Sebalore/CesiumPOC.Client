@@ -204,18 +204,6 @@ class _store extends EventEmitter {
     return new Promise((resolve) => {
       const layerName = data.layerName;
       const layerIndex = this.data.layers.findIndex(l => l.name===layerName);
-      if (agent===resources.AGENTS.USER) {
-        data =  {
-          label: data.label,
-          id: Guid.create(),
-          layerName: layerName,
-          position: data.position,
-          billboard: {
-            image: `${resources.IMG.BASE_URL}${resources.LAYERS[layerName].IMG}`,
-            scale: 0.95
-          }
-        }; 
-      }
       this.data.layers[layerIndex].entities.push(data);
       resolve(data);
     });
@@ -260,6 +248,7 @@ class _store extends EventEmitter {
         result: null,
         error: null
       };
+      //TODO: check if action is aplliable to layer
       if (typeof this['handle' + action.type] === 'function') {
         //execute the action if there is a matching function defined in store
         this['handle' + action.type](action.agent, action.data)

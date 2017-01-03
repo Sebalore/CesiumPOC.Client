@@ -24,7 +24,8 @@ export default class Main extends Component {
   } 
 
   componentWillUnmount() {
-    store.removeListener('change', this.setLayers);
+    store.removeListener('layersChanged', this.setLayers);
+    store.removeListener('activeLayersChanged', this.setAddableEntityLayersInfo);
     store.removeListener('contextAwareActionExecuted', this.refs.cesium.handleContextAwareActions);
   }
 
@@ -37,8 +38,8 @@ export default class Main extends Component {
       addableEntityLayersInfo: layers
       .filter(l => {
           const add = resources.ACTIONS.ADD;
-          const hasUserAgent = add.AGENTS.find(agent => agent === resources.AGENTS.USER) !== undefined;
-          const hasLayer = add.LAYERS.find(layer => layer === l.name) !== undefined;
+          const hasUserAgent = add.AGENTS.some(agent => agent === resources.AGENTS.USER);
+          const hasLayer = add.LAYERS.some(layer => layer === l.name);
           return l.active && hasUserAgent && hasLayer;
       }).map(l =>{
         return {name: l.name, imgUrl: l.imgUrl};

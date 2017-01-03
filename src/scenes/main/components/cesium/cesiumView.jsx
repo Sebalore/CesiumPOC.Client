@@ -1,6 +1,8 @@
 // Base Imports
 import React from 'react';
 import path from 'path';
+import Guid from 'guid';
+
 
 // ---------------------------------------------Cesium Imports----------------------------------------------------
 
@@ -117,6 +119,7 @@ export default class CesiumView extends React.Component {
         // class members
         this.viewState = initialViewState;
         this.dataSources = [];
+        this.isZoomedToBestFit = false;
 
         // class methods
         this.onDrop = this.onDrop.bind(this);
@@ -196,6 +199,27 @@ export default class CesiumView extends React.Component {
                         }
                         break;
                     }
+                    case resources.ACTIONS.TOGGLE_BEST_FIT_DISPLAY.TYPE: {
+                        console.assert(layerIsActive);
+                        const entity = eventData.data.entity
+                        if(!this.isZoomedToBestFit) {
+                            this.viewer.zoomTo(entity, {
+                                heading : 0,
+                                pitch: -Math.PI/2,
+                                range: this.viewState.zoomHeight/2  //TODO: calculate it according to entity size
+                            });
+                            entity.billboard.scale = 4; //TODO: calculate it according to entity size
+
+                            this.isZoomedToBestFit = true;
+                        } else {
+                            //revert to default view
+                            entity.billboard.scale = 1;
+                            //this.viewer.zoomTo(Cartesian3.fromDegrees(this.viewState.center.x, this.viewState.center.y), new Cartesian3(0.0, 0.0, this.viewState.zoomHeight));
+                            this.viewer.camera.lookAt(Cartesian3.fromDegrees(this.viewState.center.x, this.viewState.center.y), new Cartesian3(0.0, 0.0, this.viewState.zoomHeight));
+                            this.isZoomedToBestFit = false;
+                        }
+
+                    }
                 }
                 resolve(eventData);
             } 
@@ -239,7 +263,7 @@ export default class CesiumView extends React.Component {
 
     setMapEventHandlers(viewer, handler, entity, selectedEntity, dragging, isFirstClick) {
             
-            // Get mouse position on scree (unrelated to Cesium viewer object)
+            // Get mouse position on screeמ (unrelated to Cesium viewer object)
             let x, y;
             window.onmousemove = function (e) {
                 x = e.clientX;
@@ -324,30 +348,35 @@ export default class CesiumView extends React.Component {
 
             }, ScreenSpaceEventType.LEFT_CLICK);
 
-            // left click on entity handler
-            handler.setInputAction( click => 
-            {
-                const pickedObject = viewer.scene.pick(click.position);
+            // // left click on entity handler
+            // handler.setInputAction( click => 
+            // {
+            //     const pickedObject = viewer.scene.pick(click.position);
                 
-                if (this.defined(pickedObject)) 
-                {
-                    const editForm = this.refs.entityEditionForm;
-                    const pickedObject = viewer.scene.pick(click.position);
+            //     if (this.defined(pickedObject)) {
+            //         this.viewer.flyTo(pickedObject);
+            //         const editForm = this.refs.entityEditionForm;
+            //         const pickedObject = viewer.scene.pick(click.position);
 
-                    if (this.defined(pickedObject)) {
+            //         if (this.defined(pickedObject)) {
                         
-                        editForm.style.visibility = 'visible';
+            //             editForm.style.visibility = 'visible';
                         
-                        this.refs.entityNameInput.value = pickedObject.id.hasOwnProperty('_label') &&  pickedObject.id.label &&  pickedObject.id.label !== 'undefined' ? 
-                            pickedObject.id.label.text._value : '... add a toolptip for this object';
-                    }
-                }
-            }, ScreenSpaceEventType.RIGHT_DOWN);
+            //             this.refs.entityNameInput.value = pickedObject.id.hasOwnProperty('_label') &&  pickedObject.id.label &&  pickedObject.id.label !== 'undefined' ? 
+            //                 pickedObject.id.label.text._value : '... add a toolptip for this object';
+            //         }
+            //     }
+            // }, ScreenSpaceEventType.RIGHT_DOWN);
 
             // left click on map
             handler.setInputAction( click => {
-                 const cartesian = this.viewer.camera.pickEllipsoid( click.position, this.viewer.scene.globe.ellipsoid);
-                 this.viewer.camera.lookAt(cartesian, new Cartesian3(0.0, 0.0, this.viewState.zoomHeight));
+                const pickedObject = viewer.scene.pick(click.position);
+                if (this.isZoomedToBestFit || this.defined(pickedObject)) {
+                    this.props.actions[resources.ACTIONS.TOGGLE_BEST_FIT_DISPLAY.TYPE](resources.AGENTS.USER, {entity: pickedObject.id});
+                } else {
+                    const cartesian = this.viewer.camera.pickEllipsoid( click.position, this.viewer.scene.globe.ellipsoid);
+                    this.viewer.camera.lookAt(cartesian, new Cartesian3(0.0, 0.0, this.viewState.zoomHeight));
+                }
             }, ScreenSpaceEventType.RIGHT_UP);         
     }
 
@@ -382,14 +411,19 @@ export default class CesiumView extends React.Component {
 
             this.props.actions[resources.ACTIONS.ADD.TYPE](
                 resources.AGENTS.USER,
-                {
-                    layer: layerName,
+                 {
+                    id: Guid.create(),
+                    layerName: layerName,
                     label: `${layerName}-New-Added`,
                     position: { 
                         height : 1000.0,            // TODO: change it 
                         latitude : latitudeString,
                         longitude : longitudeString,
-                    }
+                    },
+                    billboard: {
+                        image: `${resources.IMG.BASE_URL}${resources.LAYERS[layerName].ACTIONS.ADD.IMG}`,
+                        scale: resources.LAYERS[layerName].ACTIONS.ADD.SCALE || 1
+                    }                    
                 });
         } else {
             console.log('CesiumView::onDrop(event) : something went wrong.');
