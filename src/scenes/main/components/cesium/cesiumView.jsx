@@ -180,11 +180,13 @@ export default class CesiumView extends React.Component {
                                 // entityToUpdate.position = Cartesian3.fromDegrees(eventData.data.position.latitude, eventData.data.position.longitude, 1000);                           
                                 // console.log('after: ', entityToUpdate.position);                             
                             }
+
                             const addedEntity = layerDataSource.entities.add(this.generateEntity(eventData.result.position, eventData.result.billboard, {
                                 label: new LabelGraphics({
                                     text: eventData.result.label || '...', 
                                     show: false
-                            })}));
+                                })
+                            }));
                             
                             this.props.actions[resources.ACTIONS.SET_ENTITY_CESIUM_ID.TYPE](
                                 resources.AGENTS.USER,
@@ -217,7 +219,34 @@ export default class CesiumView extends React.Component {
                     entityId: e.id,
                     cesiumId: cesiumEntity.id
                 }
-            );                                       
+            ); 
+
+            // TODO: add manualy description, and add method to handle it
+        //             cesiumEntity.description = '\
+        // <img\
+        //   width="50%"\
+        //   style="float:left; margin: 0 1em 1em 0;"\
+        //   src="//cesiumjs.org/images/2015/02-02/Flag_of_Wyoming.svg"/>\
+        // <p>\
+        //   Wyoming is a state in the mountain region of the Western \
+        //   United States.\
+        // </p>\
+        // <p>\
+        //   Wyoming is the 10th most extensive, but the least populous \
+        //   and the second least densely populated of the 50 United \
+        //   States. The western two thirds of the state is covered mostly \
+        //   with the mountain ranges and rangelands in the foothills of \
+        //   the eastern Rocky Mountains, while the eastern third of the \
+        //   state is high elevation prairie known as the High Plains. \
+        //   Cheyenne is the capital and the most populous city in Wyoming, \
+        //   with a population estimate of 62,448 in 2013.\
+        // </p>\
+        // <p>\
+        //   Source: \
+        //   <a style="color: WHITE"\
+        //     target="_blank"\
+        //     href="http://en.wikipedia.org/wiki/Wyoming">Wikpedia</a>\
+        // </p>';                                
         });
 
         this.viewer.dataSources.add(layerDataSource);
@@ -332,16 +361,14 @@ export default class CesiumView extends React.Component {
                 
                 if (this.defined(pickedObject)) 
                 {
-                    const editForm = this.refs.entityEditionForm;
-                    const pickedObject = viewer.scene.pick(click.position);
+                    // const editForm = this.refs.entityEditionForm;
+                    // const pickedObject = viewer.scene.pick(click.position);
 
-                    if (this.defined(pickedObject)) {
-                        
-                        editForm.style.visibility = 'visible';
-                        
-                        this.refs.entityNameInput.value = pickedObject.id.hasOwnProperty('_label') &&  pickedObject.id.label &&  pickedObject.id.label !== 'undefined' ? 
-                            pickedObject.id.label.text._value : '... add a toolptip for this object';
-                    }
+                    // editForm.style.visibility = 'visible';
+                    
+                    // this.refs.entityNameInput.value = pickedObject.id.hasOwnProperty('_label') &&  pickedObject.id.label &&  pickedObject.id.label !== 'undefined' ? 
+                    // pickedObject.id.label.text._value : '... add a toolptip for this object';
+                    
                 }
             }, ScreenSpaceEventType.RIGHT_DOWN);
 
