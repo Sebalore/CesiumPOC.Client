@@ -359,20 +359,12 @@ export default class CesiumView extends React.Component {
                         
                         editForm.style.visibility = 'visible';
                         
-                        this.refs.entityNameInput.value = pickedObject.id.hasOwnProperty('label') &&  pickedObject.id.label &&  pickedObject.id.label !== 'undefined' ? 
+                        this.refs.entityNameInput.value = pickedObject.id.hasOwnProperty('_label') &&  pickedObject.id.label &&  pickedObject.id.label !== 'undefined' ? 
                             pickedObject.id.label.text._value : '... add a toolptip for this object';
                     }
                 }
 
-            }, ScreenSpaceEventType.RIGHT_DOWN);
-
-            // left click on map
-            handler.setInputAction( click => {
-                 const cartesian = this.viewer.camera.pickEllipsoid( click.position, this.viewer.scene.globe.ellipsoid);
-                 const cartographic =  Cartographic.fromCartesian(cartesian); 
-                 //this.viewer.scene.globe.ellipsoid.cartesianToCartographic(cartesian);
-                 this.setNewFocusOnMap(cartographic.longitude, cartographic.latitude);
-            }, ScreenSpaceEventType.RIGHT_UP);            
+            }, ScreenSpaceEventType.RIGHT_DOWN);          
     }
 
     defined(object) {
