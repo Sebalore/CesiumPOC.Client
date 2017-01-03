@@ -27,7 +27,7 @@ const componentStyle = {
     }
 };
 
-export default class Layers extends React.Component {
+export default class Layers extends React.PureComponent {
     constructor(props) {
         super(props);
 
@@ -102,14 +102,6 @@ export default class Layers extends React.Component {
                             style={this.props.setIconStyle('../../../../shared/images/icon_2.svg')} 
                             draggable='false' 
                             onClick = {() =>  this.onStaticListItemClicked(11)}
-                        />
-                    </li>
-                    <li style = {componentStyle.li} ref="li_10">
-                        <div
-                            ref = "svg10"
-                            style={this.props.setIconStyle('../../../../shared/images/icon_1.svg')} 
-                            draggable='false' 
-                            onClick = {() =>  this.onStaticListItemClicked(10)}
                         />
                     </li>
                 </ul>

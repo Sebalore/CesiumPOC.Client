@@ -9,6 +9,34 @@ import {resources} from '../../shared/data/resources';
 
 const initialViewState = {
   layers: [
+        {
+      name: resources.FLIGHT_CIRCLE,
+      imgUrl: `${resources.IMG.BASE_URL}${resources.LAYERS[resources.FLIGHT_CIRCLE].IMG}`,
+      active: true,
+      actions: [
+        {
+          id: resources.LAYERS[resources.DMA].ACTIONS.ADD.ID,
+          description: resources.LAYERS[resources.DMA].ACTIONS.ADD.DESC,
+          imgUrl: `${resources.IMG.BASE_URL}${resources.LAYERS[resources.FLIGHT_CIRCLE].ACTIONS.ADD.IMG}`
+        }
+      ],
+      entities: [
+        // {
+        //   id: Guid.create(),
+        //   cesiumId: null, //guid to be provided by cesium
+        //   label: `${resources.FLIGHT_CIRCLE}: Yossi`,
+        //   position: {
+        //     longitude: 34.99249855493725,
+        //     latitude: 32.79628841345832,
+        //     height: 1.0
+        //   },
+        //   billboard: {
+        //     image: `${resources.IMG.BASE_URL}${resources.LAYERS[resources.FLIGHT_CIRCLE].IMG}`,
+        //     scale: 0.95
+        //   }
+        // }
+      ]
+    },
     {
       name: resources.DMA,
       imgUrl: `${resources.IMG.BASE_URL}${resources.LAYERS[resources.DMA].IMG}`,
