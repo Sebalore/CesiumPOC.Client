@@ -26,7 +26,6 @@ import CesiumViewer from 'cesium/Source/Widgets/Viewer/Viewer';
 //import Entity from 'cesium/Source/DataSources/Entity';
 import Cartesian2 from 'cesium/Source/Core/Cartesian2';
 import Cartesian3 from 'cesium/Source/Core/Cartesian3';
-//import Rectangle from 'cesium/Source/Core/Rectangle';
 import ScreenSpaceEventHandler from 'cesium/Source/Core/ScreenSpaceEventHandler';
 import 'cesium/Source/Widgets/widgets.css';
 import Math from 'cesium/Source/Core/Math';
@@ -121,7 +120,7 @@ export default class CesiumView extends React.Component {
         this.dataSources = [];
         this.isZoomedToBestFit = false;
 
-        // class methods
+       // class methods
         this.onDrop = this.onDrop.bind(this);
         this.handleContextAwareActions = this.handleContextAwareActions.bind(this);
     }
@@ -154,16 +153,10 @@ export default class CesiumView extends React.Component {
                 const layerIdx = this.props.layers.findIndex(l => l.name === eventData.data.layerName);
                 const layerIsActive = layerIdx> -1 && this.props.layers[layerIdx].active;               
                 const layerDataSource = ds.get(Array.from(ds).findIndex((fuckThis, i) => ds.get(i).name===eventData.data.layerName));
+
                 switch (eventData.type) {
                     case resources.ACTIONS.TOGGLE_LAYER.TYPE: {
-                        if(layerIsActive) {
-                            this.createLayerDataSource(this.props.layers[layerIdx]);
-                        }
-                        else {
-                            if(layerDataSource && this.viewer.dataSources.contains(layerDataSource)) {
-                                this.viewer.dataSources.remove(layerDataSource, true);
-                            }
-                        }
+                        layerDataSource.show = !layerDataSource.show;
                         break;   
                     } 
                     case resources.ACTIONS.DELETE.TYPE: {
@@ -181,13 +174,23 @@ export default class CesiumView extends React.Component {
                         if (layerIsActive) {
                             if (eventData.type === resources.ACTIONS.UPDATE_POSITION.TYPE) {
                                 const entityToUpdate = layerDataSource.entities.getById(eventData.result.cesiumId);
-                                layerDataSource.entities.remove(entityToUpdate);                                
+                                layerDataSource.entities.remove(entityToUpdate);   
+
+                                // real update
+                                // TODO: uncomment when we have replay from cesium forum
+
+                                // console.log('------------------------change entity position------------------');
+                                // console.log('before: ', entityToUpdate.position);
+                                // entityToUpdate.position = Cartesian3.fromDegrees(eventData.data.position.latitude, eventData.data.position.longitude, 1000);                           
+                                // console.log('after: ', entityToUpdate.position);                             
                             }
+
                             const addedEntity = layerDataSource.entities.add(this.generateEntity(eventData.result.position, eventData.result.billboard, {
                                 label: new LabelGraphics({
                                     text: eventData.result.label || '...', 
                                     show: false
-                            })}));
+                                })
+                            }));
                             
                             this.props.actions[resources.ACTIONS.SET_ENTITY_CESIUM_ID.TYPE](
                                 resources.AGENTS.USER,
@@ -221,6 +224,7 @@ export default class CesiumView extends React.Component {
 
                     }
                 }
+
                 resolve(eventData);
             } 
         });
@@ -240,7 +244,34 @@ export default class CesiumView extends React.Component {
                     entityId: e.id,
                     cesiumId: cesiumEntity.id
                 }
-            );                                       
+            ); 
+
+            // TODO: add manualy description, and add method to handle it
+        //             cesiumEntity.description = '\
+        // <img\
+        //   width="50%"\
+        //   style="float:left; margin: 0 1em 1em 0;"\
+        //   src="//cesiumjs.org/images/2015/02-02/Flag_of_Wyoming.svg"/>\
+        // <p>\
+        //   Wyoming is a state in the mountain region of the Western \
+        //   United States.\
+        // </p>\
+        // <p>\
+        //   Wyoming is the 10th most extensive, but the least populous \
+        //   and the second least densely populated of the 50 United \
+        //   States. The western two thirds of the state is covered mostly \
+        //   with the mountain ranges and rangelands in the foothills of \
+        //   the eastern Rocky Mountains, while the eastern third of the \
+        //   state is high elevation prairie known as the High Plains. \
+        //   Cheyenne is the capital and the most populous city in Wyoming, \
+        //   with a population estimate of 62,448 in 2013.\
+        // </p>\
+        // <p>\
+        //   Source: \
+        //   <a style="color: WHITE"\
+        //     target="_blank"\
+        //     href="http://en.wikipedia.org/wiki/Wyoming">Wikpedia</a>\
+        // </p>';                                
         });
 
         this.viewer.dataSources.add(layerDataSource);
@@ -367,6 +398,7 @@ export default class CesiumView extends React.Component {
             //         }
             //     }
             // }, ScreenSpaceEventType.RIGHT_DOWN);
+
 
             // left click on map
             handler.setInputAction( click => {
