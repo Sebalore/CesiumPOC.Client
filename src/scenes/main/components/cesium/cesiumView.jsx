@@ -24,13 +24,11 @@ import CesiumViewer from 'cesium/Source/Widgets/Viewer/Viewer';
 //import Entity from 'cesium/Source/DataSources/Entity';
 import Cartesian2 from 'cesium/Source/Core/Cartesian2';
 import Cartesian3 from 'cesium/Source/Core/Cartesian3';
-import Cartographic from 'cesium/Source/core/Cartographic';
 //import Rectangle from 'cesium/Source/Core/Rectangle';
 import ScreenSpaceEventHandler from 'cesium/Source/Core/ScreenSpaceEventHandler';
 import 'cesium/Source/Widgets/widgets.css';
 import Math from 'cesium/Source/Core/Math';
 import CustomDataSource from 'cesium/Source/DataSources/CustomDataSource.js';
-import DataSourceCollection from 'cesium/Source/DataSources/DataSourceCollection.js';
 import LabelGraphics from 'cesium/Source/DataSources/LabelGraphics.js';
 
 import ScreenSpaceEventType from 'cesium/Source/Core/ScreenSpaceEventType.js';
@@ -69,9 +67,6 @@ const componentStyle = {
         background: 'white',
         border: '1px solid #47494c',
         borderRadius: '5px',
-        // top: '-110vh',
-        // left: '-1vw',
-        //marginLeft: '300px',
         visibility: 'hidden',
         textAlign: 'center',
     },
@@ -92,7 +87,6 @@ const componentStyle = {
 };
 
 const initialViewState = {
-    // id: 'af3e91b2-3ff0-4adf-2a29-23649c017542', // Guid.create(),
     activeLayer: null,
     layers: [],
     zoomHeight: 20000,
@@ -359,18 +353,17 @@ export default class CesiumView extends React.Component {
                         
                         editForm.style.visibility = 'visible';
                         
-                        this.refs.entityNameInput.value = pickedObject.id.hasOwnProperty('label') &&  pickedObject.id.label &&  pickedObject.id.label !== 'undefined' ? 
+                        this.refs.entityNameInput.value = pickedObject.id.hasOwnProperty('_label') &&  pickedObject.id.label &&  pickedObject.id.label !== 'undefined' ? 
                             pickedObject.id.label.text._value : '... add a toolptip for this object';
                     }
                 }
-
             }, ScreenSpaceEventType.RIGHT_DOWN);
 
             // left click on map
             handler.setInputAction( click => {
                  const cartesian = this.viewer.camera.pickEllipsoid( click.position, this.viewer.scene.globe.ellipsoid);
                  this.viewer.camera.lookAt(cartesian, new Cartesian3(0.0, 0.0, this.viewState.zoomHeight));
-            }, ScreenSpaceEventType.RIGHT_UP);            
+            }, ScreenSpaceEventType.RIGHT_UP);         
     }
 
     defined(object) {
