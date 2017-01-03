@@ -282,7 +282,7 @@ export default class CesiumView extends React.Component {
                         
                         tooltipInfo.style.visibility = 'visible';
                         
-                        tooltipInfo.innerHTML = pickedObject.hasOwnProperty('label') && pickedObject.label && pickedObject.label !== 'undefined' ? 
+                        tooltipInfo.innerHTML = pickedObject.id.hasOwnProperty('_label') && pickedObject.id.label && pickedObject.id.label !== 'undefined' ? 
                             pickedObject.id.label.text._value : '... add a toolptip for this object';
                     }
                 }

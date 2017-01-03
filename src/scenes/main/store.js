@@ -310,12 +310,13 @@ class _store extends EventEmitter {
                     data: {
                         layerName: resources.UAV,
                         entityId: e.id,
-                        position: cords.value
+                        position: cords.value,
+                        label: `UAV-${e.id}`
                     }                              
                   });                
                 }
             }, 2000);            
-          })
+          });
           
           initialViewState.layers.find(l => l.name===resources.HELICOPTERS).entities.forEach(e =>{
             const gen = e.gen(e.position);
@@ -328,12 +329,13 @@ class _store extends EventEmitter {
                     data: {
                         layerName: resources.HELICOPTERS,
                         entityId: e.id,
-                        position: cords.value
+                        position: cords.value,
+                        label: `helicopter-${e.id}`
                     }                              
                   });                
                 }
             }, 2000);            
-          })
+          });
 
           break;
         }
