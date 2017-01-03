@@ -11,23 +11,41 @@ import {resources} from '../../shared/data/resources';
 export default class Main extends Component {
 
   componentWillMount() {
-    this.setState({layers: store.data.layers});
-    store.on('change', this.setLayers.bind(this));
+    this.setLayers(store.data.layers);
+    this.setAddableEntityLayersInfo(store.data.layers);
+    store.on('layersChanged', this.setLayers.bind(this));
+    store.on('activeLayersChanged', this.setAddableEntityLayersInfo.bind(this));
+    
   }
 
   componentDidMount() {
     store.on('contextAwareActionExecuted', this.refs.cesium.handleContextAwareActions.bind(this.refs.cesium));
     window.dispatcher.dispatch({type: 'DEBUG_1'});
-  }
+  } 
 
   componentWillUnmount() {
     store.removeListener('change', this.setLayers);
     store.removeListener('contextAwareActionExecuted', this.refs.cesium.handleContextAwareActions);
   }
 
-  setLayers(data) {
-    this.setState({layers: store.data.layers});
+  setLayers(layers) {
+    this.setState({layers});
   }
+
+  setAddableEntityLayersInfo(layers) {
+    this.setState({
+      addableEntityLayersInfo: layers
+      .filter(l => {
+          const add = resources.ACTIONS.ADD;
+          const hasUserAgent = add.AGENTS.find(agent => agent === resources.AGENTS.USER) !== undefined;
+          const hasLayer = add.LAYERS.find(layer => layer === l.name) !== undefined;
+          return l.active && hasUserAgent && hasLayer;
+      }).map(l =>{
+        return {name: l.name, imgUrl: l.imgUrl};
+      })
+    });
+  }
+
 
   setIconStyle(imgName) {
     const lastSlash = imgName.lastIndexOf("/");
@@ -43,23 +61,22 @@ export default class Main extends Component {
 
   render() {
     if (this.state && this.state.layers) {
-      const layers = this.state.layers;
-      const addableEntityLayers = this.state.layers.filter(l => {
-          const add = resources.ACTIONS.ADD;
-          const hasUserAgent = add.AGENTS.find(agent => agent === resources.AGENTS.USER) !== undefined;
-          const hasLayer = add.LAYERS.find(layer => layer === l.name) !== undefined;
-          return l.active && hasUserAgent && hasLayer;
-        });
       return (
         <div className="mainContainer" style={componentStyle}>
           <div style={componentStyle.mainComponentSon}>
-            <Layers layers={layers} actions={actions} setIconStyle={this.setIconStyle}/>
+            <Layers 
+              layers={this.state.layers} 
+              actions={actions} 
+              setIconStyle={this.setIconStyle}/>
             <AddEntity
-              layers={addableEntityLayers}
+              layersInfo={this.state.addableEntityLayersInfo}
               actions={actions}
               setIconStyle={this.setIconStyle}/>
           </div>
-          <CesiumView layers={layers} actions={actions} ref='cesium'/>
+          <CesiumView 
+            layers={this.state.layers} 
+            actions={actions} 
+            ref='cesium'/>
         </div>
       );
     } else {

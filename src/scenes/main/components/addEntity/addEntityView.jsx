@@ -37,9 +37,20 @@ const componentStyle = {
     }
 };
 
-export default class AddEntity extends React.Component {
+export default class AddEntity extends React.PureComponent {
+
+    constructor(props) {
+        super(props);
+
+    }
+
+    // shouldComponentUpdate(nextProps) {
+
+    //     return shallowCompare(this, nextProps);
+    // }
+
     render() {
-        if (this.props.layers) {
+        if (this.props.layersInfo) {
             return (
                 <div style={componentStyle.containerDiv}>
                     <ul style={componentStyle.ul}>
@@ -49,11 +60,11 @@ export default class AddEntity extends React.Component {
                         <li style={componentStyle.li}>
                             <div style={this.props.setIconStyle('icon_8.svg')} draggable='false'/>
                         </li>
-                        {this.props.layers.map((layer, idx) => <li key={idx} style={componentStyle.li}>
+                        {this.props.layersInfo.map((layerInfo, idx) => <li key={idx} style={componentStyle.li}>
                                 <div 
                                     id={Guid.create()} 
-                                    data-layerName = {layer.name}
-                                    style={this.props.setIconStyle(layer.imgUrl)} 
+                                    data-layerName = {layerInfo.name}
+                                    style={this.props.setIconStyle(layerInfo.imgUrl)} 
                                     draggable='true' 
                                     onDragStart={(e) => { e.dataTransfer.setData('text/plain', e.target.id); }}
                                 />
