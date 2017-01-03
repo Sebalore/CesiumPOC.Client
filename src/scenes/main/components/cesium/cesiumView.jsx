@@ -20,11 +20,12 @@ BingMapsApi.defaultKey = 'ApKtWGAVLWzzHvuvGZFWTRIXrsyLJ5czBuu9MkIGAdWwsQpXz_GiC5
 
 //various Cesium objects
 import CesiumViewer from 'cesium/Source/Widgets/Viewer/Viewer';
-import JulianDate from 'cesium/Source/Core/JulianDate';
-import Entity from 'cesium/Source/DataSources/Entity';
+//import JulianDate from 'cesium/Source/Core/JulianDate';
+//import Entity from 'cesium/Source/DataSources/Entity';
 import Cartesian2 from 'cesium/Source/Core/Cartesian2';
 import Cartesian3 from 'cesium/Source/Core/Cartesian3';
-import Rectangle from 'cesium/Source/Core/Rectangle';
+import Cartographic from 'cesium/Source/core/Cartographic';
+//import Rectangle from 'cesium/Source/Core/Rectangle';
 import ScreenSpaceEventHandler from 'cesium/Source/Core/ScreenSpaceEventHandler';
 import 'cesium/Source/Widgets/widgets.css';
 import Math from 'cesium/Source/Core/Math';
@@ -359,6 +360,14 @@ export default class CesiumView extends React.Component {
                 }
 
             }, ScreenSpaceEventType.RIGHT_DOWN);
+
+            // left click on map
+            handler.setInputAction( click => {
+                 const cartesian = this.viewer.camera.pickEllipsoid( click.position, this.viewer.scene.globe.ellipsoid);
+                 const cartographic =  Cartographic.fromCartesian(cartesian); 
+                 //this.viewer.scene.globe.ellipsoid.cartesianToCartographic(cartesian);
+                 this.setNewFocusOnMap(cartographic.longitude, cartographic.latitude);
+            }, ScreenSpaceEventType.RIGHT_UP);            
     }
 
     defined(object) {
