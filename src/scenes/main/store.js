@@ -21,20 +21,6 @@ const initialViewState = {
         }
       ],
       entities: [
-        // {
-        //   id: Guid.create(),
-        //   cesiumId: null, //guid to be provided by cesium
-        //   label: `${resources.DMA}: Yossi`,
-        //   position: {
-        //     longitude: 34.99249855493725,
-        //     latitude: 32.79628841345832,
-        //     height: 1.0
-        //   },
-        //   billboard: {
-        //     image: `${resources.IMG.BASE_URL}${resources.LAYERS[resources.DMA].IMG}`,
-        //     scale: 0.95
-        //   }
-        // }
       ]
     }, {
       name: resources.UAV,
@@ -192,6 +178,8 @@ class _store extends EventEmitter {
       const layerIndex = this.data.layers.findIndex(l => l.name===layerName);
       if (agent===resources.AGENTS.USER) {
         data =  {
+          label: data.label,
+          ce
           id: Guid.create(),
           layerName: layerName,
           position: data.position,
@@ -199,7 +187,7 @@ class _store extends EventEmitter {
             image: `${resources.IMG.BASE_URL}${resources.LAYERS[layerName].IMG}`,
             scale: 0.95
           }
-        }         
+        }; 
       }
       this.data.layers[layerIndex].entities.push(data);
       resolve(data);
