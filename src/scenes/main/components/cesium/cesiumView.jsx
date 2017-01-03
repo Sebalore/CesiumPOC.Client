@@ -47,8 +47,13 @@ const componentStyle = {
     },
     fullSizeDimentions: {
         height : '95%',
-        width: '95%',
+        // width: '95%',
         margin: '5px auto'
+    },
+    map : {
+        height: '95%',
+        width: '91vw',
+        margin: '0 auto',
     },
     altimeter : {
         position: 'relative',
@@ -421,7 +426,7 @@ export default class CesiumView extends React.Component {
         return (
             <div style = {componentStyle.general}>
                 <div id="general" ref="general" style = {componentStyle.fullSizeDimentions}>
-                    <div style = {componentStyle.fullSizeDimentions} id="map"className="map" ref="map" onDragOver= { (e) => e.preventDefault() } onDrop={this.onDrop}>
+                    <div style = {componentStyle.map} id="map"className="map" ref="map" onDragOver= { (e) => e.preventDefault() } onDrop={this.onDrop}>
                     </div>
                 </div>
                 <img style = {componentStyle.altimeter} src="https://s27.postimg.org/op4ssy0ur/altimeter.png" alt="altimeter"/>
