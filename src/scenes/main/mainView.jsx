@@ -17,9 +17,7 @@ export default class Main extends Component {
 
   componentDidMount() {
     store.on('contextAwareActionExecuted', this.refs.cesium.handleContextAwareActions.bind(this.refs.cesium));
-    window
-      .dispatcher
-      .dispatch({type: 'DEBUG_1'});
+    window.dispatcher.dispatch({type: 'DEBUG_1'});
   }
 
   componentWillUnmount() {
@@ -46,18 +44,10 @@ export default class Main extends Component {
   render() {
     if (this.state && this.state.layers) {
       const layers = this.state.layers;
-      const addableEntityLayers = this
-        .state
-        .layers
-        .filter(l => {
+      const addableEntityLayers = this.state.layers.filter(l => {
           const add = resources.ACTIONS.ADD;
-          const hasUserAgent = add
-            .AGENTS
-            .find(agent => agent === resources.AGENTS.USER) !== undefined;
-          const hasLayer = add
-            .LAYERS
-            .find(layer => layer === l.name) !== undefined;
-
+          const hasUserAgent = add.AGENTS.find(agent => agent === resources.AGENTS.USER) !== undefined;
+          const hasLayer = add.LAYERS.find(layer => layer === l.name) !== undefined;
           return l.active && hasUserAgent && hasLayer;
         });
       return (
