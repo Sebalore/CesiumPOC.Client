@@ -91,13 +91,13 @@ const componentStyle = {
     top: '0',
     left: '0',
     fontSize: '30px',
-    width: '91%',
+    width: '91vw',
     height: '6vh',
-    marginLeft: '93px'
+    margin: '0 auto'
   },
   icon: {
     width: '48px',
-    height: '48px',
+    height: '100%',
     display: 'inline-block',
     WebkitMaskSize: 'cover',
     maskSize: 'cover',

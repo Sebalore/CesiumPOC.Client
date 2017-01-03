@@ -7,23 +7,21 @@ const componentStyle = {
     containerDiv : {
         display: 'inline-block',
         float: 'right',
-        maxHeight: '100%',
-        // maxWidth: '70%',
+        height: '100%',
         backgroundColor: '#47494c',
         border: '2px solid black',
-        width: '57vw',
+        width: '60vw',
         overflow: 'hidden',
-        marginRight: '14px',
     }, 
     li : {
+        height: '100%',
         width: '2vw',
         listStyle: 'none',
         marginLeft: '25px',
     },
     ul : {
-        margin: '0',
-        marginTop: '8px',
-        marginRight: '15px',
+        height: '100%',
+        margin: 'auto 2.5vw auto 0px',
         display: 'inline-flex',
         float: 'right',
     }

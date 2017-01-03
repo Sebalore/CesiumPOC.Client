@@ -8,24 +8,25 @@ const componentStyle = {
     containerDiv: {
         display: 'inline-block',
         float: 'left',
-        maxHeight: '100%',
-        width: '32.7vw',
-        marginLeft: '1px',
+        height: '100%',
+        width: '30.5vw',
         listStyle: 'none',
         backgroundColor: '#47494c',
         border: '2px solid black',
     },
     li: {
         width: '2vw',
+        height: '100%',
         listStyle: 'none',
         marginLeft: '25px',
     },
     ul: {
         display: 'inline-flex',
-        margin: '0',
-        marginTop: '8px',
+        height: '100%',
+        margin: 'auto 0',
+        marginRight: '2.5vw',
         float: 'right',
-        marginRight: '14px',
+        paddingLeft: '0'
     },
     image: {
         maxHeight: resources.IMG.MAX_HEIGHT,
