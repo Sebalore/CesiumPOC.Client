@@ -179,7 +179,6 @@ class _store extends EventEmitter {
       if (agent===resources.AGENTS.USER) {
         data =  {
           label: data.label,
-          ce
           id: Guid.create(),
           layerName: layerName,
           position: data.position,
