@@ -4,17 +4,17 @@ import React, {Component} from 'react';
 import actions from './actions';
 import store from './store';
 import CesiumView from './components/cesium/cesiumView';
-import Layers from './components/layers/layersView';
+import EntityTypes from './components/entityTypes/entityTypesView';
 import AddEntity from './components/addEntity/addEntityView';
 import {resources} from '../../shared/data/resources';
 
 export default class Main extends Component {
 
   componentWillMount() {
-    this.setLayers(store.data.layers);
-    this.setAddableEntityLayersInfo(store.data.layers);
-    store.on('layersChanged', this.setLayers.bind(this));
-    store.on('activeLayersChanged', this.setAddableEntityLayersInfo.bind(this));
+    this.setEntityTypes(store.data.entityTypes);
+    this.setAddableEntityTypesInfo(store.data.entityTypes);
+    store.on('entityTypesChanged', this.setEntityTypes.bind(this));
+    store.on('activeEntityTypesChanged', this.setAddableEntityTypesInfo.bind(this));
     
   }
 
@@ -24,23 +24,23 @@ export default class Main extends Component {
   } 
 
   componentWillUnmount() {
-    store.removeListener('layersChanged', this.setLayers);
-    store.removeListener('activeLayersChanged', this.setAddableEntityLayersInfo);
+    store.removeListener('entityTypesChanged', this.setEntityTypes);
+    store.removeListener('activeEntityTypesChanged', this.setAddableEntityTypesInfo);
     store.removeListener('contextAwareActionExecuted', this.refs.cesium.handleContextAwareActions);
   }
 
-  setLayers(layers) {
-    this.setState({layers});
+  setEntityTypes(entityTypes) {
+    this.setState({entityTypes});
   }
 
-  setAddableEntityLayersInfo(layers) {
+  setAddableEntityTypesInfo(entityTypes) {
     this.setState({
-      addableEntityLayersInfo: layers
+      addableEntityTypesInfo: entityTypes
       .filter(l => {
           const add = resources.ACTIONS.ADD;
           const hasUserAgent = add.AGENTS.some(agent => agent === resources.AGENTS.USER);
-          const hasLayer = add.LAYERS.some(layer => layer === l.name);
-          return l.active && hasUserAgent && hasLayer;
+          const hasEntityType = add.ENTITY_TYPES.some(entityType => entityType === l.name);
+          return l.active && hasUserAgent && hasEntityType;
       }).map(l =>{
         return {name: l.name, imgUrl: l.imgUrl};
       })
@@ -61,21 +61,21 @@ export default class Main extends Component {
   }
 
   render() {
-    if (this.state && this.state.layers) {
+    if (this.state && this.state.entityTypes) {
       return (
         <div className="mainContainer" style={componentStyle}>
           <div style={componentStyle.mainComponentSon}>
-            <Layers 
-              layers={this.state.layers} 
+            <EntityTypes 
+              entityTypes={this.state.entityTypes} 
               actions={actions} 
               setIconStyle={this.setIconStyle}/>
             <AddEntity
-              layersInfo={this.state.addableEntityLayersInfo}
+              entityTypesInfo={this.state.addableEntityTypesInfo}
               actions={actions}
               setIconStyle={this.setIconStyle}/>
           </div>
           <CesiumView 
-            layers={this.state.layers} 
+            entityTypes={this.state.entityTypes} 
             actions={actions} 
             ref='cesium'/>
         </div>

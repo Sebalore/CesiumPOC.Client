@@ -4,11 +4,25 @@ export default class FlightCircleForm extends React.Component
 {
     constructor(props) {
         super(props);
+
+        this.onCancleBtnClicked = this.onCancleBtnClicked.bind(this);
+        this.onOkBtnClicked = this.onOkBtnClicked.bind(this);
+    }
+
+    onOkBtnClicked(e) {
+        e.preventDefault();
+        this.props.onFormClosed();
+    }
+
+    onCancleBtnClicked(e) {
+        e.preventDefault();
+        this.props.onFormClosed();
     }
 
     render() {
-        return (
-            <div style = {componentStyle.container}>
+        if (this.props.toDisplay) {
+            return (
+            <div style = {componentStyle.container} ref="container">
                 <header style = {componentStyle.header}>
                     <h1 style = {componentStyle.header.h1}>Create Flight Area Circle</h1>
                 </header>
@@ -29,11 +43,15 @@ export default class FlightCircleForm extends React.Component
                     </div>
                 </section>
                 <footer style={componentStyle.footer}>
-                    <button style={componentStyle.footer.button.ok}>Ok</button>
-                    <button style={componentStyle.footer.button.cancle}>Cancle</button>
+                    <button style={componentStyle.footer.button.ok} onClick={ (e) =>  this.onOkBtnClicked(e) }>Ok</button>
+                    <button style={componentStyle.footer.button.cancle} onClick={ (e) =>  this.onCancleBtnClicked(e) }>Cancle</button>
                 </footer>
             </div>
-        );
+            );
+        }
+        else {
+            return null;
+        }
     }
 }
 
@@ -101,4 +119,9 @@ const componentStyle = {
     },
 };
 
-// FlightCircleForm.propTypes = {};
+FlightCircleForm.propTypes = {
+    onFormClosed: React.PropTypes.func,
+    entity: React.PropTypes.array,
+    layerName: React.PropTypes.string,
+    toDisplay: React.PropTypes.bool
+};
