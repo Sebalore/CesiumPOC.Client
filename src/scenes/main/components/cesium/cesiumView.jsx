@@ -2,7 +2,10 @@
 import React from 'react';
 import path from 'path';
 import Guid from 'guid';
+import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 
+// outer components 
+import FlightCircleForm from './FlightCircleForm.jsx';
 
 // ---------------------------------------------Cesium Imports----------------------------------------------------
 
@@ -42,11 +45,10 @@ import {resources} from '../../../../shared/data/resources.js';
 const componentStyle = {
     general: {
         width: '100vw',
-        height: '95vh', // the upperBarView height is 6 vh.
+        height: '95vh',
     },
     fullSizeDimentions: {
         height : '95%',
-        // width: '95%',
         margin: '5px auto'
     },
     map : {
@@ -100,12 +102,12 @@ const initialViewState = {
         animation: false,
         fullscreenButton: false,
         homeButton: false,
-        infoBox: false,
+        infoBox: false,  // allow the info box to pop up when selecting an entity
         navigationHelpButton: false,
         shadows: false,
         sceneModePicker: false,
         sceneMode: 3, //Cesium.SceneMode.SCENE3D
-        selectionIndicator: false,
+        selectionIndicator: true,   // allow a green box that displayed around the selected entity
         baseLayerPicker: false,
         geocoder: false,
     }
@@ -117,7 +119,6 @@ export default class CesiumView extends React.Component {
         super(props);
         // class members
         this.viewState = initialViewState;
-        this.dataSources = [];
         this.isZoomedToBestFit = false;
 
        // class methods
@@ -131,9 +132,9 @@ export default class CesiumView extends React.Component {
         const dragging = false, isFirstClick = true;
 
         this.viewer = new CesiumViewer(this.refs.map, this.viewState.options);
-        this.viewer.camera.lookAt(Cartesian3.fromDegrees(this.viewState.center.x, this.viewState.center.y), new Cartesian3(0.0, 0.0, this.viewState.zoomHeight));
-
         this.handler = new ScreenSpaceEventHandler(this.viewer.scene.canvas);  
+
+        this.viewer.camera.lookAt(Cartesian3.fromDegrees(this.viewState.center.x, this.viewState.center.y), new Cartesian3(0.0, 0.0, this.viewState.zoomHeight));
 
         // subscribe viewer entities
         // this.viewer.entities.collectionChanged.addEventListenter( (collection, added, removed, changed) => console.log('entities collection changed!'));
@@ -148,7 +149,8 @@ export default class CesiumView extends React.Component {
         return new Promise((resolve, reject) => {
             if (error) {
                 reject(error);
-            } else {
+            } 
+            else {
                 const ds = this.viewer.dataSources;
                 const layerIdx = this.props.layers.findIndex(l => l.name === eventData.data.layerName);
                 const layerIsActive = layerIdx> -1 && this.props.layers[layerIdx].active;               
@@ -204,17 +206,18 @@ export default class CesiumView extends React.Component {
                     }
                     case resources.ACTIONS.TOGGLE_BEST_FIT_DISPLAY.TYPE: {
                         console.assert(layerIsActive);
-                        const entity = eventData.data.entity
+                        const entity = eventData.data.entity;
                         if(!this.isZoomedToBestFit) {
                             this.viewer.zoomTo(entity, {
                                 heading : 0,
                                 pitch: -Math.PI/2,
                                 range: this.viewState.zoomHeight/2  //TODO: calculate it according to entity size
                             });
-                            entity.billboard.scale = 4; //TODO: calculate it according to entity size
 
+                            entity.billboard.scale = 4; //TODO: calculate it according to entity size
                             this.isZoomedToBestFit = true;
-                        } else {
+                        } 
+                        else {
                             //revert to default view
                             entity.billboard.scale = 1;
                             //this.viewer.zoomTo(Cartesian3.fromDegrees(this.viewState.center.x, this.viewState.center.y), new Cartesian3(0.0, 0.0, this.viewState.zoomHeight));
@@ -245,33 +248,7 @@ export default class CesiumView extends React.Component {
                     cesiumId: cesiumEntity.id
                 }
             ); 
-
-            // TODO: add manualy description, and add method to handle it
-        //             cesiumEntity.description = '\
-        // <img\
-        //   width="50%"\
-        //   style="float:left; margin: 0 1em 1em 0;"\
-        //   src="//cesiumjs.org/images/2015/02-02/Flag_of_Wyoming.svg"/>\
-        // <p>\
-        //   Wyoming is a state in the mountain region of the Western \
-        //   United States.\
-        // </p>\
-        // <p>\
-        //   Wyoming is the 10th most extensive, but the least populous \
-        //   and the second least densely populated of the 50 United \
-        //   States. The western two thirds of the state is covered mostly \
-        //   with the mountain ranges and rangelands in the foothills of \
-        //   the eastern Rocky Mountains, while the eastern third of the \
-        //   state is high elevation prairie known as the High Plains. \
-        //   Cheyenne is the capital and the most populous city in Wyoming, \
-        //   with a population estimate of 62,448 in 2013.\
-        // </p>\
-        // <p>\
-        //   Source: \
-        //   <a style="color: WHITE"\
-        //     target="_blank"\
-        //     href="http://en.wikipedia.org/wiki/Wyoming">Wikpedia</a>\
-        // </p>';                                
+            
         });
 
         this.viewer.dataSources.add(layerDataSource);
@@ -293,7 +270,6 @@ export default class CesiumView extends React.Component {
     }
 
     setMapEventHandlers(viewer, handler, entity, selectedEntity, dragging, isFirstClick) {
-            
             // Get mouse position on screeמ (unrelated to Cesium viewer object)
             let x, y;
             window.onmousemove = function (e) {
@@ -327,8 +303,8 @@ export default class CesiumView extends React.Component {
                 else {
                     const pickedObject = viewer.scene.pick(movement.endPosition);
 
+                    // handle tooltip display on the screen
                     if (this.defined(pickedObject)) {
-                        
                         tooltipInfo.style.visibility = 'visible';
                         tooltipInfo.style.top = (y - 70) + 'px';
                         tooltipInfo.style.left = (x - 20) + 'px';                          
@@ -343,10 +319,8 @@ export default class CesiumView extends React.Component {
             // mouse up handler
             handler.setInputAction( () => 
             {
-                   
                 dragging = false;
                 viewer.scene.screenSpaceCameraController.enableInputs = true;
-
             }, ScreenSpaceEventType.LEFT_UP);
            
            //click two times animation handler
@@ -378,27 +352,6 @@ export default class CesiumView extends React.Component {
                 }   // end if !dragging
 
             }, ScreenSpaceEventType.LEFT_CLICK);
-
-            // // left click on entity handler
-            // handler.setInputAction( click => 
-            // {
-            //     const pickedObject = viewer.scene.pick(click.position);
-                
-            //     if (this.defined(pickedObject)) {
-            //         this.viewer.flyTo(pickedObject);
-            //         const editForm = this.refs.entityEditionForm;
-            //         const pickedObject = viewer.scene.pick(click.position);
-
-            //         if (this.defined(pickedObject)) {
-                        
-            //             editForm.style.visibility = 'visible';
-                        
-            //             this.refs.entityNameInput.value = pickedObject.id.hasOwnProperty('_label') &&  pickedObject.id.label &&  pickedObject.id.label !== 'undefined' ? 
-            //                 pickedObject.id.label.text._value : '... add a toolptip for this object';
-            //         }
-            //     }
-            // }, ScreenSpaceEventType.RIGHT_DOWN);
-
 
             // left click on map
             handler.setInputAction( click => {
@@ -472,14 +425,7 @@ export default class CesiumView extends React.Component {
                 </div>
                 <img style = {componentStyle.altimeter} src="https://s27.postimg.org/op4ssy0ur/altimeter.png" alt="altimeter"/>
                 <div style = {componentStyle.tooltip} ref="movementToolTip" id="movementToolTip" /*onClick = {() => {this.refs.movementToolTip.style.visibility = 'hidden';}}*//>
-                <form style={componentStyle.editEntityForm} ref="entityEditionForm" id="entityEditionForm" >
-                    <h1 style={componentStyle.formH1}>Create some circle</h1>
-                    <h2>Name:</h2>
-                    <input type="text" name="Name" defaultValue="Name" ref="entityNameInput"/>
-                    <br/><br/>
-                    <input type="button" value="OK" onClick = {(e) => {e.preventDefault(); this.refs.entityEditionForm.style.visibility = 'hidden';}} />
-                    <input type="button" value="Cancle" onClick = {(e) => {e.preventDefault(); this.refs.entityEditionForm.style.visibility = 'hidden';}} />
-                </form >
+                <FlightCircleForm entity={this.selectedEntity} layerInfo={this.selectedLayer} />
             </div>
         );
     }
@@ -492,4 +438,15 @@ CesiumView.propTypes = {
     onRemovEntity : React.PropTypes.func,
     onUpdateEntityPosition : React.PropTypes.func
 };
+
+/**
+ <form id="entityEditionForm" >
+    <h1>Create some circle</h1>
+    <h2>Name:</h2>
+    <input type="text" name="Name" defaultValue="Name" ref="entityNameInput"/>
+    <br/><br/>
+    <input type="button" value="OK" onClick = {(e) => {e.preventDefault(); this.refs.entityEditionForm.style.visibility = 'hidden';}} />
+    <input type="button" value="Cancle" onClick = {(e) => {e.preventDefault(); this.refs.entityEditionForm.style.visibility = 'hidden';}} />
+</form >
+ */
 
