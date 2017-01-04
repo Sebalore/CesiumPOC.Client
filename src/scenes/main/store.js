@@ -8,16 +8,16 @@ import { createLinearCoordinatesGenerator } from './services';
 import {resources} from '../../shared/data/resources';
 
 const initialViewState = {
-  layers: [
+  entityTypes: [
         {
       name: resources.FLIGHT_CIRCLE,
-      imgUrl: `${resources.IMG.BASE_URL}${resources.LAYERS[resources.FLIGHT_CIRCLE].IMG}`,
+      imgUrl: `${resources.IMG.BASE_URL}${resources.ENTITY_TYPES[resources.FLIGHT_CIRCLE].IMG}`,
       active: true,
       actions: [
         {
-          id: resources.LAYERS[resources.DMA].ACTIONS.ADD.ID,
-          description: resources.LAYERS[resources.DMA].ACTIONS.ADD.DESC,
-          imgUrl: `${resources.IMG.BASE_URL}${resources.LAYERS[resources.FLIGHT_CIRCLE].ACTIONS.ADD.IMG}`
+          id: resources.ENTITY_TYPES[resources.DMA].ACTIONS.ADD.ID,
+          description: resources.ENTITY_TYPES[resources.DMA].ACTIONS.ADD.DESC,
+          imgUrl: `${resources.IMG.BASE_URL}${resources.ENTITY_TYPES[resources.FLIGHT_CIRCLE].ACTIONS.ADD.IMG}`
         }
       ],
       entities: [
@@ -31,7 +31,7 @@ const initialViewState = {
         //     height: 1.0
         //   },
         //   billboard: {
-        //     image: `${resources.IMG.BASE_URL}${resources.LAYERS[resources.FLIGHT_CIRCLE].IMG}`,
+        //     image: `${resources.IMG.BASE_URL}${resources.ENTITY_TYPES[resources.FLIGHT_CIRCLE].ACTIONS.ADD.IMG}`,
         //     scale: 0.95
         //   }
         // }
@@ -39,26 +39,26 @@ const initialViewState = {
     },
     {
       name: resources.DMA,
-      imgUrl: `${resources.IMG.BASE_URL}${resources.LAYERS[resources.DMA].IMG}`,
+      imgUrl: `${resources.IMG.BASE_URL}${resources.ENTITY_TYPES[resources.DMA].IMG}`,
       active: true,
       actions: [
         {
-          id: resources.LAYERS[resources.DMA].ACTIONS.ADD.ID,
-          description: resources.LAYERS[resources.DMA].ACTIONS.ADD.DESC,
-          imgUrl: `${resources.IMG.BASE_URL}${resources.LAYERS[resources.DMA].IMG}`
+          id: resources.ENTITY_TYPES[resources.DMA].ACTIONS.ADD.ID,
+          description: resources.ENTITY_TYPES[resources.DMA].ACTIONS.ADD.DESC,
+          imgUrl: `${resources.IMG.BASE_URL}${resources.ENTITY_TYPES[resources.DMA].ACTIONS.ADD.IMG}`
         }
       ],
       entities: [
       ]
     }, {
       name: resources.UAV,
-      imgUrl: `${resources.IMG.BASE_URL}${resources.LAYERS[resources.UAV].IMG}`,
+      imgUrl: `${resources.IMG.BASE_URL}${resources.ENTITY_TYPES[resources.UAV].IMG}`,
       active: true,
       actions: [
         {
-          id: resources.LAYERS[resources.UAV].ACTIONS.ADD.ID,
-          description: resources.LAYERS[resources.UAV].ACTIONS.ADD.DESC,
-          imgUrl: `${resources.IMG.BASE_URL}${resources.LAYERS[resources.UAV].IMG}`
+          id: resources.ENTITY_TYPES[resources.UAV].ACTIONS.ADD.ID,
+          description: resources.ENTITY_TYPES[resources.UAV].ACTIONS.ADD.DESC,
+          imgUrl: `${resources.IMG.BASE_URL}${resources.ENTITY_TYPES[resources.UAV].ACTIONS.ADD.IMG}`
         }
       ],
       entities: [
@@ -72,7 +72,7 @@ const initialViewState = {
             height: 1000.0
           },
           billboard: {
-            image: `${resources.IMG.BASE_URL}${resources.LAYERS[resources.UAV].IMG}`,
+            image: `${resources.IMG.BASE_URL}${resources.ENTITY_TYPES[resources.UAV].ACTIONS.ADD.IMG}`,
             scale: 0.95
           },
           gen:  createLinearCoordinatesGenerator({
@@ -90,7 +90,7 @@ const initialViewState = {
             height: 1500.0
           },
           billboard: {
-            image: `${resources.IMG.BASE_URL}${resources.LAYERS[resources.UAV].IMG}`,
+            image: `${resources.IMG.BASE_URL}${resources.ENTITY_TYPES[resources.UAV].ACTIONS.ADD.IMG}`,
             rotation: -90,
             scale: 0.95
           },
@@ -109,7 +109,7 @@ const initialViewState = {
             height: 750.0
           },
           billboard: {
-            image: `${resources.IMG.BASE_URL}${resources.LAYERS[resources.UAV].IMG}`,
+            image: `${resources.IMG.BASE_URL}${resources.ENTITY_TYPES[resources.UAV].ACTIONS.ADD.IMG}`,
             rotation: 90,
             scale: 0.95
           },
@@ -122,13 +122,13 @@ const initialViewState = {
       ]
     }, {
       name: resources.HELICOPTERS,
-      imgUrl: `${resources.IMG.BASE_URL}${resources.LAYERS[resources.HELICOPTERS].IMG}`,
+      imgUrl: `${resources.IMG.BASE_URL}${resources.ENTITY_TYPES[resources.HELICOPTERS].IMG}`,
       active: true,
       actions: [
         {
-          id: resources.LAYERS[resources.HELICOPTERS].ACTIONS.ADD.ID,
-          description: resources.LAYERS[resources.HELICOPTERS].ACTIONS.ADD.DESC,
-          imgUrl: `${resources.IMG.BASE_URL}${resources.LAYERS[resources.HELICOPTERS].IMG}`
+          id: resources.ENTITY_TYPES[resources.HELICOPTERS].ACTIONS.ADD.ID,
+          description: resources.ENTITY_TYPES[resources.HELICOPTERS].ACTIONS.ADD.DESC,
+          imgUrl: `${resources.IMG.BASE_URL}${resources.ENTITY_TYPES[resources.HELICOPTERS].ACTIONS.ADD.IMG}`
         }
       ],
       entities: [
@@ -142,7 +142,7 @@ const initialViewState = {
             height: 69.0
           },
           billboard: {
-            image: `${resources.IMG.BASE_URL}${resources.LAYERS[resources.HELICOPTERS].IMG}`,
+            image: `${resources.IMG.BASE_URL}${resources.ENTITY_TYPES[resources.HELICOPTERS].ACTIONS.ADD.IMG}`,
             scale: 0.95
           },
           gen:  createLinearCoordinatesGenerator({
@@ -160,7 +160,7 @@ const initialViewState = {
             height: 250.0
           },
           billboard: {
-            image: `${resources.IMG.BASE_URL}${resources.LAYERS[resources.HELICOPTERS].IMG}`,
+            image: `${resources.IMG.BASE_URL}${resources.ENTITY_TYPES[resources.HELICOPTERS].ACTIONS.ADD.IMG}`,
             scale: 0.95
           },
           gen:  createLinearCoordinatesGenerator({
@@ -190,52 +190,52 @@ class _store extends EventEmitter {
     return Promise.resolve(this.data);
   }
   
-  ['handle' + resources.ACTIONS.TOGGLE_LAYER.TYPE](agent, data) {
+  ['handle' + resources.ACTIONS.TOGGLE_ENTITY_TYPE.TYPE](agent, data) {
     return new Promise((resolve) => {
-      const layerName = data.layerName;
-      const layerIndex = this.data.layers.findIndex(l => l.name===layerName);
-      this.data.layers[layerIndex].active = !this.data.layers[layerIndex].active;
-      this.emit('activeLayersChanged', this.data.layers);
-      resolve(this.data.layers[layerIndex]);
+      const entityTypeName = data.entityTypeName;
+      const entityTypeIndex = this.data.entityTypes.findIndex(l => l.name===entityTypeName);
+      this.data.entityTypes[entityTypeIndex].active = !this.data.entityTypes[entityTypeIndex].active;
+      this.emit('activeEntityTypesChanged', this.data.entityTypes);
+      resolve(this.data.entityTypes[entityTypeIndex]);
     });
   }
   
   ['handle' + resources.ACTIONS.ADD.TYPE](agent, data) {
     return new Promise((resolve) => {
-      const layerName = data.layerName;
-      const layerIndex = this.data.layers.findIndex(l => l.name===layerName);
-      this.data.layers[layerIndex].entities.push(data);
+      const entityTypeName = data.entityTypeName;
+      const entityTypeIndex = this.data.entityTypes.findIndex(l => l.name===entityTypeName);
+      this.data.entityTypes[entityTypeIndex].entities.push(data);
       resolve(data);
     });
   }
   
   ['handle' + resources.ACTIONS.SET_ENTITY_CESIUM_ID.TYPE](agent, data) {
     return new Promise((resolve) => {
-      const layerName = data.layerName;
-      const layerIndex = this.data.layers.findIndex(l => l.name===layerName);
-      const entityIndex = this.data.layers[layerIndex].entities.findIndex(e => e.id===data.entityId);
-      this.data.layers[layerIndex].entities[entityIndex].cesiumId = data.cesiumId;
-      resolve(this.data.layers[layerIndex].entities[entityIndex]);
+      const entityTypeName = data.entityTypeName;
+      const entityTypeIndex = this.data.entityTypes.findIndex(l => l.name===entityTypeName);
+      const entityIndex = this.data.entityTypes[entityTypeIndex].entities.findIndex(e => e.id===data.entityId);
+      this.data.entityTypes[entityTypeIndex].entities[entityIndex].cesiumId = data.cesiumId;
+      resolve(this.data.entityTypes[entityTypeIndex].entities[entityIndex]);
     });
   }
   
   ['handle' + resources.ACTIONS.DELETE.TYPE](agent, data) {
       return new Promise((resolve) => {
-      const layerName = data.layerName;
-      const layerIndex = this.data.layers.findIndex(l => l.name===layerName);
-      const entityIndex = this.data.layers[layerIndex].entities.findIndex(e => e.id===data.entityId);
-      this.data.layers[layerIndex].entities.splice(entityIndex, 1);   
+      const entityTypeName = data.entityTypeName;
+      const entityTypeIndex = this.data.entityTypes.findIndex(l => l.name===entityTypeName);
+      const entityIndex = this.data.entityTypes[entityTypeIndex].entities.findIndex(e => e.id===data.entityId);
+      this.data.entityTypes[entityTypeIndex].entities.splice(entityIndex, 1);   
       resolve(true);
     });
   }
 
   ['handle' +  resources.ACTIONS.UPDATE_POSITION.TYPE](agent, data) {
       return new Promise((resolve) => {
-      const layerName = data.layerName;
-      const layerIndex = this.data.layers.findIndex(l => l.name===layerName);
-      const entityIndex = this.data.layers[layerIndex].entities.findIndex(e => e.id===data.entityId);
-      this.data.layers[layerIndex].entities[entityIndex].position = data.position;
-      resolve(this.data.layers[layerIndex].entities[entityIndex]);
+      const entityTypeName = data.entityTypeName;
+      const entityTypeIndex = this.data.entityTypes.findIndex(l => l.name===entityTypeName);
+      const entityIndex = this.data.entityTypes[entityTypeIndex].entities.findIndex(e => e.id===data.entityId);
+      this.data.entityTypes[entityTypeIndex].entities[entityIndex].position = data.position;
+      resolve(this.data.entityTypes[entityTypeIndex].entities[entityIndex]);
     });
   }
 
@@ -248,12 +248,12 @@ class _store extends EventEmitter {
         result: null,
         error: null
       };
-      //TODO: check if action is aplliable to layer
+      //TODO: check if action is aplliable to entityType
       if (typeof this['handle' + action.type] === 'function') {
         //execute the action if there is a matching function defined in store
         this['handle' + action.type](action.agent, action.data)
         .then((actionResult) => {
-            this.emit('layersChanged', this.data.layers);
+            this.emit('entityTypesChanged', this.data.entityTypes);
             return Promise.resolve(actionResult);
         })
         .then((actionResult) => {
@@ -304,7 +304,7 @@ class _store extends EventEmitter {
           };
           //----------------------------------------------------------------------------------------------
           
-          initialViewState.layers.find(l => l.name===resources.UAV).entities.forEach(e =>{
+          initialViewState.entityTypes.find(l => l.name===resources.UAV).entities.forEach(e =>{
             const gen = e.gen(e.position);
             setInterval(() => {
               const cords = gen.next();
@@ -313,7 +313,7 @@ class _store extends EventEmitter {
                     type: resources.ACTIONS.UPDATE_POSITION.TYPE,
                     agent: resources.AGENTS.API,
                     data: {
-                        layerName: resources.UAV,
+                        entityTypeName: resources.UAV,
                         entityId: e.id,
                         position: cords.value,
                         label: `UAV-${e.id}`
@@ -323,7 +323,7 @@ class _store extends EventEmitter {
             }, 2000);            
           });
           
-          initialViewState.layers.find(l => l.name===resources.HELICOPTERS).entities.forEach(e =>{
+          initialViewState.entityTypes.find(l => l.name===resources.HELICOPTERS).entities.forEach(e =>{
             const gen = e.gen(e.position);
             setInterval(() => {
               const cords = gen.next();
@@ -332,7 +332,7 @@ class _store extends EventEmitter {
                     type: resources.ACTIONS.UPDATE_POSITION.TYPE,
                     agent: resources.AGENTS.API,
                     data: {
-                        layerName: resources.HELICOPTERS,
+                        entityTypeName: resources.HELICOPTERS,
                         entityId: e.id,
                         position: cords.value,
                         label: `helicopter-${e.id}`

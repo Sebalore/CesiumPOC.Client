@@ -45,7 +45,7 @@ export default class AddEntity extends React.PureComponent {
     }
 
     render() {
-        if (this.props.layersInfo) {
+        if (this.props.entityTypesInfo) {
             return (
                 <div style={componentStyle.containerDiv}>
                     <ul style={componentStyle.ul}>
@@ -55,12 +55,12 @@ export default class AddEntity extends React.PureComponent {
                         <li style={componentStyle.li}>
                             <div style={this.props.setIconStyle('icon_8.svg')} draggable='false'/>
                         </li>
-                        {this.props.layersInfo.map((layer, idx) => <li key={idx} style={componentStyle.li}>
+                        {this.props.entityTypesInfo.map((entityType, idx) => <li key={idx} style={componentStyle.li}>
                                 <div 
                                     id={Guid.create()} 
-                                    style={this.props.setIconStyle(layer.imgUrl)} 
+                                    style={this.props.setIconStyle(entityType.imgUrl)} 
                                     draggable='true' 
-                                    onDragStart={(e) => { e.dataTransfer.setData('text', layer.name); }}
+                                    onDragStart={(e) => { e.dataTransfer.setData('text', entityType.name); }}
                                 />
                             </li>)}
                     </ul>

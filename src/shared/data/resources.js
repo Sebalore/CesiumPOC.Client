@@ -1,4 +1,4 @@
-//------ LAYER NAMES --------------
+//------ ENTITY_TYPE NAMES --------------
 const UAV = 'UAV';
 const HELICOPTERS = 'Helicopters';
 const DMA = 'DynamicMissionArea';
@@ -8,7 +8,7 @@ const ADD = 'ADD';
 const DELETE = 'DELETE';
 const UPDATE_POSITION = 'UPDATE_POSITION';
 const MAP_CENTER = 'MAP_CENTER';
-const TOGGLE_LAYER = 'TOGGLE_LAYER';
+const TOGGLE_ENTITY_TYPE = 'TOGGLE_ENTITY_TYPE';
 const SET_ENTITY_CESIUM_ID = 'SET_ENTITY_CESIUM_ID';
 const TOGGLE_BEST_FIT_DISPLAY = 'TOGGLE_BEST_FIT_DISPLAY';
 //--------------------------------- ------ AGENTS ------------------
@@ -36,7 +36,7 @@ export const resources = {
         USER: USER,
         API: API
     },
-    LAYERS: {
+    ENTITY_TYPES: {
         [FLIGHT_CIRCLE]: {
             IMG: 'icon_1.svg',
             ACTIONS: {
@@ -64,7 +64,7 @@ export const resources = {
                 ADD: {
                     ID: 'Add',
                     DESC: 'Add a new UAV',
-                    IMG: 'icon_5.svg'
+                    IMG: 'icon_5_black_1.svg'
                 }
             }
         },
@@ -74,7 +74,7 @@ export const resources = {
                 ADD: {
                     ID: 'Add',
                     DESC: 'Add a new helicopter',
-                    IMG: 'icon_3.svg'
+                    IMG: 'icon_3_black_1.svg'
                 }
             }
         }        
@@ -83,18 +83,18 @@ export const resources = {
         ADD: {
             TYPE: ADD,
             DESC: 'Add a new entity',
-            LAYERS: [
+            ENTITY_TYPES: [
                 DMA, UAV, HELICOPTERS, FLIGHT_CIRCLE
-            ], //ON WHAT LAYERS CAN THIS ACTION BE PERFORMED
+            ], //ON WHAT ENTITY_TYPES CAN THIS ACTION BE PERFORMED
             AGENTS: [
                 USER, API
             ], //WHOS CAN PERFORM ACTION
-            IMG: 'layer'
+            IMG: 'entityType'
         },
         DELETE: {
             TYPE: DELETE,
             DESC: 'Delete an entity',
-            LAYERS: [
+            ENTITY_TYPES: [
                 DMA, UAV, HELICOPTERS, FLIGHT_CIRCLE
             ],
             AGENTS: [
@@ -105,7 +105,7 @@ export const resources = {
         UPDATE_POSITION: {
             TYPE: UPDATE_POSITION,
             DESC: 'Change position coordinates (and rotation?) of entity',
-            LAYERS: [
+            ENTITY_TYPES: [
                 DMA, UAV, HELICOPTERS
             ],
             AGENTS: [USER, API]
@@ -113,7 +113,7 @@ export const resources = {
         MAP_CENTER: {
             TYPE: MAP_CENTER,
             DESC: 'Change map camera view to center on the entity',
-            LAYERS: [
+            ENTITY_TYPES: [
                 DMA, UAV, HELICOPTERS, FLIGHT_CIRCLE
             ],
             AGENTS: [USER]
@@ -121,15 +121,15 @@ export const resources = {
         SET_ENTITY_CESIUM_ID : {
             TYPE: SET_ENTITY_CESIUM_ID,
             DESC: 'add generated cesiumId to added object in the store',
-            LAYERS: [
+            ENTITY_TYPES: [
                 DMA, UAV, HELICOPTERS, FLIGHT_CIRCLE
             ],
             AGENTS: [USER]
         },
-        TOGGLE_LAYER: {
-            TYPE: TOGGLE_LAYER,
-            DESC: 'Turn on/off layer on the map',
-            LAYERS: [
+        TOGGLE_ENTITY_TYPE: {
+            TYPE: TOGGLE_ENTITY_TYPE,
+            DESC: 'Turn on/off entityType on the map',
+            ENTITY_TYPES: [
                 DMA, UAV, HELICOPTERS, FLIGHT_CIRCLE
             ],
             AGENTS: [USER]
@@ -137,7 +137,7 @@ export const resources = {
         TOGGLE_BEST_FIT_DISPLAY: {
             TYPE: TOGGLE_BEST_FIT_DISPLAY,
             DESC: 'Turn on/off best fit zoom on object',
-            LAYERS: [
+            ENTITY_TYPES: [
                 DMA, FLIGHT_CIRCLE
             ],
             AGENTS: [USER]

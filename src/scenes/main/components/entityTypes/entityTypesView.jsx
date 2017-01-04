@@ -27,7 +27,7 @@ const componentStyle = {
     }
 };
 
-export default class Layers extends React.PureComponent {
+export default class EntityTypes extends React.PureComponent {
     constructor(props) {
         super(props);
 
@@ -35,10 +35,10 @@ export default class Layers extends React.PureComponent {
         this.onStaticListItemClicked = this.onStaticListItemClicked.bind(this);
     }
 
-    onListItemClicked(layer, idx) {
-        this.props.actions[resources.ACTIONS.TOGGLE_LAYER.TYPE](resources.AGENTS.USER,{layerName: layer.name});
+    onListItemClicked(entityType, idx) {
+        this.props.actions[resources.ACTIONS.TOGGLE_ENTITY_TYPE.TYPE](resources.AGENTS.USER,{entityTypeName: entityType.name});
         this.refs[`svg${idx}`].style.backgroundColor = 
-            layer.active ? 
+            entityType.active ? 
                 '#c9953a' : 'white';
     }
 
@@ -77,14 +77,14 @@ export default class Layers extends React.PureComponent {
                         />
                     </li>
                     {
-                        this.props.layers.map((layer, idx) => 
+                        this.props.entityTypes.map((entityType, idx) => 
                             <li key={idx} style = {componentStyle.li} ref={`li_${idx}`}>
                                 <div 
                                     ref = {`svg${idx}`}
                                     id={Guid.create()} 
-                                    style={this.props.setIconStyle(layer.imgUrl)} 
+                                    style={this.props.setIconStyle(entityType.imgUrl)} 
                                     draggable='false' 
-                                    onClick = {() =>  this.onListItemClicked(layer, idx)}
+                                    onClick = {() =>  this.onListItemClicked(entityType, idx)}
                                 />
                             </li>)
                     }

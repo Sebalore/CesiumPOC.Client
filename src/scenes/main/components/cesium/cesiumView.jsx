@@ -1,3 +1,4 @@
+  
 // Base Imports
 import React from 'react';
 import path from 'path';
@@ -33,10 +34,11 @@ import CustomDataSource from 'cesium/Source/DataSources/CustomDataSource.js';
 import LabelGraphics from 'cesium/Source/DataSources/LabelGraphics.js';
 
 import ScreenSpaceEventType from 'cesium/Source/Core/ScreenSpaceEventType.js';
+//-----------------------------------------------------------------------------------------------------------------
 
+//-----------------resources----------------------------------------
 import {resources} from '../../../../shared/data/resources.js'; 
 
-// --------------------------------------------------------------------------------------------------------------
 
 // Consts
 const componentStyle = {
@@ -88,8 +90,8 @@ const componentStyle = {
 };
 
 const initialViewState = {
-    activeLayer: null,
-    layers: [],
+    activeEntityType: null,
+    entityTypes: [],
     zoomHeight: 20000,
     center: {
       x: resources.MAP_CENTER.longitude,
@@ -97,16 +99,16 @@ const initialViewState = {
     },
     options: {
         timeline: false,
-        animation: false,
+        animation: true,
         fullscreenButton: false,
         homeButton: false,
-        infoBox: false,
+        infoBox: true,
         navigationHelpButton: false,
         shadows: false,
         sceneModePicker: false,
         sceneMode: 3, //Cesium.SceneMode.SCENE3D
-        selectionIndicator: false,
-        baseLayerPicker: false,
+        selectionIndicator: true,
+        baseEntityTypePicker: false,
         geocoder: false,
     }
 };
@@ -118,7 +120,7 @@ export default class CesiumView extends React.Component {
         // class members
         this.viewState = initialViewState;
         this.dataSources = [];
-        this.isZoomedToBestFit = false;
+        this.zoomedEntity = null;
 
        // class methods
         this.onDrop = this.onDrop.bind(this);
@@ -138,8 +140,8 @@ export default class CesiumView extends React.Component {
         // subscribe viewer entities
         // this.viewer.entities.collectionChanged.addEventListenter( (collection, added, removed, changed) => console.log('entities collection changed!'));
 
-        // map the data sources from the layers
-        this.props.layers.forEach(layer => this.createLayerDataSource(layer));
+        // map the data sources from the entityTypes
+        this.props.entityTypes.forEach(entityType => this.createEntityTypeDataSource(entityType));
 
         this.setMapEventHandlers(this.viewer, this.handler, entity, selectedEntity, dragging, isFirstClick);
     }
@@ -150,20 +152,20 @@ export default class CesiumView extends React.Component {
                 reject(error);
             } else {
                 const ds = this.viewer.dataSources;
-                const layerIdx = this.props.layers.findIndex(l => l.name === eventData.data.layerName);
-                const layerIsActive = layerIdx> -1 && this.props.layers[layerIdx].active;               
-                const layerDataSource = ds.get(Array.from(ds).findIndex((fuckThis, i) => ds.get(i).name===eventData.data.layerName));
+                const entityTypeIdx = this.props.entityTypes.findIndex(l => l.name === eventData.data.entityTypeName);
+                const entityTypeIsActive = entityTypeIdx> -1 && this.props.entityTypes[entityTypeIdx].active;               
+                const entityTypeDataSource = ds.get(Array.from(ds).findIndex((fuckThis, i) => ds.get(i).name===eventData.data.entityTypeName));
 
                 switch (eventData.type) {
-                    case resources.ACTIONS.TOGGLE_LAYER.TYPE: {
-                        layerDataSource.show = !layerDataSource.show;
+                    case resources.ACTIONS.TOGGLE_ENTITY_TYPE.TYPE: {
+                        entityTypeDataSource.show = !entityTypeDataSource.show;
                         break;   
                     } 
                     case resources.ACTIONS.DELETE.TYPE: {
-                        if (layerIsActive) {
+                        if (entityTypeIsActive) {
                             if(eventData.agent === resources.AGENTS.USER) {
-                                if (layerDataSource && layerDataSource.entities) {
-                                    layerDataSource.entities.removeById(eventData.data.cesiumId);
+                                if (entityTypeDataSource && entityTypeDataSource.entities) {
+                                    entityTypeDataSource.entities.removeById(eventData.data.cesiumId);
                                 }
                             }
                         }
@@ -171,10 +173,10 @@ export default class CesiumView extends React.Component {
                     }                    
                     case resources.ACTIONS.ADD.TYPE:
                     case resources.ACTIONS.UPDATE_POSITION.TYPE: {
-                        if (layerIsActive) {
+                        if (entityTypeIsActive) {
                             if (eventData.type === resources.ACTIONS.UPDATE_POSITION.TYPE) {
-                                const entityToUpdate = layerDataSource.entities.getById(eventData.result.cesiumId);
-                                layerDataSource.entities.remove(entityToUpdate);   
+                                const entityToUpdate = entityTypeDataSource.entities.getById(eventData.result.cesiumId);
+                                entityTypeDataSource.entities.remove(entityToUpdate);   
 
                                 // real update
                                 // TODO: uncomment when we have replay from cesium forum
@@ -185,7 +187,7 @@ export default class CesiumView extends React.Component {
                                 // console.log('after: ', entityToUpdate.position);                             
                             }
 
-                            const addedEntity = layerDataSource.entities.add(this.generateEntity(eventData.result.position, eventData.result.billboard, {
+                            const addedEntity = entityTypeDataSource.entities.add(this.generateEntity(eventData.result.position, eventData.result.billboard, {
                                 label: new LabelGraphics({
                                     text: eventData.result.label || '...', 
                                     show: false
@@ -195,7 +197,7 @@ export default class CesiumView extends React.Component {
                             this.props.actions[resources.ACTIONS.SET_ENTITY_CESIUM_ID.TYPE](
                                 resources.AGENTS.USER,
                                 {
-                                    layerName: eventData.data.layerName,
+                                    entityTypeName: eventData.data.entityTypeName,
                                     entityId: eventData.result.id,
                                     cesiumId: addedEntity.id
                                 });
@@ -203,9 +205,8 @@ export default class CesiumView extends React.Component {
                         break;
                     }
                     case resources.ACTIONS.TOGGLE_BEST_FIT_DISPLAY.TYPE: {
-                        console.assert(layerIsActive);
-                        const entity = eventData.data.entity
-                        if(!this.isZoomedToBestFit) {
+                        const entity = eventData.data.entity || this.zoomedEntity;
+                        if(!this.zoomedEntity) {
                             this.viewer.zoomTo(entity, {
                                 heading : 0,
                                 pitch: -Math.PI/2,
@@ -213,13 +214,13 @@ export default class CesiumView extends React.Component {
                             });
                             entity.billboard.scale = 4; //TODO: calculate it according to entity size
 
-                            this.isZoomedToBestFit = true;
+                            this.zoomedEntity = entity;
                         } else {
                             //revert to default view
                             entity.billboard.scale = 1;
-                            //this.viewer.zoomTo(Cartesian3.fromDegrees(this.viewState.center.x, this.viewState.center.y), new Cartesian3(0.0, 0.0, this.viewState.zoomHeight));
+
                             this.viewer.camera.lookAt(Cartesian3.fromDegrees(this.viewState.center.x, this.viewState.center.y), new Cartesian3(0.0, 0.0, this.viewState.zoomHeight));
-                            this.isZoomedToBestFit = false;
+                            this.zoomedEntity = null;
                         }
 
                     }
@@ -231,16 +232,16 @@ export default class CesiumView extends React.Component {
     }
 
     /**
-     * maps the entities array of a layer to a newly created cesium CustomDataSource object
-     * @param {Object} layer the layer object
+     * maps the entities array of a entityType to a newly created cesium CustomDataSource object
+     * @param {Object} entityType the entityType object
      */
-    createLayerDataSource(layer) {
-        const layerDataSource = new CustomDataSource(layer.name);
-        layer.entities.map(e => {
-            const cesiumEntity = layerDataSource.entities.add(this.generateEntity(e.position, e.billboard, {label: new LabelGraphics({text: e.label || 'nothing here', show: false})})); 
+    createEntityTypeDataSource(entityType) {
+        const entityTypeDataSource = new CustomDataSource(entityType.name);
+        entityType.entities.map(e => {
+            const cesiumEntity = entityTypeDataSource.entities.add(this.generateEntity(e.position, e.billboard, {label: new LabelGraphics({text: e.label || 'nothing here', show: false})})); 
             this.props.actions[resources.ACTIONS.SET_ENTITY_CESIUM_ID.TYPE](
                 resources.AGENTS.USER, {
-                    layerName: layer.name,
+                    entityTypeName: entityType.name,
                     entityId: e.id,
                     cesiumId: cesiumEntity.id
                 }
@@ -274,7 +275,7 @@ export default class CesiumView extends React.Component {
         // </p>';                                
         });
 
-        this.viewer.dataSources.add(layerDataSource);
+        this.viewer.dataSources.add(entityTypeDataSource);
     }
 
     /**
@@ -403,8 +404,8 @@ export default class CesiumView extends React.Component {
             // left click on map
             handler.setInputAction( click => {
                 const pickedObject = viewer.scene.pick(click.position);
-                if (this.isZoomedToBestFit || this.defined(pickedObject)) {
-                    this.props.actions[resources.ACTIONS.TOGGLE_BEST_FIT_DISPLAY.TYPE](resources.AGENTS.USER, {entity: pickedObject.id});
+                if (this.zoomedEntity || pickedObject) {
+                    this.props.actions[resources.ACTIONS.TOGGLE_BEST_FIT_DISPLAY.TYPE](resources.AGENTS.USER, {entity: pickedObject?pickedObject.id:null});
                 } else {
                     const cartesian = this.viewer.camera.pickEllipsoid( click.position, this.viewer.scene.globe.ellipsoid);
                     this.viewer.camera.lookAt(cartesian, new Cartesian3(0.0, 0.0, this.viewState.zoomHeight));
@@ -432,11 +433,11 @@ export default class CesiumView extends React.Component {
             cartesian = this.viewer.camera.pickEllipsoid(mousePosition, this.viewer.scene.globe.ellipsoid); // maybe the problem here!!
         }
      
-        const layerName = event.dataTransfer.getData('text');
-        const layer = this.props.layers.find(l => l.name === layerName);
-        //console.log(layerName);
+        const entityTypeName = event.dataTransfer.getData('text');
+        const entityType = this.props.entityTypes.find(l => l.name === entityTypeName);
+        //console.log(entityTypeName);
 
-        if (cartesian && layerName && layer) {
+        if (cartesian && entityTypeName && entityType) {
             const cartographic =  this.viewer.scene.globe.ellipsoid.cartesianToCartographic(cartesian);
             const longitudeString = Math.toDegrees(cartographic.longitude);
             const latitudeString = Math.toDegrees(cartographic.latitude);
@@ -445,16 +446,16 @@ export default class CesiumView extends React.Component {
                 resources.AGENTS.USER,
                  {
                     id: Guid.create(),
-                    layerName: layerName,
-                    label: `${layerName}-New-Added`,
+                    entityTypeName: entityTypeName,
+                    label: `${entityTypeName}-New-Added`,
                     position: { 
                         height : 1000.0,            // TODO: change it 
                         latitude : latitudeString,
                         longitude : longitudeString,
                     },
                     billboard: {
-                        image: `${resources.IMG.BASE_URL}${resources.LAYERS[layerName].ACTIONS.ADD.IMG}`,
-                        scale: resources.LAYERS[layerName].ACTIONS.ADD.SCALE || 1
+                        image: `${resources.IMG.BASE_URL}${resources.ENTITY_TYPES[entityTypeName].ACTIONS.ADD.IMG}`,
+                        scale: resources.ENTITY_TYPES[entityTypeName].ACTIONS.ADD.SCALE || 1
                     }                    
                 });
         } else {
@@ -486,8 +487,8 @@ export default class CesiumView extends React.Component {
 }
 
 CesiumView.propTypes = {
-    layers : React.PropTypes.array,
-    activeLayer : React.PropTypes.object,
+    entityTypes : React.PropTypes.array,
+    activeEntityType : React.PropTypes.object,
     onAddEntity : React.PropTypes.func,
     onRemovEntity : React.PropTypes.func,
     onUpdateEntityPosition : React.PropTypes.func
