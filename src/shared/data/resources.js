@@ -1,8 +1,16 @@
-//------ ENTITY_TYPE NAMES --------------
+
+//------LAYERS AND ENTITY TYPES NAMES --------------
 const UAV = 'UAV';
-const HELICOPTERS = 'Helicopters';
+const AIRPLANE = 'Airplane';
+const HELICOPTER = 'Helicopter';
+
 const DMA = 'DynamicMissionArea';
-const FLIGHT_CIRCLE = 'FlightCircle';
+const FORBIDEN_FLIGHT_AREA = 'ForbidenFlightArea';
+const FLIGHT_AREA = 'FlightArea';
+const FLIGHT_CIRCLE = 'FlightCircle'; //layer
+const FLIGHT_CIRCLE_IN = 'FlightCircle - Enter'; //entity type
+const FLIGHT_CIRCLE_OUT = 'FlightCircle - Exit'; //entity type
+
 //--------------------------------- ------- ACTION NAMES ------------
 const ADD = 'ADD';
 const DELETE = 'DELETE';
@@ -11,16 +19,29 @@ const MAP_CENTER = 'MAP_CENTER';
 const TOGGLE_ENTITY_TYPE = 'TOGGLE_ENTITY_TYPE';
 const SET_ENTITY_CESIUM_ID = 'SET_ENTITY_CESIUM_ID';
 const TOGGLE_BEST_FIT_DISPLAY = 'TOGGLE_BEST_FIT_DISPLAY';
+
 //--------------------------------- ------ AGENTS ------------------
 const USER = 'USER';
 const API = 'API';
 //--------------------------------
 
 export const resources = {
-    FLIGHT_CIRCLE: FLIGHT_CIRCLE,
-    DMA: DMA,
-    UAV: UAV,
-    HELICOPTERS: HELICOPTERS,
+    LAYER_NAMES: {
+        UAV : UAV,
+        DMA : DMA,
+        FORBIDEN_FLIGHT_AREA : FORBIDEN_FLIGHT_AREA,
+        FLIGHT_AREA : FLIGHT_AREA,
+        FLIGHT_CIRCLE : FLIGHT_CIRCLE,         
+    },
+    ENTITY_TYPE_NAMES :{
+        AIRPLANE : AIRPLANE,
+        HELICOPTER : HELICOPTER,
+        DMA : DMA,
+        FORBIDEN_FLIGHT_AREA : FORBIDEN_FLIGHT_AREA,
+        FLIGHT_AREA : FLIGHT_AREA,
+        FLIGHT_CIRCLE_IN : FLIGHT_CIRCLE_IN, 
+        FLIGHT_CIRCLE_OUT : FLIGHT_CIRCLE_OUT, 
+    },
     MAP_CENTER: {
         longitude: 34.99249855493725,
         latitude:  32.79628841345832,
@@ -37,14 +58,14 @@ export const resources = {
         API: API
     },
     ENTITY_TYPES: {
-        [FLIGHT_CIRCLE]: {
+        [FLIGHT_CIRCLE_IN]: {
             IMG: 'icon_1.svg',
             ACTIONS: {
                 ADD: {
                     ID: 'Add',
                     DESC: 'Add a new flight circle.',
                     IMG: 'icon_11.svg',
-                    SCALE: 2
+                    SCALE: 1
                 }
             }
         },
@@ -58,17 +79,17 @@ export const resources = {
                 }
             }
         },
-        [UAV]: {
+        [AIRPLANE]: {
             IMG: 'icon_5.svg',
             ACTIONS: {
                 ADD: {
                     ID: 'Add',
-                    DESC: 'Add a new UAV',
+                    DESC: 'Add a new AIRPLANE',
                     IMG: 'icon_5_black_1.svg'
                 }
             }
         },
-        [HELICOPTERS]: {
+        [HELICOPTER]: {
             IMG: 'icon_3.svg',
             ACTIONS: {
                 ADD: {
@@ -83,9 +104,9 @@ export const resources = {
         ADD: {
             TYPE: ADD,
             DESC: 'Add a new entity',
-            ENTITY_TYPES: [
-                DMA, UAV, HELICOPTERS, FLIGHT_CIRCLE
-            ], //ON WHAT ENTITY_TYPES CAN THIS ACTION BE PERFORMED
+            LAYERS: [
+                DMA, FLIGHT_AREA, FORBIDEN_FLIGHT_AREA, UAV, FLIGHT_CIRCLE
+            ], //ON WHAT LAYERS CAN THIS ACTION BE PERFORMED
             AGENTS: [
                 USER, API
             ], //WHOS CAN PERFORM ACTION
@@ -94,8 +115,8 @@ export const resources = {
         DELETE: {
             TYPE: DELETE,
             DESC: 'Delete an entity',
-            ENTITY_TYPES: [
-                DMA, UAV, HELICOPTERS, FLIGHT_CIRCLE
+            LAYERS: [
+                DMA, FLIGHT_AREA, FORBIDEN_FLIGHT_AREA, UAV, FLIGHT_CIRCLE
             ],
             AGENTS: [
                 USER, API
@@ -105,40 +126,40 @@ export const resources = {
         UPDATE_POSITION: {
             TYPE: UPDATE_POSITION,
             DESC: 'Change position coordinates (and rotation?) of entity',
-            ENTITY_TYPES: [
-                DMA, UAV, HELICOPTERS
+            LAYERS: [
+                DMA, FLIGHT_AREA, FORBIDEN_FLIGHT_AREA, UAV
             ],
             AGENTS: [USER, API]
         },
         MAP_CENTER: {
             TYPE: MAP_CENTER,
             DESC: 'Change map camera view to center on the entity',
-            ENTITY_TYPES: [
-                DMA, UAV, HELICOPTERS, FLIGHT_CIRCLE
+            LAYERS: [
+                DMA, FLIGHT_AREA, FORBIDEN_FLIGHT_AREA, UAV, FLIGHT_CIRCLE
             ],
             AGENTS: [USER]
         },
         SET_ENTITY_CESIUM_ID : {
             TYPE: SET_ENTITY_CESIUM_ID,
             DESC: 'add generated cesiumId to added object in the store',
-            ENTITY_TYPES: [
-                DMA, UAV, HELICOPTERS, FLIGHT_CIRCLE
+            LAYERS: [
+                DMA, FLIGHT_AREA, FORBIDEN_FLIGHT_AREA, UAV, FLIGHT_CIRCLE
             ],
             AGENTS: [USER]
         },
         TOGGLE_ENTITY_TYPE: {
             TYPE: TOGGLE_ENTITY_TYPE,
-            DESC: 'Turn on/off entityType on the map',
-            ENTITY_TYPES: [
-                DMA, UAV, HELICOPTERS, FLIGHT_CIRCLE
+            DESC: 'Turn on/off layer and/or entity type on the map',
+            LAYERS: [
+                DMA, FLIGHT_AREA, FORBIDEN_FLIGHT_AREA, UAV, FLIGHT_CIRCLE
             ],
-            AGENTS: [USER]
+            AGENTS: [USER, API]
         },
         TOGGLE_BEST_FIT_DISPLAY: {
             TYPE: TOGGLE_BEST_FIT_DISPLAY,
             DESC: 'Turn on/off best fit zoom on object',
-            ENTITY_TYPES: [
-                DMA, FLIGHT_CIRCLE
+            LAYERS: [
+                DMA, FLIGHT_AREA, FORBIDEN_FLIGHT_AREA, FLIGHT_CIRCLE
             ],
             AGENTS: [USER]
         }
