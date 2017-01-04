@@ -39,8 +39,8 @@ export default class Main extends Component {
       .filter(l => {
           const add = resources.ACTIONS.ADD;
           const hasUserAgent = add.AGENTS.some(agent => agent === resources.AGENTS.USER);
-          const hasEntityType = add.ENTITY_TYPES.some(entityType => entityType === l.name);
-          return l.active && hasUserAgent && hasEntityType;
+          const hasLayer = true; //TODO: add layer check   add.LAYERS.some(entityType => entityType === l.name);
+          return l.active && hasUserAgent && hasLayer;
       }).map(l =>{
         return {name: l.name, imgUrl: l.imgUrl};
       })
