@@ -4,6 +4,39 @@ import Guid from 'guid';
 //CONSTS
 import {resources} from '../../../../shared/data/resources';
 
+const AddEntity =  (props) => {
+    if (props.entityTypesInfo) {
+        return (
+            <div style={componentStyle.containerDiv}>
+                <ul style={componentStyle.ul}>
+                    <li style={componentStyle.li}>
+                        <div style={props.setIconStyle('icon_7.svg')} draggable='false'/>
+                    </li>
+                    <li style={componentStyle.li}>
+                        <div style={props.setIconStyle('icon_8.svg')} draggable='false'/>
+                    </li>
+                    {
+                        props.entityTypesInfo.map((entityType, idx) => 
+                        <li key={idx} style={componentStyle.li}>
+                            <div 
+                                id={Guid.create()} 
+                                style={props.setIconStyle(entityType.imgUrl)} 
+                                draggable='true' 
+                                onDragStart={(e) => { e.dataTransfer.setData('text', entityType.name); }}
+                            />
+                        </li>)
+                    }
+                </ul>
+            </div>
+        );
+    } 
+    else {
+        return ( <div style={componentStyle.containerDiv}> ..... </div> );
+    }
+};
+
+export default AddEntity;
+
 const componentStyle = {
     containerDiv: {
         display: 'inline-block',
@@ -36,42 +69,3 @@ const componentStyle = {
         fill: 'currentColor'
     }
 };
-
-export default class AddEntity extends React.PureComponent {
-
-    constructor(props) {
-        super(props);
-
-    }
-
-    render() {
-        if (this.props.entityTypesInfo) {
-            return (
-                <div style={componentStyle.containerDiv}>
-                    <ul style={componentStyle.ul}>
-                        <li style={componentStyle.li}>
-                            <div style={this.props.setIconStyle('icon_7.svg')} draggable='false'/>
-                        </li>
-                        <li style={componentStyle.li}>
-                            <div style={this.props.setIconStyle('icon_8.svg')} draggable='false'/>
-                        </li>
-                        {this.props.entityTypesInfo.map((entityType, idx) => <li key={idx} style={componentStyle.li}>
-                                <div 
-                                    id={Guid.create()} 
-                                    style={this.props.setIconStyle(entityType.imgUrl)} 
-                                    draggable='true' 
-                                    onDragStart={(e) => { e.dataTransfer.setData('text', entityType.name); }}
-                                />
-                            </li>)}
-                    </ul>
-                </div>
-            );
-        } else {
-            return (
-                <div style={componentStyle.containerDiv}>
-                    .....
-                </div>
-            );
-        }
-    }
-}

@@ -113,8 +113,5 @@ const componentStyle = {
 };
 
 FlightCircleForm.propTypes = {
-    onFormClosed: React.PropTypes.func,
-    entity: React.PropTypes.object,
-    layerName: React.PropTypes.string,
-    toDisplay: React.PropTypes.bool
+    onFormClosed: React.PropTypes.func
 };
