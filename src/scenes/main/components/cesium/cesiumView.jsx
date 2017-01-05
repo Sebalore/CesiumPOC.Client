@@ -36,8 +36,9 @@ import CesiumViewer from 'cesium/Source/Widgets/Viewer/Viewer';
 //import Entity from 'cesium/Source/DataSources/Entity';
 import Cartesian2 from 'cesium/Source/Core/Cartesian2';
 import Cartesian3 from 'cesium/Source/Core/Cartesian3';
+import CesiumColor from 'cesium/Source/Core/Color.js';
 import ScreenSpaceEventHandler from 'cesium/Source/Core/ScreenSpaceEventHandler';
-import Math from 'cesium/Source/Core/Math';
+import CesiumMath from 'cesium/Source/Core/Math';
 import CustomDataSource from 'cesium/Source/DataSources/CustomDataSource.js';
 import LabelGraphics from 'cesium/Source/DataSources/LabelGraphics.js';
 import ScreenSpaceEventType from 'cesium/Source/Core/ScreenSpaceEventType.js';
@@ -47,6 +48,7 @@ import 'cesium/Source/Widgets/widgets.css';
 
 //-----------------resources----------------------------------------
 import {resources} from '../../../../shared/data/resources.js'; 
+import {Images} from '../../../../shared/images/AllImages.js';
 
 
 // Consts
@@ -233,7 +235,7 @@ export default class CesiumView extends React.Component {
                             const range =  entity.billboard.sizeInMeters? entity.billboard.width.getValue() * 2.25: null;
                             this.viewer.zoomTo(entity, {
                                 heading : 0,
-                                pitch: -Math.PI/2,
+                                pitch: -CesiumMath.PI/2,
                                 range: range
                             });
                             this.zoomedEntity = entity;
@@ -255,7 +257,18 @@ export default class CesiumView extends React.Component {
     createEntityTypeDataSource(entityType) {
         const entityTypeDataSource = new CustomDataSource(entityType.name);
         entityType.entities.map(e => {
-            const cesiumEntity = entityTypeDataSource.entities.add(this.generateEntity(e.position, e.billboard, {label: new LabelGraphics({text: e.label || 'nothing here', show: false})})); 
+            const cesiumEntity = entityTypeDataSource.entities.add(
+                this.generateEntity(
+                    e.position, 
+                    e.billboard, 
+                    {
+                        label: new LabelGraphics({
+                            text: e.label || 'nothing here', 
+                            show: false
+                        })
+                    }
+                )
+            ); 
             this.props.actions[resources.ACTIONS.SET_ENTITY_CESIUM_ID.TYPE](
                 resources.AGENTS.USER, {
                     entityTypeName: entityType.name,
@@ -420,31 +433,32 @@ export default class CesiumView extends React.Component {
         const mousePosition = new Cartesian2(x, y);
         let cartesian = mousePosition;
         if (this.viewer.scene.mode === 3) {
-            //Cesium.SceneMode.SCENE3D 
             cartesian = this.viewer.camera.pickEllipsoid(mousePosition, this.viewer.scene.globe.ellipsoid); // maybe the problem here!!
         }
      
         const entityTypeName = event.dataTransfer.getData('text');
         const entityType = this.props.entityTypes.find(l => l.name === entityTypeName);
-        //console.log(entityTypeName);
 
         if (cartesian && entityTypeName && entityType) {
             const cartographic =  this.viewer.scene.globe.ellipsoid.cartesianToCartographic(cartesian);
-            const longitudeString = Math.toDegrees(cartographic.longitude);
-            const latitudeString = Math.toDegrees(cartographic.latitude);
+            const longitudeString = CesiumMath.toDegrees(cartographic.longitude);
+            const latitudeString = CesiumMath.toDegrees(cartographic.latitude);
+            const defaultHeight = 10;
 
             this.props.actions[resources.ACTIONS.ADD.TYPE](
                 resources.AGENTS.USER,
                  {
                     id: Guid.create(),
-                    entityTypeName: entityTypeName,
+                    entityTypeName,
                     label: `${entityTypeName}-New-Added`,
                     position: { 
-                        height : 10,            // TODO: change it 
+                        height : defaultHeight,
                         latitude : latitudeString,
                         longitude : longitudeString,
                     },
-                    billboard: this.getBillboardByEntityType(entityTypeName)          
+                    billboard: this.getBillboardByEntityType(
+                        entityTypeName, 
+                        entityTypeName === resources.ENTITY_TYPE_NAMES.AIRPLANE || resources.ENTITY_TYPE_NAMES.HELICOPTER? defaultHeight : null)     
                 });
         } 
         else {
@@ -452,28 +466,67 @@ export default class CesiumView extends React.Component {
         }
     }
 
-    getBillboardByEntityType(entityTypeName) {
-        let billboard = {
-                    image: `${resources.IMG.BASE_URL}${resources.ENTITY_TYPES[entityTypeName].ACTIONS.ADD.IMG}`,
-                    scale: resources.ENTITY_TYPES[entityTypeName].ACTIONS.ADD.SCALE || 1
-                };      
+    /**
+     * @param {Number} height
+     * @returns {Cesium.Color} 
+     */
+    // TODO: relate to the height. now it is simply random
+    mapHeightToColor(/*height*/) {
+        return CesiumColor.fromRandom({alpha:1.0});
+    }
+
+    /**
+     * generate svg with desired color for cesium billboard
+     * @param {String} svg an inline svg
+     * @param {Cesium.Color} color
+     * @returns {String} that represent the desired svg
+     */
+    pinColor(svg, color) {
+        function cesiumRgb2Hex(rgb) {
+            return (Math.round(((1 << 24) + (rgb.red*255 << 16) + (rgb.green*255 << 8) + rgb.blue*255))
+                .toString(16)
+                    .slice(1));
+        }
+    
+        function exportSVG(svg) {
+            return `data:image/svg+xml;base64,${btoa(svg)}` ;   // https://developer.mozilla.org/en/DOM/window.btoa
+        }
+        
+        const hexColor = cesiumRgb2Hex(color); // get the hex color to fill
+        
+        return exportSVG(svg.replace('ffffff', hexColor));
+    }
+
+    /**
+     * @param {String} entityTypeName
+     * @param {Number} entityHeight only for AIRPLANE & HELICOPTER, otherwise null
+     */
+    getBillboardByEntityType(entityTypeName, entityHeight) {
+        const billboard = {
+            scale: resources.ENTITY_TYPES[entityTypeName].ACTIONS.ADD.SCALE || 1
+        };
+
         switch (entityTypeName) {
             case resources.ENTITY_TYPE_NAMES.AIRPLANE:
             case resources.ENTITY_TYPE_NAMES.HELICOPTER:
             {
-                break           
+                const imageName = `${resources.ENTITY_TYPES[entityTypeName].ACTIONS.ADD.IMG}`.replace('.svg', '');  // TODO: use without replace
+                billboard.image = this.pinColor(Images[imageName], this.mapHeightToColor(entityHeight));
+                break;          
             }
             case resources.ENTITY_TYPE_NAMES.FLIGHT_AREA:
             case resources.ENTITY_TYPE_NAMES.FLIGHT_CIRCLE_OUT:
             case resources.ENTITY_TYPE_NAMES.FORBIDEN_FLIGHT_AREA:            
             case resources.ENTITY_TYPE_NAMES.FLIGHT_CIRCLE_IN:
             {
+                billboard.image = `${resources.IMG.BASE_URL}${resources.ENTITY_TYPES[entityTypeName].ACTIONS.ADD.IMG}`,
                 billboard.sizeInMeters = true;
                 billboard.height = 1050;
                 billboard.width = 1000;
                 break;
             }
         }
+        
         return billboard;
     }
 

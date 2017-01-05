@@ -1,5 +1,4 @@
 import React, {Component} from 'react';
-
 //inner components
 import actions from './actions';
 import store from './store';
@@ -46,7 +45,6 @@ export default class Main extends Component {
       })
     });
   }
-
 
   setIconStyle(imgName) {
     const lastSlash = imgName.lastIndexOf('/');
