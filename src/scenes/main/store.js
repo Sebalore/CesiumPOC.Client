@@ -19,20 +19,6 @@ const initialViewState = {
         }
       ],
       entities: [
-        // {
-        //   id: Guid.create(),
-        //   cesiumId: null, //guid to be provided by cesium
-        //   label: `${resources.ENTITY_TYPE_NAMES.FLIGHT_CIRCLE_IN}: Yossi`,
-        //   position: {
-        //     longitude: 34.99249855493725,
-        //     latitude: 32.79628841345832,
-        //     height: 1.0
-        //   },
-        //   billboard: {
-        //     image: `${resources.IMG.BASE_URL}${resources.ENTITY_TYPES[resources.ENTITY_TYPE_NAMES.FLIGHT_CIRCLE_IN].ACTIONS.ADD.IMG}`,
-        //     scale: 0.95
-        //   }
-        // }
       ]
     }, {
       name: resources.ENTITY_TYPE_NAMES.DMA,
@@ -322,6 +308,7 @@ class _store extends EventEmitter {
                     type: resources.ACTIONS.UPDATE_POSITION.TYPE,
                     agent: resources.AGENTS.API,
                     data: {
+                      // TODO: add billboard
                         entityTypeName: resources.ENTITY_TYPE_NAMES.AIRPLANE,
                         entityId: e.id,
                         position: cords.value,
@@ -341,6 +328,7 @@ class _store extends EventEmitter {
                     type: resources.ACTIONS.UPDATE_POSITION.TYPE,
                     agent: resources.AGENTS.API,
                     data: {
+                      // TODO: add billboard
                         entityTypeName: resources.ENTITY_TYPE_NAMES.HELICOPTER,
                         entityId: e.id,
                         position: cords.value,

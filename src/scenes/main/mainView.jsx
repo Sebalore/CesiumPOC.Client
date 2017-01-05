@@ -14,7 +14,6 @@ export default class Main extends Component {
     this.setAddableEntityTypesInfo(store.data.entityTypes);
     store.on('entityTypesChanged', this.setEntityTypes.bind(this));
     store.on('activeEntityTypesChanged', this.setAddableEntityTypesInfo.bind(this));
-    
   }
 
   componentDidMount() {

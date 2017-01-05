@@ -208,8 +208,7 @@ export default class CesiumView extends React.Component {
                                     show: false
                                 })
                             }));
-
-                                                       
+               
                             this.props.actions[resources.ACTIONS.SET_ENTITY_CESIUM_ID.TYPE](
                                 resources.AGENTS.USER,
                                 {
@@ -222,8 +221,6 @@ export default class CesiumView extends React.Component {
                             addedEntity.addProperty('storeEntity');
                             addedEntity['storeEntity'] =  eventData.result;
                             //TODO: observe it by subscribing to entity.definitionChanged                                    
-
-
                         }
                         break;
                     }
@@ -530,16 +527,13 @@ export default class CesiumView extends React.Component {
         return billboard;
     }
 
+    /**
+     * @param {Object} formDetails pay attention: closedWithData is the flag that tell's us how does the form was closed.
+     */
     onFlightCircleFormClosed(formDetails) {
         this.currentDisplayForm = '';
         if(formDetails.closedWithData) {
-            console.log('I closed with data:');
-            console.dir(formDetails);
-
-        }
-        else {
-            console.log('I closed without data!');
-
+            // handle form closed by Ok btn
         }
     }
 
