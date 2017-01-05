@@ -4,40 +4,45 @@ const FlightCircleForm  = (props) =>
 {
     const onOkBtnClicked = (e) => {
         e.preventDefault();
-        props.onFormClosed();
+        props.onFormClosed({
+            closedWithData: true,
+            name: document.getElementById('inputName').value,
+            height: Number(document.getElementById('inputHeight').value),
+            radius: Number(document.getElementById('inputRadius').value),
+        });
     };
 
     const onCancleBtnClicked = (e) => {
         e.preventDefault();
-        props.onFormClosed();
+        props.onFormClosed({closedWithData: false});
     };
 
     return (
-    <div style = {componentStyle.container}>
-        <header style = {componentStyle.header}>
-            <h1 style = {componentStyle.header.h1}>Create Flight Area Circle</h1>
-        </header>
-        <section style = {componentStyle.section}>
-            <div style={componentStyle.section.line}>
-                <label style={componentStyle.section.label}>Name</label>
-                <input style={componentStyle.section.input} type="text" id="inputName"/>
-            </div>
-            
-            <div style={componentStyle.section.line}>
-                <label style={componentStyle.section.label}>Height</label>
-                <input style={componentStyle.section.input} type="text" id="inputHeight" type="number" min="0" max="1000000" step="50" defaultValue ="1000"/>
-            </div>
-            
-            <div style={componentStyle.section.line}>
-                <label style={componentStyle.section.label} >Radius</label>
-                <input style={componentStyle.section.input} type="text" id="inputRadius" type="number" min="5" max="30" step="5" defaultValue ="5"/>
-            </div>
-        </section>
-        <footer style={componentStyle.footer}>
-            <button style={componentStyle.footer.button.ok} onClick={ (e) =>  onOkBtnClicked(e) }>Ok</button>
-            <button style={componentStyle.footer.button.cancle} onClick={ (e) =>  onCancleBtnClicked(e) }>Cancle</button>
-        </footer>
-    </div>
+        <div style = {componentStyle.container}>
+            <header style = {componentStyle.header}>
+                <h1 style = {componentStyle.header.h1}>Create Flight Area Circle</h1>
+            </header>
+            <section style = {componentStyle.section}>
+                <div style={componentStyle.section.line}>
+                    <label style={componentStyle.section.label}>Name</label>
+                    <input style={componentStyle.section.input} type="text" id="inputName"/>
+                </div>
+                
+                <div style={componentStyle.section.line}>
+                    <label style={componentStyle.section.label}>Height</label>
+                    <input style={componentStyle.section.input} type="text" id="inputHeight" type="number" min="0" max="1000000" step="50" defaultValue ="1000"/>
+                </div>
+                
+                <div style={componentStyle.section.line}>
+                    <label style={componentStyle.section.label} >Radius</label>
+                    <input style={componentStyle.section.input} type="text" id="inputRadius" type="number" min="5" max="30" step="5" defaultValue ="5"/>
+                </div>
+            </section>
+            <footer style={componentStyle.footer}>
+                <button style={componentStyle.footer.button.ok} onClick={ (e) =>  onOkBtnClicked(e) }>Ok</button>
+                <button style={componentStyle.footer.button.cancle} onClick={ (e) =>  onCancleBtnClicked(e) }>Cancle</button>
+            </footer>
+        </div>
     );
 };
 

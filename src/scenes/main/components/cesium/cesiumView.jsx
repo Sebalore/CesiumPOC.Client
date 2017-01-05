@@ -439,13 +439,21 @@ export default class CesiumView extends React.Component {
                         scale: resources.ENTITY_TYPES[entityTypeName].ACTIONS.ADD.SCALE || 1
                     }                    
                 });
-        } else {
+        } 
+        else {
             console.log('CesiumView::onDrop(event) : something went wrong.');
         }
     }
 
-    onFlightCircleFormClosed() {
+    onFlightCircleFormClosed(formDetails) {
         this.currentDisplayForm = '';
+        if(formDetails.closedWithData) {
+            console.log('I closed with data:');
+            console.dir(formDetails);
+        }
+        else {
+            console.log('I closed without data!');
+        }
     }
 
     render() {
