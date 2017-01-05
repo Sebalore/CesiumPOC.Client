@@ -1,59 +1,47 @@
 import React from 'react';
 
-export default class FlightCircleForm extends React.Component
+const FlightCircleForm  = (props) =>
 {
-    constructor(props) {
-        super(props);
-
-        this.onCancleBtnClicked = this.onCancleBtnClicked.bind(this);
-        this.onOkBtnClicked = this.onOkBtnClicked.bind(this);
-    }
-
-    onOkBtnClicked(e) {
+    const onOkBtnClicked = (e) => {
         e.preventDefault();
-        this.props.onFormClosed();
-    }
+        props.onFormClosed();
+    };
 
-    onCancleBtnClicked(e) {
+    const onCancleBtnClicked = (e) => {
         e.preventDefault();
-        this.props.onFormClosed();
-    }
+        props.onFormClosed();
+    };
 
-    render() {
-        if (this.props.toDisplay) {
-            return (
-            <div style = {componentStyle.container} ref="container">
-                <header style = {componentStyle.header}>
-                    <h1 style = {componentStyle.header.h1}>Create Flight Area Circle</h1>
-                </header>
-                <section style = {componentStyle.section}>
-                    <div style={componentStyle.section.line}>
-                        <label style={componentStyle.section.label}>Name</label>
-                        <input style={componentStyle.section.input} type="text" id="inputName"/>
-                    </div>
-                    
-                    <div style={componentStyle.section.line}>
-                        <label style={componentStyle.section.label}>Height</label>
-                        <input style={componentStyle.section.input} type="text" id="inputHeight" type="number" min="0" max="1000000" step="50" defaultValue ="1000"/>
-                    </div>
-                    
-                    <div style={componentStyle.section.line}>
-                        <label style={componentStyle.section.label} >Radius</label>
-                        <input style={componentStyle.section.input} type="text" id="inputRadius" type="number" min="5" max="30" step="5" defaultValue ="5"/>
-                    </div>
-                </section>
-                <footer style={componentStyle.footer}>
-                    <button style={componentStyle.footer.button.ok} onClick={ (e) =>  this.onOkBtnClicked(e) }>Ok</button>
-                    <button style={componentStyle.footer.button.cancle} onClick={ (e) =>  this.onCancleBtnClicked(e) }>Cancle</button>
-                </footer>
+    return (
+    <div style = {componentStyle.container}>
+        <header style = {componentStyle.header}>
+            <h1 style = {componentStyle.header.h1}>Create Flight Area Circle</h1>
+        </header>
+        <section style = {componentStyle.section}>
+            <div style={componentStyle.section.line}>
+                <label style={componentStyle.section.label}>Name</label>
+                <input style={componentStyle.section.input} type="text" id="inputName"/>
             </div>
-            );
-        }
-        else {
-            return null;
-        }
-    }
-}
+            
+            <div style={componentStyle.section.line}>
+                <label style={componentStyle.section.label}>Height</label>
+                <input style={componentStyle.section.input} type="text" id="inputHeight" type="number" min="0" max="1000000" step="50" defaultValue ="1000"/>
+            </div>
+            
+            <div style={componentStyle.section.line}>
+                <label style={componentStyle.section.label} >Radius</label>
+                <input style={componentStyle.section.input} type="text" id="inputRadius" type="number" min="5" max="30" step="5" defaultValue ="5"/>
+            </div>
+        </section>
+        <footer style={componentStyle.footer}>
+            <button style={componentStyle.footer.button.ok} onClick={ (e) =>  onOkBtnClicked(e) }>Ok</button>
+            <button style={componentStyle.footer.button.cancle} onClick={ (e) =>  onCancleBtnClicked(e) }>Cancle</button>
+        </footer>
+    </div>
+    );
+};
+
+export default FlightCircleForm;
 
 const componentStyle = {
     container : { 
@@ -121,7 +109,7 @@ const componentStyle = {
 
 FlightCircleForm.propTypes = {
     onFormClosed: React.PropTypes.func,
-    entity: React.PropTypes.array,
+    entity: React.PropTypes.object,
     layerName: React.PropTypes.string,
     toDisplay: React.PropTypes.bool
 };

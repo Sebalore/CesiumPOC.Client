@@ -101,7 +101,7 @@ const initialViewState = {
     },
     options: {
         timeline: false,
-        animation: true,
+        animation: false,
         fullscreenButton: false,
         homeButton: false,
         infoBox: false,  // allow the info box to pop up when selecting an entity
@@ -328,7 +328,7 @@ export default class CesiumView extends React.Component {
                 viewer.scene.screenSpaceCameraController.enableInputs = true;
             }, ScreenSpaceEventType.LEFT_UP);
            
-           //click two times animation handler
+            //click two times animation handler
             handler.setInputAction( click => 
             {
                 if(!dragging)
@@ -367,23 +367,21 @@ export default class CesiumView extends React.Component {
                     
                     if(pickedObject) {
                         const entityTypeStr = pickedObject.id.entityCollection.owner.name;
-                        const entityOwnerIdx = Object.keys(resources.ENTITY_TYPES).indexOf(entityTypeStr);
-                        const entityOwnerArray = this.props.entityTypes[entityOwnerIdx].entities;
+                        const entityOwner = this.props.entityTypes.find( entityArr => entityArr.name === entityTypeStr );
 
-                        this.selectedEntity = entityOwnerArray.filter( (entity) => {
-                            return entity.cesiumId === pickedObject.id.id;
-                        });
-
+                        this.selectedEntity = entityOwner.entities.find( (entity) => entity.cesiumId === pickedObject.id.id );
                         switch (entityTypeStr) {
-                            case resources.DMA:
-                            case resources.UAV:
-                            case resources.HELICOPTERS:
+                            case resources.ENTITY_TYPE_NAMES.AIRPLANE:
+                            case resources.ENTITY_TYPE_NAMES.FLIGHT_AREA:
+                            case resources.ENTITY_TYPE_NAMES.FLIGHT_CIRCLE_OUT:
+                            case resources.ENTITY_TYPE_NAMES.FORBIDEN_FLIGHT_AREA:
+                            case resources.ENTITY_TYPE_NAMES.HELICOPTER:
                             {
                                 break;
                             }
-                            case resources.FLIGHT_CIRCLE:
+                            case resources.ENTITY_TYPE_NAMES.FLIGHT_CIRCLE_IN:
                             {
-                                this.currentDisplayForm = resources.FLIGHT_CIRCLE;
+                                this.currentDisplayForm = resources.ENTITY_TYPE_NAMES.FLIGHT_CIRCLE_IN;
                                 break;
                             }
                         }
@@ -460,7 +458,14 @@ export default class CesiumView extends React.Component {
                 </div>
                 <img style = {componentStyle.altimeter} src="https://s27.postimg.org/op4ssy0ur/altimeter.png" alt="altimeter" />
                 <div style = {componentStyle.tooltip} ref="movementToolTip" id="movementToolTip" />
-                <FlightCircleForm onFormClosed={this.onFlightCircleFormClosed} ref="flightCircleForm" entity={this.selectedEntity} layerName={this.selectedLayerName} toDisplay={this.currentDisplayForm == resources.FLIGHT_CIRCLE}/>
+                {
+                    this.currentDisplayForm === resources.ENTITY_TYPE_NAMES.FLIGHT_CIRCLE_IN ?
+                        <FlightCircleForm 
+                            entity={this.selectedEntity} 
+                            layerName={this.selectedLayerName} 
+                            onFormClosed={this.onFlightCircleFormClosed} 
+                        /> : null
+                }
             </div>
         );
     }
