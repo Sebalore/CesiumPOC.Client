@@ -49,7 +49,7 @@ export default class Main extends Component {
 
 
   setIconStyle(imgName) {
-    const lastSlash = imgName.lastIndexOf("/");
+    const lastSlash = imgName.lastIndexOf('/');
     const parsedImage = imgName.substring(lastSlash + 1, imgName.length);
     const newStyle = JSON.parse(JSON.stringify(componentStyle.icon)); // deep cloning
     const concreteDisplay = `url(${resources.IMG.BASE_URL}${parsedImage}) no-repeat 50% 50%`;
@@ -77,7 +77,8 @@ export default class Main extends Component {
           <CesiumView 
             entityTypes={this.state.entityTypes} 
             actions={actions} 
-            ref='cesium'/>
+            ref='cesium'
+          />
         </div>
       );
     } else {

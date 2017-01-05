@@ -448,11 +448,8 @@ export default class CesiumView extends React.Component {
     onFlightCircleFormClosed(formDetails) {
         this.currentDisplayForm = '';
         if(formDetails.closedWithData) {
-            console.log('I closed with data:');
-            console.dir(formDetails);
-        }
-        else {
-            console.log('I closed without data!');
+            // this.selectedLayerName
+            // this.selectedEntity
         }
     }
 
@@ -468,11 +465,7 @@ export default class CesiumView extends React.Component {
                 <div style = {componentStyle.tooltip} ref="movementToolTip" id="movementToolTip" />
                 {
                     this.currentDisplayForm === resources.ENTITY_TYPE_NAMES.FLIGHT_CIRCLE_IN ?
-                        <FlightCircleForm 
-                            entity={this.selectedEntity} 
-                            layerName={this.selectedLayerName} 
-                            onFormClosed={this.onFlightCircleFormClosed} 
-                        /> : null
+                        <FlightCircleForm onFormClosed={this.onFlightCircleFormClosed} /> : null
                 }
             </div>
         );
