@@ -274,6 +274,7 @@ class _store extends EventEmitter {
           eventData.error = err;
           console.error(`[action ${action.agent}]:${action.type} store hadler. ${JSON.stringify(err)}`);
           this.emit('contextAwareActionExecuted', err, eventData);
+          return Promise.reject(err);
         });
       } else {
         //otherwise just fire the event

@@ -8,6 +8,12 @@ import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 // outer components 
 import FlightCircleForm from './FlightCircleForm.jsx';
 
+
+//-------------------------Geodesy --------------------------
+//Libraries of geodesy functions implemented in JavaScript
+import geodesy from 'geodesy';
+// https://github.com/chrisveness/geodesy
+
 // ---------------------------------------------Cesium Imports----------------------------------------------------
 
 //----------------!!!!Cesium sources setup!!!!! -------------------------------
@@ -31,12 +37,12 @@ import CesiumViewer from 'cesium/Source/Widgets/Viewer/Viewer';
 import Cartesian2 from 'cesium/Source/Core/Cartesian2';
 import Cartesian3 from 'cesium/Source/Core/Cartesian3';
 import ScreenSpaceEventHandler from 'cesium/Source/Core/ScreenSpaceEventHandler';
-import 'cesium/Source/Widgets/widgets.css';
 import Math from 'cesium/Source/Core/Math';
 import CustomDataSource from 'cesium/Source/DataSources/CustomDataSource.js';
 import LabelGraphics from 'cesium/Source/DataSources/LabelGraphics.js';
-
 import ScreenSpaceEventType from 'cesium/Source/Core/ScreenSpaceEventType.js';
+
+import 'cesium/Source/Widgets/widgets.css';
 //-----------------------------------------------------------------------------------------------------------------
 
 //-----------------resources----------------------------------------
@@ -200,39 +206,43 @@ export default class CesiumView extends React.Component {
                                     show: false
                                 })
                             }));
-                            
+
+                                                       
                             this.props.actions[resources.ACTIONS.SET_ENTITY_CESIUM_ID.TYPE](
                                 resources.AGENTS.USER,
                                 {
                                     entityTypeName: eventData.data.entityTypeName,
                                     entityId: eventData.result.id,
                                     cesiumId: addedEntity.id
-                                });
+                            });
+
+                            console.assert( eventData.result.cesiumId === addedEntity.id);
+                            addedEntity.addProperty('storeEntity');
+                            addedEntity['storeEntity'] =  eventData.result;
+                            //TODO: observe it by subscribing to entity.definitionChanged                                    
+
+
                         }
                         break;
                     }
+              
                     case resources.ACTIONS.TOGGLE_BEST_FIT_DISPLAY.TYPE: {
 
                         const entity = eventData.data.entity || this.zoomedEntity;
                         if(!this.zoomedEntity) {
+                            const range =  entity.billboard.sizeInMeters? entity.billboard.width.getValue() * 2.25: null;
                             this.viewer.zoomTo(entity, {
                                 heading : 0,
                                 pitch: -Math.PI/2,
-                                range: this.viewState.zoomHeight/2  //TODO: calculate it according to entity size
+                                range: range
                             });
-
                             this.zoomedEntity = entity;
                         } else {
-                            //revert to default view
-                            entity.billboard.scale = 1;
-
                             this.viewer.camera.lookAt(Cartesian3.fromDegrees(this.viewState.center.x, this.viewState.center.y), new Cartesian3(0.0, 0.0, this.viewState.zoomHeight));
                             this.zoomedEntity = null;
                         }
-
                     }
                 }
-
                 resolve(eventData);
             } 
         });
@@ -430,14 +440,11 @@ export default class CesiumView extends React.Component {
                     entityTypeName: entityTypeName,
                     label: `${entityTypeName}-New-Added`,
                     position: { 
-                        height : 1000.0,            // TODO: change it 
+                        height : 10,            // TODO: change it 
                         latitude : latitudeString,
                         longitude : longitudeString,
                     },
-                    billboard: {
-                        image: `${resources.IMG.BASE_URL}${resources.ENTITY_TYPES[entityTypeName].ACTIONS.ADD.IMG}`,
-                        scale: resources.ENTITY_TYPES[entityTypeName].ACTIONS.ADD.SCALE || 1
-                    }                    
+                    billboard: this.getBillboardByEntityType(entityTypeName)          
                 });
         } 
         else {
@@ -445,11 +452,38 @@ export default class CesiumView extends React.Component {
         }
     }
 
+    getBillboardByEntityType(entityTypeName) {
+        let billboard = {
+                    image: `${resources.IMG.BASE_URL}${resources.ENTITY_TYPES[entityTypeName].ACTIONS.ADD.IMG}`,
+                    scale: resources.ENTITY_TYPES[entityTypeName].ACTIONS.ADD.SCALE || 1
+                };      
+        switch (entityTypeName) {
+            case resources.ENTITY_TYPE_NAMES.AIRPLANE:
+            case resources.ENTITY_TYPE_NAMES.HELICOPTER:
+            {
+                break           
+            }
+            case resources.ENTITY_TYPE_NAMES.FLIGHT_AREA:
+            case resources.ENTITY_TYPE_NAMES.FLIGHT_CIRCLE_OUT:
+            case resources.ENTITY_TYPE_NAMES.FORBIDEN_FLIGHT_AREA:            
+            case resources.ENTITY_TYPE_NAMES.FLIGHT_CIRCLE_IN:
+            {
+                billboard.sizeInMeters = true;
+                billboard.height = 1050;
+                billboard.width = 1000;
+                break;
+            }
+        }
+        return billboard;
+    }
+
     onFlightCircleFormClosed(formDetails) {
         this.currentDisplayForm = '';
         if(formDetails.closedWithData) {
             console.log('I closed with data:');
             console.dir(formDetails);
+
+
         }
         else {
             console.log('I closed without data!');
