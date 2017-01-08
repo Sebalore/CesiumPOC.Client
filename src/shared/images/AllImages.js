@@ -38,6 +38,13 @@ export const Images = {
                     l4.4-13.2h1.4L8.7,130.4L8.7,130.4z"/>
             </g>
     </svg>`,
+    circle_with_number_inside: // replace 'ENTER_NUMBER_HERE' with the number
+        `<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="30" height="30" viewBox="0 0 44 44">
+            <circle cx="22" cy="22" r="20" stroke="white" stroke-width="2" fill="#ffffff"/>
+            <text font-size="15" fill="white" font-family="Verdana" text-anchor="middle" alignment-baseline="baseline" x="22" y="28">
+                ENTER_NUMBER_HERE
+            </text>
+        </svg>`
 };
 
 // use example :

@@ -10,6 +10,7 @@ const FLIGHT_AREA = 'FlightArea';
 const FLIGHT_CIRCLE = 'FlightCircle'; //layer
 const FLIGHT_CIRCLE_IN = 'FlightCircle - Enter'; //entity type
 const FLIGHT_CIRCLE_OUT = 'FlightCircle - Exit'; //entity type
+const MISSION_TOOLTIP = 'MissionTooltip'; //entity type
 
 //--------------------------------- ------- ACTION NAMES ------------
 const ADD = 'ADD';
@@ -41,6 +42,7 @@ export const resources = {
         FLIGHT_AREA : FLIGHT_AREA,
         FLIGHT_CIRCLE_IN : FLIGHT_CIRCLE_IN, 
         FLIGHT_CIRCLE_OUT : FLIGHT_CIRCLE_OUT, 
+        MISSION_TOOLTIP: MISSION_TOOLTIP
     },
     MAP_CENTER: {
         longitude: 34.99249855493725,
@@ -101,7 +103,18 @@ export const resources = {
                     SCALE: 0.5
                 }
             }
-        }        
+        },
+        [MISSION_TOOLTIP] : {
+            IMG: 'circle_with_number_inside',
+            ACTIONS: {
+                ADD: {
+                    ID: 'Add',
+                    DESC: 'Add a new helicopter mission id tooltip',
+                    IMG: 'circle_with_number_inside',
+                    SCALE: 1
+                }
+            }
+        }      
     },
     ACTIONS: {
         ADD: {
