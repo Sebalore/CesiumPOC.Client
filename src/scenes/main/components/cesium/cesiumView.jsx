@@ -33,14 +33,14 @@ BingMapsApi.defaultKey = 'ApKtWGAVLWzzHvuvGZFWTRIXrsyLJ5czBuu9MkIGAdWwsQpXz_GiC5
 //various Cesium objects
 import CesiumViewer from 'cesium/Source/Widgets/Viewer/Viewer';
 //import JulianDate from 'cesium/Source/Core/JulianDate';
-//import Entity from 'cesium/Source/DataSources/Entity';
+import Entity from 'cesium/Source/DataSources/Entity';
 import Cartesian2 from 'cesium/Source/Core/Cartesian2';
 import Cartesian3 from 'cesium/Source/Core/Cartesian3';
 import CesiumColor from 'cesium/Source/Core/Color.js';
 import ScreenSpaceEventHandler from 'cesium/Source/Core/ScreenSpaceEventHandler';
 import CesiumMath from 'cesium/Source/Core/Math';
 import CustomDataSource from 'cesium/Source/DataSources/CustomDataSource.js';
-import LabelGraphics from 'cesium/Source/DataSources/LabelGraphics.js';
+// import LabelGraphics from 'cesium/Source/DataSources/LabelGraphics.js';
 import ScreenSpaceEventType from 'cesium/Source/Core/ScreenSpaceEventType.js';
 
 import 'cesium/Source/Widgets/widgets.css';
@@ -211,13 +211,8 @@ export default class CesiumView extends React.Component {
                             const addedEntity = entityTypeDataSource.entities.add(this.generateEntity(
                                 eventData.result.position, 
                                 eventData.result.billboard,
-                                svgNeededDetails, // if we want to add svg with all the functionality, send this object, otherwise send empty object
-                                {
-                                    label: new LabelGraphics({
-                                        text: eventData.result.label || '...', 
-                                        show: false
-                                })
-                            }));
+                                svgNeededDetails // if we want to add svg with all the functionality, send this object, otherwise send empty object
+                            ));
                
                             this.props.actions[resources.ACTIONS.SET_ENTITY_CESIUM_ID.TYPE](
                                 resources.AGENTS.USER,
@@ -264,20 +259,23 @@ export default class CesiumView extends React.Component {
         const entityTypeDataSource = new CustomDataSource(entityType.name);
         entityType.entities.map(e => {
             const svgNeededDetails = entityType.name === resources.ENTITY_TYPE_NAMES.AIRPLANE || resources.ENTITY_TYPE_NAMES.HELICOPTER ? 
-                {entityTypeName: entityType.name} : {};
+                { entityTypeName: entityType.name } : {};
             const cesiumEntity = entityTypeDataSource.entities.add(
                 this.generateEntity(
                     e.position, 
                     e.billboard, 
-                    svgNeededDetails, 
-                    {
-                        label: new LabelGraphics({
-                            text: e.label || 'nothing here', 
-                            show: false
-                        })
-                    }
+                    svgNeededDetails
                 )
             ); 
+
+            cesiumEntity.addProperty('storeEntity');
+            cesiumEntity['storeEntity'] = e;
+
+            // if object is related to a mission
+            if(e.hasOwnProperty('missionId') && this.defined(e.missionId)) {
+                //
+            }
+
             this.props.actions[resources.ACTIONS.SET_ENTITY_CESIUM_ID.TYPE](
                 resources.AGENTS.USER, {
                     entityTypeName: entityType.name,
@@ -353,10 +351,12 @@ export default class CesiumView extends React.Component {
 
                     // handle tooltip display on the screen
                     if (this.defined(pickedObject)) {
+                        const storeEntityRepresentation = pickedObject.id.storeEntity;
+                        
                         tooltipInfo.style.visibility = 'visible';
                         tooltipInfo.style.top = (y - 70) + 'px';
                         tooltipInfo.style.left = (x - 20) + 'px';                          
-                        tooltipInfo.innerHTML = pickedObject.id.label ? pickedObject.id.label.text._value : '... add a toolptip for this object';
+                        tooltipInfo.innerHTML = storeEntityRepresentation.label ? storeEntityRepresentation.label : '... add a toolptip for this object';
 
                         setTimeout(() => tooltipInfo.style.visibility = 'hidden', 7000);
                     }
@@ -479,10 +479,7 @@ export default class CesiumView extends React.Component {
                     billboard: {
                         image: resources.ENTITY_TYPES[entityTypeName].ACTIONS.ADD.IMG ,
                         scale: resources.ENTITY_TYPES[entityTypeName].ACTIONS.ADD.SCALE
-                    }
-                        // this.getBillboardByEntityType(
-                        // entityTypeName, 
-                        // entityTypeName === resources.ENTITY_TYPE_NAMES.AIRPLANE || resources.ENTITY_TYPE_NAMES.HELICOPTER? defaultHeight : null)     
+                    }     
                 });
         } 
         else {
