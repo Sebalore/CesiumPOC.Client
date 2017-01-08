@@ -8,7 +8,8 @@ import { createLinearCoordinatesGenerator } from './services';
 import {resources} from '../../shared/data/resources';
 
 const initialViewState = {
-  entityTypes: [{
+  entityTypes: [
+    {
       name: resources.ENTITY_TYPE_NAMES.FLIGHT_CIRCLE_IN,
       imgUrl: `${resources.IMG.BASE_URL}${resources.ENTITY_TYPES[resources.ENTITY_TYPE_NAMES.FLIGHT_CIRCLE_IN].IMG}`,
       active: true,
@@ -18,8 +19,7 @@ const initialViewState = {
           imgUrl: `${resources.IMG.BASE_URL}${resources.ENTITY_TYPES[resources.ENTITY_TYPE_NAMES.FLIGHT_CIRCLE_IN].ACTIONS.ADD.IMG}`
         }
       ],
-      entities: [
-      ]
+      entities: []
     }, {
       name: resources.ENTITY_TYPE_NAMES.DMA,
       imgUrl: `${resources.IMG.BASE_URL}${resources.ENTITY_TYPES[resources.ENTITY_TYPE_NAMES.DMA].IMG}`,
@@ -31,7 +31,8 @@ const initialViewState = {
         }
       ],
       entities: []
-    }, {
+    }, 
+    {
       name: resources.ENTITY_TYPE_NAMES.AIRPLANE,
       imgUrl: `${resources.IMG.BASE_URL}${resources.ENTITY_TYPES[resources.ENTITY_TYPE_NAMES.AIRPLANE].IMG}`,
       active: true,
@@ -45,7 +46,7 @@ const initialViewState = {
           id: Guid.create(), //serial number on planes tail;
           cesiumId: null, //guid to be provided by cesium
           label: `${resources.ENTITY_TYPE_NAMES.AIRPLANE}: 001`,
-          missionId : null,
+          missionId : 123,
           position: {
             longitude: resources.MAP_CENTER.longitude - 0.075,
             latitude: resources.MAP_CENTER.latitude - 0.04,
@@ -80,6 +81,7 @@ const initialViewState = {
           id: Guid.create(),
           cesiumId: null, //guid to be provided by cesium
           label: `${resources.ENTITY_TYPE_NAMES.AIRPLANE}: 002`,
+           missionId : 777,
           position: {
             longitude: resources.MAP_CENTER.longitude - 0.05,
             latitude: resources.MAP_CENTER.latitude + 0.03,
@@ -148,6 +150,7 @@ const initialViewState = {
           id: Guid.create(),
           cesiumId: null, //guid to be provided by cesium
           label: `${resources.ENTITY_TYPE_NAMES.HELICOPTER}: 002`,
+          missionId : 888,
           position: {
             longitude: resources.MAP_CENTER.longitude  + 0.0065,
             latitude: resources.MAP_CENTER.latitude - 0.0085,
