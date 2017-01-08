@@ -494,22 +494,29 @@ export default class CesiumView extends React.Component {
      * @param {Number} height
      * @returns {Cesium.Color} 
      */
-    // TODO: relate to the height. 
     mapHeightToColor(height) {
-        const alpha = 1;
-        let color = null;
+        let heightRange = height - height % heightJumpUnit;
+        const heightJumpUnit = 500, 
+            maxHeightInAltimeterScalla = 5500, 
+            minHeightInAltimeterScalla = 3000,
+            heightColors = {
+                '3000': CesiumColor.BISQUE ,
+                '3500': CesiumColor.GOLD ,
+                '4000': CesiumColor.DARKSEAGREEN ,
+                '4500': CesiumColor.DARKOLIVEGREEN ,
+                '5000': CesiumColor.SANDYBROWN,
+                '5500': CesiumColor.SANDYBROWN
+            },
+            alpha = 1;
         
-        if(height < 1000) {
-            color = CesiumColor.SPRINGGREEN ;
+        if (height > maxHeightInAltimeterScalla) {
+            heightRange = maxHeightInAltimeterScalla;
         }
-        else if (height < 1500) {
-            color = CesiumColor.SANDYBROWN  ;
-        }
-        else {
-            color = CesiumColor.TOMATO ;
-        }
+        else if (height < minHeightInAltimeterScalla) {
+            heightRange = minHeightInAltimeterScalla;
+        }        
 
-        return CesiumColor.fromAlpha(color, alpha);
+        return CesiumColor.fromAlpha(heightColors[heightRange], alpha);
     }
 
     /**
@@ -578,7 +585,6 @@ export default class CesiumView extends React.Component {
     }
 
     render() {
-
         return (
             <div style = {componentStyle.general}>
                 <div id="general" ref="general" style = {componentStyle.fullSizeDimentions}>
