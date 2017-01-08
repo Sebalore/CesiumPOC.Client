@@ -75,7 +75,8 @@ export const resources = {
                 ADD: {
                     ID: 'Add',
                     DESC: 'Add a new destination point',
-                    IMG: 'icon_9.svg'
+                    IMG: 'icon_9.svg',
+                    SCALE: 0.5
                 }
             }
         },
@@ -85,7 +86,8 @@ export const resources = {
                 ADD: {
                     ID: 'Add',
                     DESC: 'Add a new AIRPLANE',
-                    IMG: 'icon_5_black_1.svg'
+                    IMG: 'icon_5_black_1.svg',
+                    SCALE: 0.5
                 }
             }
         },
@@ -95,7 +97,8 @@ export const resources = {
                 ADD: {
                     ID: 'Add',
                     DESC: 'Add a new helicopter',
-                    IMG: 'icon_3_black_1.svg'
+                    IMG: 'icon_3_black_1.svg',
+                    SCALE: 0.5
                 }
             }
         }        

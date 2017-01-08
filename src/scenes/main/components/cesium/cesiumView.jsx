@@ -123,6 +123,9 @@ const initialViewState = {
     }
 };
 
+// TODO: export it in a configuration file, and import it here
+const defaultHeight = 10;
+
 export default class CesiumView extends React.Component {
 
     constructor(props) {
@@ -202,10 +205,17 @@ export default class CesiumView extends React.Component {
                                 // console.log('after: ', entityToUpdate.position);                             
                             }
 
-                            const addedEntity = entityTypeDataSource.entities.add(this.generateEntity(eventData.result.position, eventData.result.billboard, {
-                                label: new LabelGraphics({
-                                    text: eventData.result.label || '...', 
-                                    show: false
+                            // TODO: define this if more genericly
+                            const svgNeededDetails = eventData.data.entityTypeName === resources.ENTITY_TYPE_NAMES.AIRPLANE || resources.ENTITY_TYPE_NAMES.HELICOPTER ? 
+                                {entityTypeName: eventData.data.entityTypeName} : {};
+                            const addedEntity = entityTypeDataSource.entities.add(this.generateEntity(
+                                eventData.result.position, 
+                                eventData.result.billboard,
+                                svgNeededDetails, // if we want to add svg with all the functionality, send this object, otherwise send empty object
+                                {
+                                    label: new LabelGraphics({
+                                        text: eventData.result.label || '...', 
+                                        show: false
                                 })
                             }));
                
@@ -224,7 +234,6 @@ export default class CesiumView extends React.Component {
                         }
                         break;
                     }
-              
                     case resources.ACTIONS.TOGGLE_BEST_FIT_DISPLAY.TYPE: {
 
                         const entity = eventData.data.entity || this.zoomedEntity;
@@ -254,10 +263,13 @@ export default class CesiumView extends React.Component {
     createEntityTypeDataSource(entityType) {
         const entityTypeDataSource = new CustomDataSource(entityType.name);
         entityType.entities.map(e => {
+            const svgNeededDetails = entityType.name === resources.ENTITY_TYPE_NAMES.AIRPLANE || resources.ENTITY_TYPE_NAMES.HELICOPTER ? 
+                {entityTypeName: entityType.name} : {};
             const cesiumEntity = entityTypeDataSource.entities.add(
                 this.generateEntity(
                     e.position, 
                     e.billboard, 
+                    svgNeededDetails, 
                     {
                         label: new LabelGraphics({
                             text: e.label || 'nothing here', 
@@ -279,16 +291,27 @@ export default class CesiumView extends React.Component {
         this.viewer.dataSources.add(entityTypeDataSource);
     }
 
+    // TODO: export it to utills
+    /**
+     * @param {Object} obj
+     */
+    isEmptyObject(obj) {
+        return Object.keys(obj).length === 0 && obj.constructor === Object;
+    }
+
     /**
      * generate entity by params
-     * @param {position} a position object containinf longitude and latitude in degrees (or radians?) and height in meters
-     * @param {billboard} billboard object
+     * @param {Object} position a position object containinf longitude and latitude in degrees (or radians?) and height in meters
+     * @param {Object} billboard 
+     * @param {Object} svgNeededDetails an object that if was not empty will define the needed details for create svg special bilbord image
      * @returns {Object} an object that can be added to cesium entities collection
      */
-    generateEntity(position, billboard, others) {
+    generateEntity(position, billboard, svgNeededDetails, others) {
         const cesiumEntity =  {
                 position: Cartesian3.fromDegrees(position.longitude, position.latitude, position.height),
-                billboard,
+                billboard: !this.isEmptyObject(svgNeededDetails) ? 
+                    this.getBillboardByEntityType(svgNeededDetails.entityTypeName, svgNeededDetails.entityTypeName === resources.ENTITY_TYPE_NAMES.AIRPLANE || resources.ENTITY_TYPE_NAMES.HELICOPTER? position.height : null)
+                    :  billboard,
                 ...others
         };
         return cesiumEntity;
@@ -440,7 +463,7 @@ export default class CesiumView extends React.Component {
             const cartographic =  this.viewer.scene.globe.ellipsoid.cartesianToCartographic(cartesian);
             const longitudeString = CesiumMath.toDegrees(cartographic.longitude);
             const latitudeString = CesiumMath.toDegrees(cartographic.latitude);
-            const defaultHeight = 10;
+            
 
             this.props.actions[resources.ACTIONS.ADD.TYPE](
                 resources.AGENTS.USER,
@@ -453,9 +476,13 @@ export default class CesiumView extends React.Component {
                         latitude : latitudeString,
                         longitude : longitudeString,
                     },
-                    billboard: this.getBillboardByEntityType(
-                        entityTypeName, 
-                        entityTypeName === resources.ENTITY_TYPE_NAMES.AIRPLANE || resources.ENTITY_TYPE_NAMES.HELICOPTER? defaultHeight : null)     
+                    billboard: {
+                        image: resources.ENTITY_TYPES[entityTypeName].ACTIONS.ADD.IMG ,
+                        scale: resources.ENTITY_TYPES[entityTypeName].ACTIONS.ADD.SCALE
+                    }
+                        // this.getBillboardByEntityType(
+                        // entityTypeName, 
+                        // entityTypeName === resources.ENTITY_TYPE_NAMES.AIRPLANE || resources.ENTITY_TYPE_NAMES.HELICOPTER? defaultHeight : null)     
                 });
         } 
         else {
@@ -467,9 +494,22 @@ export default class CesiumView extends React.Component {
      * @param {Number} height
      * @returns {Cesium.Color} 
      */
-    // TODO: relate to the height. now it is simply random
-    mapHeightToColor(/*height*/) {
-        return CesiumColor.fromRandom({alpha:1.0});
+    // TODO: relate to the height. 
+    mapHeightToColor(height) {
+        const alpha = 1;
+        let color = null;
+        
+        if(height < 1000) {
+            color = CesiumColor.SPRINGGREEN ;
+        }
+        else if (height < 1500) {
+            color = CesiumColor.SANDYBROWN  ;
+        }
+        else {
+            color = CesiumColor.TOMATO ;
+        }
+
+        return CesiumColor.fromAlpha(color, alpha);
     }
 
     /**
