@@ -6,13 +6,13 @@ import Guid from 'guid';
 import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 
 // outer components 
-import FlightCircleForm from './FlightCircleForm.jsx';
+import EntityForm from './components/entityFormView';
 
 
-//-------------------------Geodesy --------------------------
-//Libraries of geodesy functions implemented in JavaScript
-import geodesy from 'geodesy';
-// https://github.com/chrisveness/geodesy
+// //-------------------------Geodesy --------------------------
+// //Libraries of geodesy functions implemented in JavaScript
+// import geodesy from 'geodesy';
+// // https://github.com/chrisveness/geodesy
 
 // ---------------------------------------------Cesium Imports----------------------------------------------------
 
@@ -81,16 +81,18 @@ const componentStyle = {
         visibility: 'hidden',
         textAlign: 'center',
     },
-    editEntityForm: {
-        width: '234px',
-        top: '-671px',
-        left: '221px',
-        height: '200px',
-        backgroundColor: '#aaaaaa',
-        position: 'relative',
+    entityForm : {
         visibility: 'hidden',
-  },
-  formH1: {
+        display: 'block',
+        position: 'fixed',
+        overflow: 'hidden',
+        background: 'gray',
+        border: '1px solid #47494c',
+        borderRadius: '5px',
+        top: 20 + 'vh',
+        left: 15 + 'vw'        
+    },
+    formH1: {
     background: '#615a5a',
     borderBottom: '1px solid black',
     textAlign: 'center'
@@ -129,14 +131,21 @@ export default class CesiumView extends React.Component {
         // class members
         this.viewState = initialViewState;
         this.zoomedEntity = null;
-        this.selectedEntity = null;
+        this.selectedEntity = {
+            entityTypeName: null,
+            isFormOpen: false,
+            position: { 
+                height: 0,            
+                latitude: 0,
+                longitude: 0,
+            }            
+        };
         this.selectedLayerName = null;
-        this.currentDisplayForm = '';
 
        // class methods
         this.onDrop = this.onDrop.bind(this);
         this.handleContextAwareActions = this.handleContextAwareActions.bind(this);
-        this.onFlightCircleFormClosed = this.onFlightCircleFormClosed.bind(this);
+        this.onEntityFormClose = this.onEntityFormClose.bind(this);
     }
 
     componentDidMount() {
@@ -200,7 +209,8 @@ export default class CesiumView extends React.Component {
                                 // console.log('after: ', entityToUpdate.position);                             
                             }
 
-                            const addedEntity = entityTypeDataSource.entities.add(this.generateEntity(eventData.result.position, eventData.result.billboard, {
+                            const addedEntity = entityTypeDataSource.entities.add(this.generateEntity(eventData.result.position, {
+                                billboard: eventData.result.billboard, 
                                 label: new LabelGraphics({
                                     text: eventData.result.label || '...', 
                                     show: false
@@ -255,7 +265,9 @@ export default class CesiumView extends React.Component {
     createEntityTypeDataSource(entityType) {
         const entityTypeDataSource = new CustomDataSource(entityType.name);
         entityType.entities.map(e => {
-            const cesiumEntity = entityTypeDataSource.entities.add(this.generateEntity(e.position, e.billboard, {label: new LabelGraphics({text: e.label || 'nothing here', show: false})})); 
+            const cesiumEntity = entityTypeDataSource.entities.add(this.generateEntity(e.position, {
+                billboard: e.billboard ,
+                label: new LabelGraphics({text: e.label || 'nothing here', show: false})})); 
             this.props.actions[resources.ACTIONS.SET_ENTITY_CESIUM_ID.TYPE](
                 resources.AGENTS.USER, {
                     entityTypeName: entityType.name,
@@ -272,13 +284,11 @@ export default class CesiumView extends React.Component {
     /**
      * generate entity by params
      * @param {position} a position object containinf longitude and latitude in degrees (or radians?) and height in meters
-     * @param {billboard} billboard object
      * @returns {Object} an object that can be added to cesium entities collection
      */
-    generateEntity(position, billboard, others) {
+    generateEntity(position, others) {
         const cesiumEntity =  {
                 position: Cartesian3.fromDegrees(position.longitude, position.latitude, position.height),
-                billboard,
                 ...others
         };
         return cesiumEntity;
@@ -290,6 +300,11 @@ export default class CesiumView extends React.Component {
             window.onmousemove = function (e) {
                 x = e.clientX;
                 y = e.clientY;
+            };  
+
+            //disable default context menu
+            window.oncontextmenu = function (e) {
+                e.preventDefault();
             };                    
 
             // Drag & Drop 
@@ -370,36 +385,15 @@ export default class CesiumView extends React.Component {
 
             // left click on map
             handler.setInputAction( click => {
-                const pickedObject = viewer.scene.pick(click.position);
+                const pickedObject = viewer.scene.pick(click.position) || this.zoomedEntity;
 
-                if (this.zoomedEntity || pickedObject) {
+                if (pickedObject) {
                     this.props.actions[resources.ACTIONS.TOGGLE_BEST_FIT_DISPLAY.TYPE](resources.AGENTS.USER, {entity: pickedObject?pickedObject.id:null});
-                    
-                    if(pickedObject) {
-                        const entityTypeStr = pickedObject.id.entityCollection.owner.name;
-                        const entityOwner = this.props.entityTypes.find( entityArr => entityArr.name === entityTypeStr );
-
-                        this.selectedEntity = entityOwner.entities.find( (entity) => entity.cesiumId === pickedObject.id.id );
-                        switch (entityTypeStr) {
-                            case resources.ENTITY_TYPE_NAMES.AIRPLANE:
-                            case resources.ENTITY_TYPE_NAMES.FLIGHT_AREA:
-                            case resources.ENTITY_TYPE_NAMES.FLIGHT_CIRCLE_OUT:
-                            case resources.ENTITY_TYPE_NAMES.FORBIDEN_FLIGHT_AREA:
-                            case resources.ENTITY_TYPE_NAMES.HELICOPTER:
-                            {
-                                break;
-                            }
-                            case resources.ENTITY_TYPE_NAMES.FLIGHT_CIRCLE_IN:
-                            {
-                                this.currentDisplayForm = resources.ENTITY_TYPE_NAMES.FLIGHT_CIRCLE_IN;
-                                break;
-                            }
-                        }
-                    }
                 } 
                 else {
                     const cartesian = this.viewer.camera.pickEllipsoid( click.position, this.viewer.scene.globe.ellipsoid);
                     this.viewer.camera.lookAt(cartesian, new Cartesian3(0.0, 0.0, this.viewState.zoomHeight));
+                    hideEntityForm();
                 }
             }, ScreenSpaceEventType.RIGHT_UP);         
     }
@@ -429,13 +423,12 @@ export default class CesiumView extends React.Component {
         //console.log(entityTypeName);
 
         if (cartesian && entityTypeName && entityType) {
+                      
             const cartographic =  this.viewer.scene.globe.ellipsoid.cartesianToCartographic(cartesian);
             const longitudeString = Math.toDegrees(cartographic.longitude);
             const latitudeString = Math.toDegrees(cartographic.latitude);
 
-            this.props.actions[resources.ACTIONS.ADD.TYPE](
-                resources.AGENTS.USER,
-                 {
+            this.selectedEntity = Object.assign({}, {
                     id: Guid.create(),
                     entityTypeName: entityTypeName,
                     label: `${entityTypeName}-New-Added`,
@@ -444,20 +437,22 @@ export default class CesiumView extends React.Component {
                         latitude : latitudeString,
                         longitude : longitudeString,
                     },
-                    billboard: this.getBillboardByEntityType(entityTypeName)          
-                });
+                    //billboard: this.getBillboard(entityTypeName)
+            }); 
+
+            this.showEntityForm(y-90, x+120)
         } 
         else {
             console.log('CesiumView::onDrop(event) : something went wrong.');
         }
     }
 
-    getBillboardByEntityType(entityTypeName) {
+    getBillboard(entity) {
         let billboard = {
-                    image: `${resources.IMG.BASE_URL}${resources.ENTITY_TYPES[entityTypeName].ACTIONS.ADD.IMG}`,
-                    scale: resources.ENTITY_TYPES[entityTypeName].ACTIONS.ADD.SCALE || 1
+                    image: `${resources.IMG.BASE_URL}${resources.ENTITY_TYPES[entity.entityTypeName].ACTIONS.ADD.IMG}`,
+                    scale: resources.ENTITY_TYPES[entity.entityTypeName].ACTIONS.ADD.SCALE || 1
                 };      
-        switch (entityTypeName) {
+        switch (entity.entityTypeName) {
             case resources.ENTITY_TYPE_NAMES.AIRPLANE:
             case resources.ENTITY_TYPE_NAMES.HELICOPTER:
             {
@@ -469,25 +464,44 @@ export default class CesiumView extends React.Component {
             case resources.ENTITY_TYPE_NAMES.FLIGHT_CIRCLE_IN:
             {
                 billboard.sizeInMeters = true;
-                billboard.height = 1050;
-                billboard.width = 1000;
+                billboard.height = (entity.radius || 1) + 50;
+                billboard.width = (entity.radius || 1);
                 break;
             }
         }
         return billboard;
     }
 
-    onFlightCircleFormClosed(formDetails) {
-        this.currentDisplayForm = '';
-        if(formDetails.closedWithData) {
-            console.log('I closed with data:');
-            console.dir(formDetails);
-
+    onEntityFormClose(formData) {
+        if(formData && formData.entity) {
+            console.log('EntityForm closed with OK:');
+            this.selectedEntity = Object.assign({}, {
+                    billboard: this.getBillboard(formData.entity),
+                    ...formData.entity
+            });
+            this.props.actions[resources.ACTIONS.ADD.TYPE](
+                resources.AGENTS.USER,
+                this.selectedEntity);  
+            console.dir(this.selectedEntity);        
         }
         else {
-            console.log('I closed without data!');
-
+            console.log('EntityForm closed with Cancel.');
         }
+        this.hideEntityForm();
+    }
+
+    showEntityForm(top, left) {
+        if (top && left) {
+            componentStyle.entityForm.top = top + 'px';
+            componentStyle.entityForm.left = left + 'px';
+        }
+        componentStyle.entityForm.visibility = 'visible';
+        this.forceUpdate();
+    }
+
+    hideEntityForm() {
+        componentStyle.entityForm.visibility = 'hidden';
+        this.forceUpdate();
     }
 
     render() {
@@ -499,11 +513,9 @@ export default class CesiumView extends React.Component {
                     </div>
                 </div>
                 <img style = {componentStyle.altimeter} src="https://s27.postimg.org/op4ssy0ur/altimeter.png" alt="altimeter" />
-                <div style = {componentStyle.tooltip} ref="movementToolTip" id="movementToolTip" />
-                {
-                    this.currentDisplayForm === resources.ENTITY_TYPE_NAMES.FLIGHT_CIRCLE_IN ?
-                        <FlightCircleForm onFormClosed={this.onFlightCircleFormClosed} /> : null
-                }
+                <div style = {componentStyle.tooltip} ref="movementToolTip" id="movementToolTip">
+                </div>
+                <EntityForm entity={this.selectedEntity} onFormClose={this.onEntityFormClose} style={Object.assign({}, componentStyle.entityForm)} ref="entityForm" id="entityForm" />
             </div>
         );
     }
