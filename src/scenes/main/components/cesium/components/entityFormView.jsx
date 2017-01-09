@@ -45,15 +45,15 @@ export default class EntityForm extends React.PureComponent {
                         <input style={componentStyle.section.input} 
                             type="text" 
                             id="inputName"
-                            value={this.props.entity.label}/>
+                            defaultValue={this.props.entity.label}/>
                     </div>
                 </section>
                 <footer style={componentStyle.footer}>
                     <button
                         style={componentStyle.footer.button.ok}
                         onClick={(e) => this.onFormClose.bind(this)(e, Object.assign({}, {
-                        label: document.getElementById('inputName').value,
-                        ...this.props.entity
+                        ...this.props.entity,
+                        label: document.getElementById('inputName').value
                     }))}>Ok</button>
                     <button
                         style={componentStyle.footer.button.cancle}

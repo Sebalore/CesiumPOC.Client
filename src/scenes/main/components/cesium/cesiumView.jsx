@@ -36,21 +36,25 @@ import CesiumViewer from 'cesium/Source/Widgets/Viewer/Viewer';
 import Entity from 'cesium/Source/DataSources/Entity';
 import Cartesian2 from 'cesium/Source/Core/Cartesian2';
 import Cartesian3 from 'cesium/Source/Core/Cartesian3';
-import CesiumColor from 'cesium/Source/Core/Color.js';
+import CesiumColor from 'cesium/Source/Core/Color';
 import ScreenSpaceEventHandler from 'cesium/Source/Core/ScreenSpaceEventHandler';
 import CesiumMath from 'cesium/Source/Core/Math';
-import CustomDataSource from 'cesium/Source/DataSources/CustomDataSource.js';
+import CustomDataSource from 'cesium/Source/DataSources/CustomDataSource';
 // import LabelGraphics from 'cesium/Source/DataSources/LabelGraphics.js';
 
-import Ellipsoid from 'cesium/Source/Core/Ellipsoid.js';
-import ScreenSpaceEventType from 'cesium/Source/Core/ScreenSpaceEventType.js';
+import Ellipsoid from 'cesium/Source/Core/Ellipsoid';
+import ScreenSpaceEventType from 'cesium/Source/Core/ScreenSpaceEventType';
 
 import 'cesium/Source/Widgets/widgets.css';
 //-----------------------------------------------------------------------------------------------------------------
 
+//-----------------services ----------------------------------------
+import { defined } from '../../services'
+
 //-----------------resources----------------------------------------
-import {resources} from '../../../../shared/data/resources.js'; 
-import {Images} from '../../../../shared/images/AllImages.js';
+import {resources} from '../../../../shared/data/resources'; 
+import {Images} from '../../../../shared/images/AllImages';
+
 
 
 // Consts
@@ -178,6 +182,107 @@ export default class CesiumView extends React.Component {
         this.props.entityTypes.forEach(entityType => this.createEntityTypeDataSource(entityType));
 
         this.setMapEventHandlers(this.viewer, this.handler, entity, selectedEntity, dragging, isFirstClick);
+    }
+
+    setMapEventHandlers(viewer, handler, entity, selectedEntity, dragging, isFirstClick) {
+            // Get mouse position on screeמ (unrelated to Cesium viewer object)
+            let x, y;
+            window.onmousemove = function (e) {
+                x = e.clientX;
+                y = e.clientY;
+            };                    
+
+            // Drag & Drop 
+            handler.setInputAction( click => 
+            {
+                const pickedObject = viewer.scene.pick(click.position);
+                
+                if (defined(pickedObject)) 
+                {
+                    entity = pickedObject.id;
+                    //entity.billboard.scale = 1.2;
+                    dragging = true;
+                    viewer.scene.screenSpaceCameraController.enableInputs = false;
+                }
+            }, ScreenSpaceEventType.LEFT_DOWN);
+
+            // dragging handler
+            handler.setInputAction( movement => 
+            {
+                const tooltipInfo = this.refs.movementToolTip;
+
+                if (dragging) 
+                {
+                    entity.position = viewer.camera.pickEllipsoid(movement.endPosition);
+                }
+                else {
+                    const pickedObject = viewer.scene.pick(movement.endPosition);
+
+                    // handle tooltip display on the screen
+                    if (defined(pickedObject)) {
+                        const storeEntityRepresentation = pickedObject.id.storeEntity;
+                        
+                        tooltipInfo.style.visibility = 'visible';
+                        tooltipInfo.style.top = (y - 70) + 'px';
+                        tooltipInfo.style.left = (x - 20) + 'px';                          
+                        tooltipInfo.innerHTML = storeEntityRepresentation.label ? storeEntityRepresentation.label : '... add a toolptip for this object';
+
+                        setTimeout(() => tooltipInfo.style.visibility = 'hidden', 7000);
+                    }
+                }
+
+            }, ScreenSpaceEventType.MOUSE_MOVE);
+
+            // mouse up handler
+            handler.setInputAction( () => 
+            {
+                dragging = false;
+                viewer.scene.screenSpaceCameraController.enableInputs = true;
+            }, ScreenSpaceEventType.LEFT_UP);
+           
+            //click two times animation handler
+            handler.setInputAction( click => 
+            {
+                if(!dragging)
+                {
+                    if (isFirstClick) // if first click on object
+                    {
+                        const pickedObject = viewer.scene.pick(click.position);
+
+                        if (defined(pickedObject)) 
+                        {
+                            selectedEntity = {
+                                id: pickedObject.id._id,
+                                entity: pickedObject.id, 
+                                x: click.position.x, 
+                                y: click.position.y 
+                            };
+
+                            this.clickType = false;
+                        }
+                    }
+                    else // if second click on object
+                    {
+                        const isRemoveWasSucceded = viewer.entities.removeById(selectedEntity.id);
+                        isFirstClick = true;
+                    }
+                }   // end if !dragging
+
+            }, ScreenSpaceEventType.LEFT_CLICK);
+
+            // left click on map
+            handler.setInputAction( click => {
+                const pickedObject = viewer.scene.pick(click.position) || this.zoomedEntity;
+
+                if (pickedObject) {
+                    this.props.actions[resources.ACTIONS.TOGGLE_BEST_FIT_DISPLAY.TYPE](resources.AGENTS.USER, {entity: pickedObject?pickedObject.id:null});
+                } 
+                else {
+                    const cartesian = this.viewer.camera.pickEllipsoid( click.position, this.viewer.scene.globe.ellipsoid);
+                    this.viewer.camera.lookAt(cartesian, new Cartesian3(0.0, 0.0, this.viewState.zoomHeight));
+                    hideEntityForm();
+                }
+            }, ScreenSpaceEventType.RIGHT_UP);         
     }
 
     handleContextAwareActions(error, eventData) {
@@ -317,7 +422,7 @@ export default class CesiumView extends React.Component {
         const storeEntity = cesiumEntity.storeEntity;
         
         // if object is related to a mission
-        if(storeEntity.hasOwnProperty('missionId') && this.defined(storeEntity.missionId)) {
+        if(storeEntity.hasOwnProperty('missionId') && defined(storeEntity.missionId)) {
             const entityMissionTooltipsDataSource = this.getDataSourceByName('EntityMissionTooltips'),
                 missionEntity = this.generateEntity(resources.ENTITY_TYPE_NAMES.MISSION_TOOLTIP, Object.assign({},{
                         position: {
@@ -338,14 +443,6 @@ export default class CesiumView extends React.Component {
         }
     }
 
-    // TODO: export it to utills
-    /**
-     * @param {Object} obj
-     */
-    isEmptyObject(obj) {
-        return Object.keys(obj).length === 0 && obj.constructor === Object;
-    }
-
     /**
      * generate entity by params
      * @param {position} a position object containinf longitude and latitude in degrees (or radians?) and height in meters
@@ -360,152 +457,6 @@ export default class CesiumView extends React.Component {
         };
 
         return cesiumEntity;
-    }
-
-    setMapEventHandlers(viewer, handler, entity, selectedEntity, dragging, isFirstClick) {
-            // Get mouse position on screeמ (unrelated to Cesium viewer object)
-            let x, y;
-            window.onmousemove = function (e) {
-                x = e.clientX;
-                y = e.clientY;
-            };                    
-
-            // Drag & Drop 
-            handler.setInputAction( click => 
-            {
-                const pickedObject = viewer.scene.pick(click.position);
-                
-                if (this.defined(pickedObject)) 
-                {
-                    entity = pickedObject.id;
-                    //entity.billboard.scale = 1.2;
-                    dragging = true;
-                    viewer.scene.screenSpaceCameraController.enableInputs = false;
-                }
-            }, ScreenSpaceEventType.LEFT_DOWN);
-
-            // dragging handler
-            handler.setInputAction( movement => 
-            {
-                const tooltipInfo = this.refs.movementToolTip;
-
-                if (dragging) 
-                {
-                    entity.position = viewer.camera.pickEllipsoid(movement.endPosition);
-                }
-                else {
-                    const pickedObject = viewer.scene.pick(movement.endPosition);
-
-                    // handle tooltip display on the screen
-                    if (this.defined(pickedObject)) {
-                        const storeEntityRepresentation = pickedObject.id.storeEntity;
-                        
-                        tooltipInfo.style.visibility = 'visible';
-                        tooltipInfo.style.top = (y - 70) + 'px';
-                        tooltipInfo.style.left = (x - 20) + 'px';                          
-                        tooltipInfo.innerHTML = storeEntityRepresentation.label ? storeEntityRepresentation.label : '... add a toolptip for this object';
-
-                        setTimeout(() => tooltipInfo.style.visibility = 'hidden', 7000);
-                    }
-                }
-
-            }, ScreenSpaceEventType.MOUSE_MOVE);
-
-            // mouse up handler
-            handler.setInputAction( () => 
-            {
-                dragging = false;
-                viewer.scene.screenSpaceCameraController.enableInputs = true;
-            }, ScreenSpaceEventType.LEFT_UP);
-           
-            //click two times animation handler
-            handler.setInputAction( click => 
-            {
-                if(!dragging)
-                {
-                    if (isFirstClick) // if first click on object
-                    {
-                        const pickedObject = viewer.scene.pick(click.position);
-
-                        if (this.defined(pickedObject)) 
-                        {
-                            selectedEntity = {
-                                id: pickedObject.id._id,
-                                entity: pickedObject.id, 
-                                x: click.position.x, 
-                                y: click.position.y 
-                            };
-
-                            this.clickType = false;
-                        }
-                    }
-                    else // if second click on object
-                    {
-                        const isRemoveWasSucceded = viewer.entities.removeById(selectedEntity.id);
-                        isFirstClick = true;
-                    }
-                }   // end if !dragging
-
-            }, ScreenSpaceEventType.LEFT_CLICK);
-
-            // left click on map
-            handler.setInputAction( click => {
-                const pickedObject = viewer.scene.pick(click.position) || this.zoomedEntity;
-
-                if (pickedObject) {
-                    this.props.actions[resources.ACTIONS.TOGGLE_BEST_FIT_DISPLAY.TYPE](resources.AGENTS.USER, {entity: pickedObject?pickedObject.id:null});
-                } 
-                else {
-                    const cartesian = this.viewer.camera.pickEllipsoid( click.position, this.viewer.scene.globe.ellipsoid);
-                    this.viewer.camera.lookAt(cartesian, new Cartesian3(0.0, 0.0, this.viewState.zoomHeight));
-                    hideEntityForm();
-                }
-            }, ScreenSpaceEventType.RIGHT_UP);         
-    }
-
-    defined(object) {
-        return (object !== undefined && object !== null);
-    }
-
-    /** the function handle droping entities from this combobox to the map */
-    onDrop(event)    {
-        // calculate new object drop area
-        const dim = this.refs.map.getClientRects()[0];
-        const x = (event.clientX - dim.left);
-        const y = (event.clientY - dim.top);
-
-        // add the new object to the map
-        const mousePosition = new Cartesian2(x, y);
-        let cartesian = mousePosition;
-        if (this.viewer.scene.mode === 3) {
-            cartesian = this.viewer.camera.pickEllipsoid(mousePosition, this.viewer.scene.globe.ellipsoid); // maybe the problem here!!
-        }
-     
-        const entityTypeName = event.dataTransfer.getData('text');
-        const entityType = this.props.entityTypes.find(l => l.name === entityTypeName);
-
-        if (cartesian && entityTypeName && entityType) {
-                      
-            const cartographic =  this.viewer.scene.globe.ellipsoid.cartesianToCartographic(cartesian);
-            const longitudeString = CesiumMath.toDegrees(cartographic.longitude);
-            const latitudeString = CesiumMath.toDegrees(cartographic.latitude);
-            
-
-            this.selectedEntity = Object.assign({}, {
-                    id: Guid.create(),
-                    entityTypeName,
-                    label: `${entityTypeName}-New-Added`,
-                    position: { 
-                        height : defaultHeight,
-                        latitude : latitudeString,
-                        longitude : longitudeString,
-                    }
-            }); 
-            this.showEntityForm(y-90, x+120);
-        } 
-        else {
-            console.log('CesiumView::onDrop(event) : something went wrong.');
-        }
     }
 
     getBillboard(entityTypeName, entity) {
@@ -599,6 +550,47 @@ export default class CesiumView extends React.Component {
         const hexColor = cesiumRgb2Hex(color); // get the hex color to fill
         
         return exportSVG(svg.replace('ffffff', hexColor));
+    }
+
+    /** the function handle droping entities from this combobox to the map */
+    onDrop(event)    {
+        // calculate new object drop area
+        const dim = this.refs.map.getClientRects()[0];
+        const x = (event.clientX - dim.left);
+        const y = (event.clientY - dim.top);
+
+        // add the new object to the map
+        const mousePosition = new Cartesian2(x, y);
+        let cartesian = mousePosition;
+        if (this.viewer.scene.mode === 3) {
+            cartesian = this.viewer.camera.pickEllipsoid(mousePosition, this.viewer.scene.globe.ellipsoid); // maybe the problem here!!
+        }
+     
+        const entityTypeName = event.dataTransfer.getData('text');
+        const entityType = this.props.entityTypes.find(l => l.name === entityTypeName);
+
+        if (cartesian && entityTypeName && entityType) {
+                      
+            const cartographic =  this.viewer.scene.globe.ellipsoid.cartesianToCartographic(cartesian);
+            const longitudeString = CesiumMath.toDegrees(cartographic.longitude);
+            const latitudeString = CesiumMath.toDegrees(cartographic.latitude);
+            
+
+            this.selectedEntity = Object.assign({}, {
+                    id: Guid.create(),
+                    entityTypeName,
+                    label: `${entityTypeName}-New-Added`,
+                    position: { 
+                        height : defaultHeight,
+                        latitude : latitudeString,
+                        longitude : longitudeString,
+                    }
+            }); 
+            this.showEntityForm(y-90, x+120);
+        } 
+        else {
+            console.log('CesiumView::onDrop(event) : something went wrong.');
+        }
     }
 
     onEntityFormClose(formData) {

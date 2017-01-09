@@ -15,6 +15,17 @@ export function createLinearCoordinatesGenerator (velocity) {
     }
 }
 
+export function defined(object) {
+        return (object !== undefined && object !== null);
+    }
+
+/**
+ * @param {Object} obj
+ */
+export function isEmptyObject(obj) {
+    return Object.keys(obj).length === 0 && obj.constructor === Object;
+}
+
 export function getDistanceBetweenPoints(point1, point2) {
     // const φ1 = lat1.toRadians();
     // const φ2 = lat2.toRadians();

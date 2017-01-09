@@ -12,7 +12,7 @@ const FlightCircleForm = (props) => {
                     <input style={props.style.section.input} 
                         type="text" 
                         id="inputName"
-                        value={props.entity.label}/>
+                        defaultValue={props.entity.label}/>
                 </div>
 
                 <div style={props.style.section.line}>
@@ -45,13 +45,13 @@ const FlightCircleForm = (props) => {
                 <button
                     style={props.style.footer.button.ok}
                     onClick={(e) => props.onFormClose(e, Object.assign({}, {
+                    ...props.entity,
                     label: document.getElementById('inputName').value,
                     radius: Number(document.getElementById('inputRadius').value),                    
                     position: {
-                        height: Number(document.getElementById('inputHeight').value),
-                        ...props.entity.position
-                    },
-                    ...props.entity
+                        ...props.entity.position,
+                        height: Number(document.getElementById('inputHeight').value)
+                    }
                 }))}>Ok</button>
                 <button
                     style={props.style.footer.button.cancle}
