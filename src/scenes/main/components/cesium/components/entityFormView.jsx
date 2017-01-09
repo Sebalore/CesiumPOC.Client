@@ -30,7 +30,33 @@ export default class EntityForm extends React.PureComponent {
                 return (<FlightCircleForm  entity= {this.props.entity} style={Object.assign(componentStyle,  {form: this.props.style})} onFormClose={this.onFormClose.bind(this)}/>);
             }
     }
-    return(<div>TODO: add form for {this.props.entityType} entity type</div>);
+    return(
+        <div style={this.props.style}>
+            <header style={componentStyle.header}>
+                <h1 style={componentStyle.header.h1}>{this.props.entity.entityTypeName}</h1>
+            </header>
+            <section style={componentStyle.section}>
+                <div style={componentStyle.section.line}>
+                    <label style={componentStyle.section.label}>Label</label>
+                    <input style={componentStyle.section.input} 
+                        type="text" 
+                        id="inputName"
+                        value={this.props.entity.label}/>
+                </div>
+            </section>
+            <footer style={componentStyle.footer}>
+                <button
+                    style={componentStyle.footer.button.ok}
+                    onClick={(e) => this.onFormClose.bind(this)(e, Object.assign({}, {
+                    label: document.getElementById('inputName').value,
+                    ...this.props.entity
+                }))}>Ok</button>
+                <button
+                    style={componentStyle.footer.button.cancle}
+                    onClick={(e) => this.onFormClose.bind(this)(e, null)}>Cancel</button>
+            </footer>
+        </div>          
+    );
  }
 };
 
