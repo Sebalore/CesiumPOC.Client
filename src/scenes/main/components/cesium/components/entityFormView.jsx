@@ -15,54 +15,69 @@ export default class EntityForm extends React.PureComponent {
         this.props.onFormClose({entity});
     };
 
- render() {
-    switch (this.props.entity.entityTypeName) {
-        case resources.ENTITY_TYPE_NAMES.AIRPLANE:
-        case resources.ENTITY_TYPE_NAMES.FLIGHT_AREA:
-        case resources.ENTITY_TYPE_NAMES.FLIGHT_CIRCLE_OUT:
-        case resources.ENTITY_TYPE_NAMES.FORBIDEN_FLIGHT_AREA:
-        case resources.ENTITY_TYPE_NAMES.HELICOPTER:
-            {
-                break;
-            }
-        case resources.ENTITY_TYPE_NAMES.FLIGHT_CIRCLE_IN:
-            {
-                return (<FlightCircleForm  entity= {this.props.entity} style={Object.assign(componentStyle,  {form: this.props.style})} onFormClose={this.onFormClose.bind(this)}/>);
-            }
+    componentWillMount() {
+        Object.assign(componentStyle.form, {top: this.props.position.top, left: this.props.position.left})
     }
-    return(
-        <div style={this.props.style}>
-            <header style={componentStyle.header}>
-                <h1 style={componentStyle.header.h1}>{this.props.entity.entityTypeName}</h1>
-            </header>
-            <section style={componentStyle.section}>
-                <div style={componentStyle.section.line}>
-                    <label style={componentStyle.section.label}>Label</label>
-                    <input style={componentStyle.section.input} 
-                        type="text" 
-                        id="inputName"
-                        value={this.props.entity.label}/>
-                </div>
-            </section>
-            <footer style={componentStyle.footer}>
-                <button
-                    style={componentStyle.footer.button.ok}
-                    onClick={(e) => this.onFormClose.bind(this)(e, Object.assign({}, {
-                    label: document.getElementById('inputName').value,
-                    ...this.props.entity
-                }))}>Ok</button>
-                <button
-                    style={componentStyle.footer.button.cancle}
-                    onClick={(e) => this.onFormClose.bind(this)(e, null)}>Cancel</button>
-            </footer>
-        </div>          
-    );
- }
+
+    render() {
+        switch (this.props.entity.entityTypeName) {
+            case resources.ENTITY_TYPE_NAMES.AIRPLANE:
+            case resources.ENTITY_TYPE_NAMES.FLIGHT_AREA:
+            case resources.ENTITY_TYPE_NAMES.FLIGHT_CIRCLE_OUT:
+            case resources.ENTITY_TYPE_NAMES.FORBIDEN_FLIGHT_AREA:
+            case resources.ENTITY_TYPE_NAMES.HELICOPTER:
+                {
+                    break;
+                }
+            case resources.ENTITY_TYPE_NAMES.FLIGHT_CIRCLE_IN:
+                {
+                    return (<FlightCircleForm  entity= {this.props.entity} style={componentStyle} onFormClose={this.onFormClose.bind(this)}/>);
+                }
+        }
+        return(
+            <div style={componentStyle.form}>
+                <header style={componentStyle.header}>
+                    <h1 style={componentStyle.header.h1}>{this.props.entity.entityTypeName}</h1>
+                </header>
+                <section style={componentStyle.section}>
+                    <div style={componentStyle.section.line}>
+                        <label style={componentStyle.section.label}>Label</label>
+                        <input style={componentStyle.section.input} 
+                            type="text" 
+                            id="inputName"
+                            value={this.props.entity.label}/>
+                    </div>
+                </section>
+                <footer style={componentStyle.footer}>
+                    <button
+                        style={componentStyle.footer.button.ok}
+                        onClick={(e) => this.onFormClose.bind(this)(e, Object.assign({}, {
+                        label: document.getElementById('inputName').value,
+                        ...this.props.entity
+                    }))}>Ok</button>
+                    <button
+                        style={componentStyle.footer.button.cancle}
+                        onClick={(e) => this.onFormClose.bind(this)(e, null)}>Cancel</button>
+                </footer>
+            </div>          
+        );
+    }
 };
 
 
 
 const componentStyle = {
+    form: {
+    visibility: 'visible',
+    display: 'block',
+    position: 'fixed',
+    overflow: 'hidden',
+    background: 'gray',
+    border: '1px solid #47494c',
+    borderRadius: '5px',
+    top: 20 + 'vh',
+    left: 15 + 'vw'        
+    },
     container: {
         position: 'relative',
         top: '-111vh',
