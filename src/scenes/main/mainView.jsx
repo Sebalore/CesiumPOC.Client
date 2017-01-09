@@ -1,5 +1,4 @@
 import React, {Component} from 'react';
-
 //inner components
 import actions from './actions';
 import store from './store';
@@ -15,7 +14,6 @@ export default class Main extends Component {
     this.setAddableEntityTypesInfo(store.data.entityTypes);
     store.on('entityTypesChanged', this.setEntityTypes.bind(this));
     store.on('activeEntityTypesChanged', this.setAddableEntityTypesInfo.bind(this));
-    
   }
 
   componentDidMount() {
@@ -46,7 +44,6 @@ export default class Main extends Component {
       })
     });
   }
-
 
   setIconStyle(imgName) {
     const lastSlash = imgName.lastIndexOf('/');

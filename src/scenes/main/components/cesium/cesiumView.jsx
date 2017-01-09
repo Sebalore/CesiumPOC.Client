@@ -33,13 +33,16 @@ BingMapsApi.defaultKey = 'ApKtWGAVLWzzHvuvGZFWTRIXrsyLJ5czBuu9MkIGAdWwsQpXz_GiC5
 //various Cesium objects
 import CesiumViewer from 'cesium/Source/Widgets/Viewer/Viewer';
 //import JulianDate from 'cesium/Source/Core/JulianDate';
-//import Entity from 'cesium/Source/DataSources/Entity';
+import Entity from 'cesium/Source/DataSources/Entity';
 import Cartesian2 from 'cesium/Source/Core/Cartesian2';
 import Cartesian3 from 'cesium/Source/Core/Cartesian3';
+import CesiumColor from 'cesium/Source/Core/Color.js';
 import ScreenSpaceEventHandler from 'cesium/Source/Core/ScreenSpaceEventHandler';
-import Math from 'cesium/Source/Core/Math';
+import CesiumMath from 'cesium/Source/Core/Math';
 import CustomDataSource from 'cesium/Source/DataSources/CustomDataSource.js';
-import LabelGraphics from 'cesium/Source/DataSources/LabelGraphics.js';
+// import LabelGraphics from 'cesium/Source/DataSources/LabelGraphics.js';
+
+import Ellipsoid from 'cesium/Source/Core/Ellipsoid.js';
 import ScreenSpaceEventType from 'cesium/Source/Core/ScreenSpaceEventType.js';
 
 import 'cesium/Source/Widgets/widgets.css';
@@ -47,6 +50,7 @@ import 'cesium/Source/Widgets/widgets.css';
 
 //-----------------resources----------------------------------------
 import {resources} from '../../../../shared/data/resources.js'; 
+import {Images} from '../../../../shared/images/AllImages.js';
 
 
 // Consts
@@ -123,6 +127,9 @@ const initialViewState = {
     }
 };
 
+// TODO: export it in a configuration file, and import it here
+const defaultHeight = 10;
+
 export default class CesiumView extends React.Component {
 
     constructor(props) {
@@ -146,6 +153,9 @@ export default class CesiumView extends React.Component {
         this.onDrop = this.onDrop.bind(this);
         this.handleContextAwareActions = this.handleContextAwareActions.bind(this);
         this.onEntityFormClose = this.onEntityFormClose.bind(this);
+        this.addEntityToDataSourceCollection = this.addEntityToDataSourceCollection.bind(this);
+        this.getDataSourceByName = this.getDataSourceByName.bind(this);
+        this.attachedAssociatedEntitiesToEntity = this.attachedAssociatedEntitiesToEntity.bind(this);
     }
 
     componentDidMount() {
@@ -161,6 +171,9 @@ export default class CesiumView extends React.Component {
         // subscribe viewer entities
         // this.viewer.entities.collectionChanged.addEventListenter( (collection, added, removed, changed) => console.log('entities collection changed!'));
 
+        // add data source for mission id tooltip
+        this.viewer.dataSources.add(new CustomDataSource('EntityMissionTooltips'));
+        
         // map the data sources from the entityTypes
         this.props.entityTypes.forEach(entityType => this.createEntityTypeDataSource(entityType));
 
@@ -209,33 +222,11 @@ export default class CesiumView extends React.Component {
                                 // console.log('after: ', entityToUpdate.position);                             
                             }
 
-                            const addedEntity = entityTypeDataSource.entities.add(this.generateEntity(eventData.result.position, {
-                                billboard: eventData.result.billboard, 
-                                label: new LabelGraphics({
-                                    text: eventData.result.label || '...', 
-                                    show: false
-                                })
-                            }));
-
-                                                       
-                            this.props.actions[resources.ACTIONS.SET_ENTITY_CESIUM_ID.TYPE](
-                                resources.AGENTS.USER,
-                                {
-                                    entityTypeName: eventData.data.entityTypeName,
-                                    entityId: eventData.result.id,
-                                    cesiumId: addedEntity.id
-                            });
-
-                            console.assert( eventData.result.cesiumId === addedEntity.id);
-                            addedEntity.addProperty('storeEntity');
-                            addedEntity['storeEntity'] =  eventData.result;
-                            //TODO: observe it by subscribing to entity.definitionChanged                                    
-
-
+                            const entityToAdd = this.generateEntity(eventData.data.entityTypeName, eventData.result, );
+                            this.addEntityToDataSourceCollection(entityToAdd, entityTypeDataSource, eventData.data.entityTypeName, eventData.result);  
                         }
                         break;
                     }
-              
                     case resources.ACTIONS.TOGGLE_BEST_FIT_DISPLAY.TYPE: {
 
                         const entity = eventData.data.entity || this.zoomedEntity;
@@ -243,7 +234,7 @@ export default class CesiumView extends React.Component {
                             const range =  entity.billboard.sizeInMeters? entity.billboard.width.getValue() * 2.25: null;
                             this.viewer.zoomTo(entity, {
                                 heading : 0,
-                                pitch: -Math.PI/2,
+                                pitch: -CesiumMath.PI/2,
                                 range: range
                             });
                             this.zoomedEntity = entity;
@@ -265,20 +256,92 @@ export default class CesiumView extends React.Component {
     createEntityTypeDataSource(entityType) {
         const entityTypeDataSource = new CustomDataSource(entityType.name);
         entityType.entities.map(e => {
-            const cesiumEntity = entityTypeDataSource.entities.add(this.generateEntity(e.position, {
-                billboard: e.billboard ,
-                label: new LabelGraphics({text: e.label || 'nothing here', show: false})})); 
-            this.props.actions[resources.ACTIONS.SET_ENTITY_CESIUM_ID.TYPE](
-                resources.AGENTS.USER, {
-                    entityTypeName: entityType.name,
-                    entityId: e.id,
-                    cesiumId: cesiumEntity.id
-                }
-            ); 
-            
+            const entityToAdd = this.generateEntity(entityType.name, e);
+            const addedEntity = this.addEntityToDataSourceCollection(entityToAdd, entityTypeDataSource, entityType.name, e);      
+            this.attachedAssociatedEntitiesToEntity(addedEntity);
         });
 
         this.viewer.dataSources.add(entityTypeDataSource);
+    }
+
+    /**
+     * get specified data source by his name
+     * @param {String} dataSourceNameToSearch
+     * @returns {Cesium.CustomDataSource} or -1 if not exist
+     */
+    getDataSourceByName(dataSourceNameToSearch) {
+        let result = -1;
+        for(let i = 0 ; i < this.viewer.dataSources.length ; i++) {
+            const currentDataSource = this.viewer.dataSources.get(i);
+            if(currentDataSource.name === dataSourceNameToSearch) {
+                result = currentDataSource;
+                break;
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * add one entity to the specified data source with addition some logic
+     * @param {Object} entityToAdd generated by generateEntity()
+     * @param {Cesium.DataSource} dataSource
+     * @param {String} entityTypeName
+     * @param {Object} storeEntityReference
+     * @returns {Cesium.Entity} added entity
+     */
+    addEntityToDataSourceCollection(entityToAdd, dataSource, entityTypeName, storeEntityReference) {
+        const addedEntity = dataSource.entities.add(entityToAdd);
+        
+        addedEntity.addProperty('storeEntity');
+        addedEntity['storeEntity'] = storeEntityReference;
+        //TODO: observe it by subscribing to entity.definitionChanged                                    
+
+
+        this.props.actions[resources.ACTIONS.SET_ENTITY_CESIUM_ID.TYPE](
+            resources.AGENTS.USER, {
+                entityTypeName,
+                entityId: storeEntityReference.id,
+                cesiumId: addedEntity.id
+            }
+        ); 
+
+        console.assert(storeEntityReference.cesiumId === addedEntity.id);
+        return addedEntity;
+    }
+
+    /**
+     * add sub entities to entity for describing him. 
+     * @param {Cesium.Entity} cesiumEntity
+     */
+    attachedAssociatedEntitiesToEntity(cesiumEntity) {
+        const storeEntity = cesiumEntity.storeEntity;
+        
+        // if object is related to a mission
+        if(storeEntity.hasOwnProperty('missionId') && this.defined(storeEntity.missionId)) {
+            const entityMissionTooltipsDataSource = this.getDataSourceByName('EntityMissionTooltips'),
+                cart = Ellipsoid.WGS84.cartesianToCartographic(cesiumEntity.position._value),
+                missionEntity = this.generateEntity(resources.ENTITY_TYPE_NAMES.MISSION_TOOLTIP, Object.assign({},{
+                        position: {
+                        longitude: storeEntity.position.longitude + 0.005, 
+                        latitude: storeEntity.position.latitude + 0.005, 
+                        height: storeEntity.position.height
+                        }, ...storeEntity
+                }));
+
+            const addedMissionEntity = entityMissionTooltipsDataSource.entities.add(missionEntity);
+
+            addedMissionEntity.addProperty('storeEntity');
+            addedMissionEntity['storeEntity'] = storeEntity;
+        }
+    }
+
+    // TODO: export it to utills
+    /**
+     * @param {Object} obj
+     */
+    isEmptyObject(obj) {
+        return Object.keys(obj).length === 0 && obj.constructor === Object;
     }
 
     /**
@@ -286,10 +349,12 @@ export default class CesiumView extends React.Component {
      * @param {position} a position object containinf longitude and latitude in degrees (or radians?) and height in meters
      * @returns {Object} an object that can be added to cesium entities collection
      */
-    generateEntity(position, others) {
+    generateEntity(entityTypeName, entity) {
+        const { position, label } = entity;
         const cesiumEntity =  {
                 position: Cartesian3.fromDegrees(position.longitude, position.latitude, position.height),
-                ...others
+                billboard: this.getBillboard(entityTypeName, entity),
+                label
         };
         return cesiumEntity;
     }
@@ -335,10 +400,12 @@ export default class CesiumView extends React.Component {
 
                     // handle tooltip display on the screen
                     if (this.defined(pickedObject)) {
+                        const storeEntityRepresentation = pickedObject.id.storeEntity;
+                        
                         tooltipInfo.style.visibility = 'visible';
                         tooltipInfo.style.top = (y - 70) + 'px';
                         tooltipInfo.style.left = (x - 20) + 'px';                          
-                        tooltipInfo.innerHTML = pickedObject.id.label ? pickedObject.id.label.text._value : '... add a toolptip for this object';
+                        tooltipInfo.innerHTML = storeEntityRepresentation.label ? storeEntityRepresentation.label : '... add a toolptip for this object';
 
                         setTimeout(() => tooltipInfo.style.visibility = 'hidden', 7000);
                     }
@@ -405,7 +472,6 @@ export default class CesiumView extends React.Component {
     /** the function handle droping entities from this combobox to the map */
     onDrop(event)    {
         // calculate new object drop area
-        // const t = this.viewer.entities;
         const dim = this.refs.map.getClientRects()[0];
         const x = (event.clientX - dim.left);
         const y = (event.clientY - dim.top);
@@ -414,32 +480,29 @@ export default class CesiumView extends React.Component {
         const mousePosition = new Cartesian2(x, y);
         let cartesian = mousePosition;
         if (this.viewer.scene.mode === 3) {
-            //Cesium.SceneMode.SCENE3D 
             cartesian = this.viewer.camera.pickEllipsoid(mousePosition, this.viewer.scene.globe.ellipsoid); // maybe the problem here!!
         }
      
         const entityTypeName = event.dataTransfer.getData('text');
         const entityType = this.props.entityTypes.find(l => l.name === entityTypeName);
-        //console.log(entityTypeName);
 
         if (cartesian && entityTypeName && entityType) {
                       
             const cartographic =  this.viewer.scene.globe.ellipsoid.cartesianToCartographic(cartesian);
-            const longitudeString = Math.toDegrees(cartographic.longitude);
-            const latitudeString = Math.toDegrees(cartographic.latitude);
+            const longitudeString = CesiumMath.toDegrees(cartographic.longitude);
+            const latitudeString = CesiumMath.toDegrees(cartographic.latitude);
+            
 
             this.selectedEntity = Object.assign({}, {
                     id: Guid.create(),
-                    entityTypeName: entityTypeName,
+                    entityTypeName,
                     label: `${entityTypeName}-New-Added`,
                     position: { 
-                        height : 10,            // TODO: change it 
+                        height : defaultHeight,
                         latitude : latitudeString,
                         longitude : longitudeString,
-                    },
-                    //billboard: this.getBillboard(entityTypeName)
+                    }
             }); 
-
             this.showEntityForm(y-90, x+120)
         } 
         else {
@@ -447,38 +510,101 @@ export default class CesiumView extends React.Component {
         }
     }
 
-    getBillboard(entity) {
-        let billboard = {
-                    image: `${resources.IMG.BASE_URL}${resources.ENTITY_TYPES[entity.entityTypeName].ACTIONS.ADD.IMG}`,
-                    scale: resources.ENTITY_TYPES[entity.entityTypeName].ACTIONS.ADD.SCALE || 1
-                };      
-        switch (entity.entityTypeName) {
-            case resources.ENTITY_TYPE_NAMES.AIRPLANE:
-            case resources.ENTITY_TYPE_NAMES.HELICOPTER:
-            {
-                break           
+    getBillboard(entityTypeName, entity) {
+        if (entity && entityTypeName) {
+            let billboard = {
+                        image: `${resources.IMG.BASE_URL}${resources.ENTITY_TYPES[entityTypeName].ACTIONS.ADD.IMG}`,
+                        scale: resources.ENTITY_TYPES[entityTypeName].ACTIONS.ADD.SCALE || 1
+                    };      
+            switch (entityTypeName) {
+                case resources.ENTITY_TYPE_NAMES.MISSION_TOOLTIP:
+                {
+                    const imageName = `${resources.ENTITY_TYPES[entityTypeName].ACTIONS.ADD.IMG}`;  // TODO: use without replace
+                    const svgString = Images[imageName].replace('ENTER_NUMBER_HERE', entity.missionId);
+
+                    billboard.image = this.pinColor(svgString, CesiumColor.BLACK);
+                    break;
+                }
+                case resources.ENTITY_TYPE_NAMES.AIRPLANE:
+                case resources.ENTITY_TYPE_NAMES.HELICOPTER:
+                {
+                    const imageName = `${resources.ENTITY_TYPES[entityTypeName].ACTIONS.ADD.IMG}`.replace('.svg', '');  // TODO: use without replace
+                    billboard.image = this.pinColor(Images[imageName], this.mapHeightToColor(entity.position.height));
+                    break;          
+                }
+                case resources.ENTITY_TYPE_NAMES.FLIGHT_AREA:
+                case resources.ENTITY_TYPE_NAMES.FLIGHT_CIRCLE_OUT:
+                case resources.ENTITY_TYPE_NAMES.FORBIDEN_FLIGHT_AREA:            
+                case resources.ENTITY_TYPE_NAMES.FLIGHT_CIRCLE_IN:
+                {
+                    billboard.image = `${resources.IMG.BASE_URL}${resources.ENTITY_TYPES[entityTypeName].ACTIONS.ADD.IMG}`,
+                    billboard.sizeInMeters = true;
+                    billboard.height = (entity.radius || 1) + 50;
+                    billboard.width = (entity.radius || 1);
+                    break;
+                }
             }
-            case resources.ENTITY_TYPE_NAMES.FLIGHT_AREA:
-            case resources.ENTITY_TYPE_NAMES.FLIGHT_CIRCLE_OUT:
-            case resources.ENTITY_TYPE_NAMES.FORBIDEN_FLIGHT_AREA:            
-            case resources.ENTITY_TYPE_NAMES.FLIGHT_CIRCLE_IN:
-            {
-                billboard.sizeInMeters = true;
-                billboard.height = (entity.radius || 1) + 50;
-                billboard.width = (entity.radius || 1);
-                break;
-            }
+            
+            return billboard;
         }
-        return billboard;
+        return null;
+    }
+
+        /**
+     * @param {Number} height
+     * @returns {Cesium.Color} 
+     */
+    mapHeightToColor(height) {
+        let heightRange = height - height % heightJumpUnit;
+        const heightJumpUnit = 500, 
+            maxHeightInAltimeterScalla = 5500, 
+            minHeightInAltimeterScalla = 3000,
+            heightColors = {
+                '3000': CesiumColor.BISQUE ,
+                '3500': CesiumColor.GOLD ,
+                '4000': CesiumColor.DARKSEAGREEN ,
+                '4500': CesiumColor.DARKOLIVEGREEN ,
+                '5000': CesiumColor.SANDYBROWN,
+                '5500': CesiumColor.SANDYBROWN
+            },
+            alpha = 1;
+        
+        if (height > maxHeightInAltimeterScalla) {
+            heightRange = maxHeightInAltimeterScalla;
+        }
+        else if (height < minHeightInAltimeterScalla) {
+            heightRange = minHeightInAltimeterScalla;
+        }        
+
+        return CesiumColor.fromAlpha(heightColors[heightRange], alpha);
+    }
+
+    /**
+     * generate svg with desired color for cesium billboard
+     * @param {String} svg an inline svg
+     * @param {Cesium.Color} color
+     * @returns {String} that represent the desired svg
+     */
+    pinColor(svg, color) {
+        function cesiumRgb2Hex(rgb) {
+            return (Math.round(((1 << 24) + (rgb.red*255 << 16) + (rgb.green*255 << 8) + rgb.blue*255))
+                .toString(16)
+                    .slice(1));
+        }
+    
+        function exportSVG(svg) {
+            return `data:image/svg+xml;base64,${btoa(svg)}` ;   // https://developer.mozilla.org/en/DOM/window.btoa
+        }
+        
+        const hexColor = cesiumRgb2Hex(color); // get the hex color to fill
+        
+        return exportSVG(svg.replace('ffffff', hexColor));
     }
 
     onEntityFormClose(formData) {
         if(formData && formData.entity) {
             console.log('EntityForm closed with OK:');
-            this.selectedEntity = Object.assign({}, {
-                    billboard: this.getBillboard(formData.entity),
-                    ...formData.entity
-            });
+            this.selectedEntity = Object.assign({}, formData.entity);
             this.props.actions[resources.ACTIONS.ADD.TYPE](
                 resources.AGENTS.USER,
                 this.selectedEntity);  
@@ -505,7 +631,6 @@ export default class CesiumView extends React.Component {
     }
 
     render() {
-
         return (
             <div style = {componentStyle.general}>
                 <div id="general" ref="general" style = {componentStyle.fullSizeDimentions}>

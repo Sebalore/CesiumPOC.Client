@@ -44,7 +44,7 @@ const FlightCircleForm = (props) => {
             <footer style={props.style.footer}>
                 <button
                     style={props.style.footer.button.ok}
-                    onClick={(e) => props.onFormClose(e, false, Object.assign({}, {
+                    onClick={(e) => props.onFormClose(e, Object.assign({}, {
                     label: document.getElementById('inputName').value,
                     radius: Number(document.getElementById('inputRadius').value),                    
                     position: {
@@ -55,7 +55,7 @@ const FlightCircleForm = (props) => {
                 }))}>Ok</button>
                 <button
                     style={props.style.footer.button.cancle}
-                    onClick={(e) => props.onFormClose(e, true)}>Cancel</button>
+                    onClick={(e) => props.onFormClose(e, null)}>Cancel</button>
             </footer>
         </div>
     );
