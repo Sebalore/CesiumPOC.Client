@@ -97,9 +97,9 @@ const componentStyle = {
         left: 15 + 'vw'        
     },
     formH1: {
-    background: '#615a5a',
-    borderBottom: '1px solid black',
-    textAlign: 'center'
+        background: '#615a5a',
+        borderBottom: '1px solid black',
+        textAlign: 'center'
   }
 };
 
@@ -222,7 +222,7 @@ export default class CesiumView extends React.Component {
                                 // console.log('after: ', entityToUpdate.position);                             
                             }
 
-                            const entityToAdd = this.generateEntity(eventData.data.entityTypeName, eventData.result, );
+                            const entityToAdd = this.generateEntity(eventData.data.entityTypeName, eventData.result);
                             this.addEntityToDataSourceCollection(entityToAdd, entityTypeDataSource, eventData.data.entityTypeName, eventData.result);  
                         }
                         break;
@@ -297,7 +297,6 @@ export default class CesiumView extends React.Component {
         addedEntity['storeEntity'] = storeEntityReference;
         //TODO: observe it by subscribing to entity.definitionChanged                                    
 
-
         this.props.actions[resources.ACTIONS.SET_ENTITY_CESIUM_ID.TYPE](
             resources.AGENTS.USER, {
                 entityTypeName,
@@ -320,7 +319,6 @@ export default class CesiumView extends React.Component {
         // if object is related to a mission
         if(storeEntity.hasOwnProperty('missionId') && this.defined(storeEntity.missionId)) {
             const entityMissionTooltipsDataSource = this.getDataSourceByName('EntityMissionTooltips'),
-                cart = Ellipsoid.WGS84.cartesianToCartographic(cesiumEntity.position._value),
                 missionEntity = this.generateEntity(resources.ENTITY_TYPE_NAMES.MISSION_TOOLTIP, Object.assign({},{
                         position: {
                         longitude: storeEntity.position.longitude + 0.005, 
@@ -329,10 +327,14 @@ export default class CesiumView extends React.Component {
                         }, ...storeEntity
                 }));
 
-            const addedMissionEntity = entityMissionTooltipsDataSource.entities.add(missionEntity);
+            // check if found before doing anything
+            if(entityMissionTooltipsDataSource !== -1) {
 
-            addedMissionEntity.addProperty('storeEntity');
-            addedMissionEntity['storeEntity'] = storeEntity;
+                const addedMissionEntity = entityMissionTooltipsDataSource.entities.add(missionEntity);
+                
+                addedMissionEntity.addProperty('storeEntity');
+                addedMissionEntity['storeEntity'] = storeEntity;
+            }
         }
     }
 
@@ -356,6 +358,7 @@ export default class CesiumView extends React.Component {
                 billboard: this.getBillboard(entityTypeName, entity),
                 label
         };
+
         return cesiumEntity;
     }
 
@@ -365,11 +368,6 @@ export default class CesiumView extends React.Component {
             window.onmousemove = function (e) {
                 x = e.clientX;
                 y = e.clientY;
-            };  
-
-            //disable default context menu
-            window.oncontextmenu = function (e) {
-                e.preventDefault();
             };                    
 
             // Drag & Drop 
@@ -503,7 +501,7 @@ export default class CesiumView extends React.Component {
                         longitude : longitudeString,
                     }
             }); 
-            this.showEntityForm(y-90, x+120)
+            this.showEntityForm(y-90, x+120);
         } 
         else {
             console.log('CesiumView::onDrop(event) : something went wrong.');
@@ -515,7 +513,8 @@ export default class CesiumView extends React.Component {
             let billboard = {
                         image: `${resources.IMG.BASE_URL}${resources.ENTITY_TYPES[entityTypeName].ACTIONS.ADD.IMG}`,
                         scale: resources.ENTITY_TYPES[entityTypeName].ACTIONS.ADD.SCALE || 1
-                    };      
+            };
+
             switch (entityTypeName) {
                 case resources.ENTITY_TYPE_NAMES.MISSION_TOOLTIP:
                 {
@@ -547,10 +546,11 @@ export default class CesiumView extends React.Component {
             
             return billboard;
         }
+
         return null;
     }
 
-        /**
+    /**
      * @param {Number} height
      * @returns {Cesium.Color} 
      */
@@ -613,6 +613,7 @@ export default class CesiumView extends React.Component {
         else {
             console.log('EntityForm closed with Cancel.');
         }
+
         this.hideEntityForm();
     }
 
@@ -634,7 +635,7 @@ export default class CesiumView extends React.Component {
         return (
             <div style = {componentStyle.general}>
                 <div id="general" ref="general" style = {componentStyle.fullSizeDimentions}>
-                    <div style = {componentStyle.map} id="map"className="map" ref="map" onDragOver= { (e) => e.preventDefault() } onDrop={this.onDrop}>
+                    <div style = {componentStyle.map} id="map"className="map" ref="map" onDragOver= { (e) => e.preventDefault() } onDrop={this.onDrop} onContextMenu={ e => e.preventDefault()} >
                     </div>
                 </div>
                 <img style = {componentStyle.altimeter} src="https://s27.postimg.org/op4ssy0ur/altimeter.png" alt="altimeter" />
