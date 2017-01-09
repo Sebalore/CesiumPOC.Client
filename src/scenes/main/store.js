@@ -75,7 +75,7 @@ const initialViewState = {
           gen:  createLinearCoordinatesGenerator({
             longitude: 0.002,
             latitude: 0.001,
-            height: 1000
+            height: 250
           })
         } , {
           id: Guid.create(),
@@ -95,7 +95,7 @@ const initialViewState = {
           gen:  createLinearCoordinatesGenerator({
             longitude: 0.001,
             latitude: -0.002,
-            height: 1000
+            height: 250
           })
         }, {
           id: Guid.create(),
@@ -114,7 +114,7 @@ const initialViewState = {
           gen:  createLinearCoordinatesGenerator({
             longitude: -0.001,
             latitude: -0.00002,
-            height: 1000
+            height: 250
           })
         }
       ]
@@ -144,7 +144,7 @@ const initialViewState = {
           gen:  createLinearCoordinatesGenerator({
             longitude: -0.00001,
             latitude: 0.0001,
-            height: 1000
+            height: 250
           })
         } , {
           id: Guid.create(),
@@ -163,7 +163,7 @@ const initialViewState = {
           gen:  createLinearCoordinatesGenerator({
             longitude: 0.00001,
             latitude: -0.0001,
-            height: 1000
+            height: 250
           })
         }
       ]
@@ -201,6 +201,7 @@ class _store extends EventEmitter {
     return new Promise((resolve) => {
       const entityTypeName = data.entityTypeName;
       const entityTypeIndex = this.data.entityTypes.findIndex(l => l.name===entityTypeName);
+      
       this.data.entityTypes[entityTypeIndex].entities.push(data);
       resolve(data);
     });
@@ -231,6 +232,7 @@ class _store extends EventEmitter {
       const entityTypeName = data.entityTypeName;
       const entityTypeIndex = this.data.entityTypes.findIndex(l => l.name===entityTypeName);
       const entityIndex = this.data.entityTypes[entityTypeIndex].entities.findIndex(e => e.id===data.entityId);
+      
       this.data.entityTypes[entityTypeIndex].entities[entityIndex].position = data.position;
       resolve(this.data.entityTypes[entityTypeIndex].entities[entityIndex]);
     });
