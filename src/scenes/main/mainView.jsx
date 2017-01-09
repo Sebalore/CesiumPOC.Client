@@ -18,7 +18,7 @@ export default class Main extends Component {
 
   componentDidMount() {
     store.on('contextAwareActionExecuted', this.refs.cesium.handleContextAwareActions.bind(this.refs.cesium));
-    //window.dispatcher.dispatch({type: 'DEBUG_1'});
+    window.dispatcher.dispatch({type: 'DEBUG_1'});
   } 
 
   componentWillUnmount() {
