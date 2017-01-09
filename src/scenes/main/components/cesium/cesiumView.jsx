@@ -110,7 +110,7 @@ const componentStyle = {
 const initialViewState = {
     activeEntityType: null,
     entityTypes: [],
-    zoomHeight: 20000,
+    zoomHeight: 990000,
     center: {
       x: resources.MAP_CENTER.longitude,
       y: resources.MAP_CENTER.latitude,
@@ -311,24 +311,18 @@ export default class CesiumView extends React.Component {
                         }
                         break;
                     }                    
-                    case resources.ACTIONS.ADD.TYPE:
+                    case resources.ACTIONS.ADD.TYPE: {
+                        const entityToAdd = this.generateEntity(eventData.data.entityTypeName, eventData.result);
+                        this.addEntityToDataSourceCollection(entityToAdd, entityTypeDataSource, eventData.data.entityTypeName, eventData.result);  
+                        break;
+                    }
                     case resources.ACTIONS.UPDATE_POSITION.TYPE: {
                         if (entityTypeIsActive) {
-                            if (eventData.type === resources.ACTIONS.UPDATE_POSITION.TYPE) {
-                                const entityToUpdate = entityTypeDataSource.entities.getById(eventData.result.cesiumId);
-                                entityTypeDataSource.entities.remove(entityToUpdate);   
-
-                                // real update
-                                // TODO: uncomment when we have replay from cesium forum
-
-                                // console.log('------------------------change entity position------------------');
-                                // console.log('before: ', entityToUpdate.position);
-                                // entityToUpdate.position = Cartesian3.fromDegrees(eventData.data.position.latitude, eventData.data.position.longitude, 1000);                           
-                                // console.log('after: ', entityToUpdate.position);                             
-                            }
-
-                            const entityToAdd = this.generateEntity(eventData.data.entityTypeName, eventData.result);
-                            this.addEntityToDataSourceCollection(entityToAdd, entityTypeDataSource, eventData.data.entityTypeName, eventData.result);  
+                            const entityToUpdate = entityTypeDataSource.entities.getById(eventData.result.cesiumId);
+                            // update position
+                            entityToUpdate.position = Cartesian3.fromDegrees(eventData.data.position.latitude, eventData.data.position.longitude, 1000);  
+                            // update bilboard for new color due to the new height
+                            entityToUpdate.billboard = this.getBillboard(eventData.data.entityTypeName, eventData.result);
                         }
                         break;
                     }
@@ -349,6 +343,7 @@ export default class CesiumView extends React.Component {
                         }
                     }
                 }
+
                 resolve(eventData);
             } 
         });
@@ -362,8 +357,9 @@ export default class CesiumView extends React.Component {
         const entityTypeDataSource = new CustomDataSource(entityType.name);
         entityType.entities.map(e => {
             const entityToAdd = this.generateEntity(entityType.name, e);
-            const addedEntity = this.addEntityToDataSourceCollection(entityToAdd, entityTypeDataSource, entityType.name, e);      
-            this.attachedAssociatedEntitiesToEntity(addedEntity);
+            const addedEntity = this.addEntityToDataSourceCollection(entityToAdd, entityTypeDataSource, entityType.name, e);    
+            // TODO: uncomment if want to see the mission number and more additional details  
+            //this.attachedAssociatedEntitiesToEntity(addedEntity);
         });
 
         this.viewer.dataSources.add(entityTypeDataSource);
@@ -506,7 +502,6 @@ export default class CesiumView extends React.Component {
      * @returns {Cesium.Color} 
      */
     mapHeightToColor(height) {
-        let heightRange = height - height % heightJumpUnit;
         const heightJumpUnit = 500, 
             maxHeightInAltimeterScalla = 5500, 
             minHeightInAltimeterScalla = 3000,
@@ -519,6 +514,7 @@ export default class CesiumView extends React.Component {
                 '5500': CesiumColor.SANDYBROWN
             },
             alpha = 1;
+        let heightRange = height - height % heightJumpUnit;
         
         if (height > maxHeightInAltimeterScalla) {
             heightRange = maxHeightInAltimeterScalla;
