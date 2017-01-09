@@ -106,7 +106,7 @@ const componentStyle = {
 const initialViewState = {
     activeEntityType: null,
     entityTypes: [],
-    zoomHeight: 20000,
+    zoomHeight: 990000,
     center: {
       x: resources.MAP_CENTER.longitude,
       y: resources.MAP_CENTER.latitude,
@@ -214,7 +214,10 @@ export default class CesiumView extends React.Component {
                     case resources.ACTIONS.UPDATE_POSITION.TYPE: {
                         if (entityTypeIsActive) {
                             const entityToUpdate = entityTypeDataSource.entities.getById(eventData.result.cesiumId);
+                            // update position
                             entityToUpdate.position = Cartesian3.fromDegrees(eventData.data.position.latitude, eventData.data.position.longitude, 1000);  
+                            // update bilboard for new color due to the new height
+                            entityToUpdate.billboard = this.getBillboard(eventData.data.entityTypeName, eventData.result);
                         }
                         break;
                     }
@@ -235,7 +238,7 @@ export default class CesiumView extends React.Component {
                         }
                     }
                 }
-                
+
                 resolve(eventData);
             } 
         });
