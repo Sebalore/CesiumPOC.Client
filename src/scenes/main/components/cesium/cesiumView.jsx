@@ -86,13 +86,13 @@ const componentStyle = {
         textAlign: 'center',
     },
     entityForm : {
-        visibility: 'hidden',
-        display: 'block',
-        position: 'fixed',
-        overflow: 'hidden',
-        background: 'gray',
-        border: '1px solid #47494c',
-        borderRadius: '5px',
+        // visibility: 'hidden',
+        // display: 'block',
+        // position: 'fixed',
+        // overflow: 'hidden',
+        // background: 'gray',
+        // border: '1px solid #47494c',
+        // borderRadius: '5px',
         top: 20 + 'vh',
         left: 15 + 'vw'        
     },
@@ -140,7 +140,7 @@ export default class CesiumView extends React.Component {
         this.zoomedEntity = null;
         this.selectedEntity = {
             entityTypeName: null,
-            isFormOpen: false,
+            showEntityForm: false,
             position: { 
                 height: 0,            
                 latitude: 0,
@@ -618,12 +618,14 @@ export default class CesiumView extends React.Component {
             componentStyle.entityForm.top = top + 'px';
             componentStyle.entityForm.left = left + 'px';
         }
-        componentStyle.entityForm.visibility = 'visible';
+        // componentStyle.entityForm.visibility = 'visible';
+        this.selectedEntity.showEntityForm = true;
         this.forceUpdate();
     }
 
     hideEntityForm() {
-        componentStyle.entityForm.visibility = 'hidden';
+        // componentStyle.entityForm.visibility = 'hidden';
+        this.selectedEntity.showEntityForm = false;
         this.forceUpdate();
     }
 
@@ -637,7 +639,9 @@ export default class CesiumView extends React.Component {
                 <img style = {componentStyle.altimeter} src="https://s27.postimg.org/op4ssy0ur/altimeter.png" alt="altimeter" />
                 <div style = {componentStyle.tooltip} ref="movementToolTip" id="movementToolTip">
                 </div>
-                <EntityForm entity={this.selectedEntity} onFormClose={this.onEntityFormClose} style={Object.assign({}, componentStyle.entityForm)} ref="entityForm" id="entityForm" />
+                {this.selectedEntity.showEntityForm &&
+                <EntityForm entity={this.selectedEntity} onFormClose={this.onEntityFormClose} position={{top: componentStyle.entityForm.top, left:componentStyle.entityForm.left}} ref="entityForm" id="entityForm" />
+                }
             </div>
         );
     }
