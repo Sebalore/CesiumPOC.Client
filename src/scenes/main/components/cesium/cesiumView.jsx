@@ -328,8 +328,8 @@ export default class CesiumView extends React.Component {
                     }
                     case resources.ACTIONS.TOGGLE_BEST_FIT_DISPLAY.TYPE: {
 
-                        const entity = eventData.data.entity || this.zoomedEntity;
                         if(!this.zoomedEntity) {
+                            const entity = eventData.data.entity;
                             const range =  entity.billboard.sizeInMeters? entity.billboard.width.getValue() * 2.25: null;
                             this.viewer.zoomTo(entity, {
                                 heading : 0,
