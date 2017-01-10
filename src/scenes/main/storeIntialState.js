@@ -2,8 +2,7 @@ import { createLinearCoordinatesGenerator } from './services';
 import {resources} from '../../shared/data/resources';
 import Guid from 'guid';
 
-export default initialViewState;
-const initialViewState = {
+export default  {
   entityTypes: [
     {
       name: resources.ENTITY_TYPE_NAMES.FLIGHT_CIRCLE_IN,
@@ -129,8 +128,8 @@ const initialViewState = {
           cesiumId: null, //guid to be provided by cesium
           label: `${resources.ENTITY_TYPE_NAMES.HELICOPTER}: 001`,
           position: {
-            longitude: resources.MAP_CENTER.longitude, // + 0.065,
-            latitude: resources.MAP_CENTER.latitude, // - 0.085,
+            longitude: resources.MAP_CENTER.longitude, 
+            latitude: resources.MAP_CENTER.latitude, 
             height: 69.0
           },
           billboard: {

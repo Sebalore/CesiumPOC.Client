@@ -1,7 +1,7 @@
 import React from 'react';
 import Guid from 'guid';
 
-//CONSTS
+// resources
 import {resources} from '../../../../shared/data/resources';
 
 const AddEntity =  (props) => {

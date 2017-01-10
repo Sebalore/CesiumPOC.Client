@@ -3,7 +3,7 @@ import dispatcher from './dispatcher';
 
 //resources
 import {resources} from '../../shared/data/resources';
-import initialViewState from './storeIntialState.js';
+import initialViewState from './storeIntialState';
 
 class _store extends EventEmitter {
 
@@ -25,6 +25,7 @@ class _store extends EventEmitter {
     return new Promise((resolve) => {
       const entityTypeName = data.entityTypeName;
       const entityTypeIndex = this.data.entityTypes.findIndex(l => l.name===entityTypeName);
+      
       this.data.entityTypes[entityTypeIndex].active = !this.data.entityTypes[entityTypeIndex].active;
       this.emit('activeEntityTypesChanged', this.data.entityTypes);
       resolve(this.data.entityTypes[entityTypeIndex]);
@@ -46,6 +47,7 @@ class _store extends EventEmitter {
       const entityTypeName = data.entityTypeName;
       const entityTypeIndex = this.data.entityTypes.findIndex(l => l.name===entityTypeName);
       const entityIndex = this.data.entityTypes[entityTypeIndex].entities.findIndex(e => e.id===data.entityId);
+      
       this.data.entityTypes[entityTypeIndex].entities[entityIndex].cesiumId = data.cesiumId;
       resolve(this.data.entityTypes[entityTypeIndex].entities[entityIndex]);
     });
@@ -56,6 +58,7 @@ class _store extends EventEmitter {
       const entityTypeName = data.entityTypeName;
       const entityTypeIndex = this.data.entityTypes.findIndex(l => l.name===entityTypeName);
       const entityIndex = this.data.entityTypes[entityTypeIndex].entities.findIndex(e => e.id===data.entityId);
+      
       this.data.entityTypes[entityTypeIndex].entities.splice(entityIndex, 1);   
       resolve(true);
     });
@@ -81,7 +84,7 @@ class _store extends EventEmitter {
         result: null,
         error: null
       };
-      //TODO: check if action is aplliable to entityType
+
       if (typeof this['handle' + action.type] === 'function') {
         //execute the action if there is a matching function defined in store
         this['handle' + action.type](action.agent, action.data)
@@ -91,19 +94,16 @@ class _store extends EventEmitter {
         })
         .then((actionResult) => {
           eventData.result = actionResult;
-          // console.log(`[action ${action.agent}]:${action.type} store hadler. ${JSON.stringify(eventData)}`);
           this.emit('contextAwareActionExecuted', null, eventData);          
           return Promise.resolve(eventData);
         })
         .catch(err => {
           eventData.error = err;
-          console.error(`[action ${action.agent}]:${action.type} store hadler. ${JSON.stringify(err)}`);
           this.emit('contextAwareActionExecuted', err, eventData);
           return Promise.reject(err);
         });
-      } else {
-        //otherwise just fire the event
-        console.warn(`[action ${action.agent}]:${action.type} has no handler in store.`);
+      } 
+      else { // if not a function, just fire the event
         this.emit('contextAwareActionExecuted', null, eventData);
       }
     }
@@ -117,27 +117,7 @@ class _store extends EventEmitter {
           break;
         }
       case 'DEBUG_1':
-        {
-          //---- for testing movement ------------------------------------------------------------------- 
-          // const initial = {
-          //   longitude: 34.99249855493725,
-          //   latitude:  32.79628841345832,
-          //   height: 1.0
-          // };
-
-          // const dest = {
-          //   longitude: -75.16617698856817,
-          //   latitude: 39.90607492083895,
-          //   height: 1000.0
-          // };
-
-          const velocity = {
-            longitude: 0.000,
-            latitude: 0.000,
-            height: 50.0
-          };
-          //----------------------------------------------------------------------------------------------
-          
+        {        
           initialViewState.entityTypes.find(l => l.name===resources.ENTITY_TYPE_NAMES.AIRPLANE).entities.forEach(e =>{
             const gen = e.gen(e.position);
             setInterval(() => {
@@ -185,8 +165,11 @@ class _store extends EventEmitter {
 }
 
 const store = new _store;
+
 dispatcher.register(store.handleActions.bind(store));
 dispatcher.register(store.handleContextAwareActions.bind(store));
+
 window.dispatcher = dispatcher;
 window.store = store;
+
 export default store;

@@ -1,10 +1,13 @@
 import React, {Component} from 'react';
+
 //inner components
 import actions from './actions';
 import store from './store';
 import CesiumView from './components/cesium/cesiumView';
 import EntityTypes from './components/entityTypes/entityTypesView';
 import AddEntity from './components/addEntity/addEntityView';
+
+// resources
 import {resources} from '../../shared/data/resources';
 
 export default class Main extends Component {
@@ -37,7 +40,7 @@ export default class Main extends Component {
       .filter(l => {
           const add = resources.ACTIONS.ADD;
           const hasUserAgent = add.AGENTS.some(agent => agent === resources.AGENTS.USER);
-          const hasLayer = true; //TODO: add layer check   add.LAYERS.some(entityType => entityType === l.name);
+          const hasLayer = true; 
           return l.active && hasUserAgent && hasLayer;
       }).map(l =>{
         return {name: l.name, imgUrl: l.imgUrl};
@@ -80,7 +83,7 @@ export default class Main extends Component {
       );
     } else {
       return (
-        <div>.....WTF?</div>
+        <div>there is a problem, please refresh the page</div>
       );
     }
   }

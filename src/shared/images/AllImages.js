@@ -37,7 +37,7 @@ export const Images = {
                     V156.8z M8.7,130.4H6.7l-4.4-4.4h-41.4l-4.7,14l-3.5,3.5h-52c-0.4,0-7,0-7-7c0-6.8,6.3-7,7-7h0.9h22.5l4.4-17.6h20l13.2,8.8H2.9
                     l4.4-13.2h1.4L8.7,130.4L8.7,130.4z"/>
             </g>
-    </svg>`,
+        </svg>`,
     circle_with_number_inside: // replace 'ENTER_NUMBER_HERE' with the number
         `<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="30" height="30" viewBox="0 0 44 44">
             <circle cx="22" cy="22" r="20" stroke="white" stroke-width="2" fill="#ffffff"/>

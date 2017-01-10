@@ -4,8 +4,6 @@ import { resources } from '../../shared/data/resources.js';
 export default {
     //--------- general actions ----------------------------------
     update: (data) => dispatcher.dispatch({type: 'UPDATE', data}),
-
-    //--------- "smart" context aware actions -----------------------------------------------------------------
     
     // entities actions
     [resources.ACTIONS.ADD.TYPE]: (agent, data) => dispatcher.dispatch({type: resources.ACTIONS.ADD.TYPE, agent, data}),
