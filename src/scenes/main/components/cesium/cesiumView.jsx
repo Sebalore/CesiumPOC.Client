@@ -55,8 +55,6 @@ import { defined } from '../../services'
 import {resources} from '../../../../shared/data/resources'; 
 import {Images} from '../../../../shared/images/AllImages';
 
-
-
 // Consts
 const componentStyle = {
     general: {
