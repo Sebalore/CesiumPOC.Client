@@ -6,14 +6,14 @@
     "test": "jest",
     "clean": "rimraf dist",
     "pre_cesium": "cp -uvr ./node_modules/cesium/Build/Cesium/* ./dist",
-    "start": "node server.js --display-error-details",
-    "start_prod": "npm run clean && npm run generate_prod_bundle && node server.js --display-error-details",
-    "start_dev": "npm run lint 2>nul & node server.js --display-error-details",
+    "start": "node server/server.js --display-error-details",
+    "start_prod": "npm run clean && npm run generate_prod_bundle && node server/server.js --display-error-details",
+    "start_dev": "npm run lint 2>nul & node server/server.js --display-error-details",
     "lint": "node_modules\\.bin\\eslint src\\**",
     "generate_dev_bundle": "webpack --config webpack.config.dev.js",
     "generate_prod_bundle": "webpack --config webpack.config.prod.js"
   },
-  "author": "someone",
+  "author": "devalore",
   "license": "ISC",
   "devDependencies": {
     "babel-core": "^6.14.0",

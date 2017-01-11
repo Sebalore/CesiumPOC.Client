@@ -15,9 +15,26 @@ export function createLinearCoordinatesGenerator (velocity) {
     }
 }
 
+/**
+ * check if a given point is in circle
+ * @param {Number} pointX  
+ * @param {Number} pointY 
+ * @param {Number} circleCenterX 
+ * @param {Number} circleCenterY 
+ * @param {Number} circleRadius 
+ */
+export function isPointIsInsideCircle(pointX, pointY, circleCenterX, circleCenterY, circleRadius) {
+    const xDistance = pointX - circleCenterX,
+        yDistance = pointY - circleCenterY, // simply calculate d = √[(xp−xc)2+(yp−yc)2]
+        distanceBetweenPoints = Math.sqrt( (xDistance * xDistance) + (yDistance * yDistance) );
+
+        return distanceBetweenPoints < circleRadius;
+}
+
 export function defined(object) {
-        return (object !== undefined && object !== null);
-    }
+    return (object !== undefined && object !== null);
+}
+
 
 /**
  * @param {Object} obj

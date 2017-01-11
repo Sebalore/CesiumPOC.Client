@@ -1,8 +1,8 @@
 import React from 'react';
 import Guid from 'guid';
 
-//CONSTS
-import {resources} from '../../../../shared/data/resources';
+// resources
+import {resources} from '../../shared/data/resources';
 
 const AddEntity =  (props) => {
     if (props.entityTypesInfo) {

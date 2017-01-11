@@ -10,7 +10,7 @@ module.exports = {
     `webpack-dev-server/client?http://${process.env.npm_package_config_host}:${process.env.npm_package_config_port}`, 
     'webpack/hot/only-dev-server', 
     'react-hot-loader/patch', 
-    './src/index.jsx' // old was './src/app/index.dev'
+    './src/index.jsx' 
   ],
   output: {
     path: path.join(__dirname, 'dist'),
@@ -26,7 +26,6 @@ module.exports = {
 
   plugins: [
     new webpack.SourceMapDevToolPlugin(),
-    //new webpack.DefinePlugin({'__DEV__': true}),
     new webpack.DefinePlugin({
       'process.env': {
         'NODE_ENV': JSON.stringify('development')

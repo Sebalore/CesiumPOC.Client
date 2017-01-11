@@ -3,11 +3,9 @@
 import React from 'react';
 import path from 'path';
 import Guid from 'guid';
-import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 
 // outer components 
 import EntityForm from './components/entityFormView';
-
 
 // //-------------------------Geodesy --------------------------
 // //Libraries of geodesy functions implemented in JavaScript
@@ -16,10 +14,7 @@ import EntityForm from './components/entityFormView';
 
 // ---------------------------------------------Cesium Imports----------------------------------------------------
 
-//----------------!!!!Cesium sources setup!!!!! -------------------------------
-///!!! Reuired for Webpack.!!!!!
-///Ensure that BUILD_DIR points to the right folder 
-///and that the Cesium files are copied there from /node_modules/cesium/Build/Cesium
+//---------------- Cesium sources setup -------------------------------
 import BuildModuleUrl from 'cesium/Source/Core/buildModuleUrl';
 BuildModuleUrl._cesiumScriptRegex = /(.*?)\/Cesium\w*\.js(?:\W|$)/i;
 const BUILD_DIR = path.resolve(__dirname, 'dist');
@@ -32,7 +27,6 @@ BingMapsApi.defaultKey = 'ApKtWGAVLWzzHvuvGZFWTRIXrsyLJ5czBuu9MkIGAdWwsQpXz_GiC5
 
 //various Cesium objects
 import CesiumViewer from 'cesium/Source/Widgets/Viewer/Viewer';
-//import JulianDate from 'cesium/Source/Core/JulianDate';
 import Entity from 'cesium/Source/DataSources/Entity';
 import Cartesian2 from 'cesium/Source/Core/Cartesian2';
 import Cartesian3 from 'cesium/Source/Core/Cartesian3';
@@ -40,8 +34,6 @@ import CesiumColor from 'cesium/Source/Core/Color';
 import ScreenSpaceEventHandler from 'cesium/Source/Core/ScreenSpaceEventHandler';
 import CesiumMath from 'cesium/Source/Core/Math';
 import CustomDataSource from 'cesium/Source/DataSources/CustomDataSource';
-// import LabelGraphics from 'cesium/Source/DataSources/LabelGraphics.js';
-
 import Ellipsoid from 'cesium/Source/Core/Ellipsoid';
 import ScreenSpaceEventType from 'cesium/Source/Core/ScreenSpaceEventType';
 
@@ -49,13 +41,11 @@ import 'cesium/Source/Widgets/widgets.css';
 //-----------------------------------------------------------------------------------------------------------------
 
 //-----------------services ----------------------------------------
-import { defined } from '../../services'
+import { defined, isPointIsInsideCircle } from '../../utills/services';
 
 //-----------------resources----------------------------------------
-import {resources} from '../../../../shared/data/resources'; 
-import {Images} from '../../../../shared/images/AllImages';
-
-
+import {resources} from '../../shared/data/resources'; 
+import {Images} from '../../shared/images/AllImages';
 
 // Consts
 const componentStyle = {
@@ -90,13 +80,6 @@ const componentStyle = {
         textAlign: 'center',
     },
     entityForm : {
-        // visibility: 'hidden',
-        // display: 'block',
-        // position: 'fixed',
-        // overflow: 'hidden',
-        // background: 'gray',
-        // border: '1px solid #47494c',
-        // borderRadius: '5px',
         top: 20 + 'vh',
         left: 15 + 'vw'        
     },
@@ -131,9 +114,6 @@ const initialViewState = {
     }
 };
 
-// TODO: export it in a configuration file, and import it here
-const defaultHeight = 10;
-
 export default class CesiumView extends React.Component {
 
     constructor(props) {
@@ -141,6 +121,7 @@ export default class CesiumView extends React.Component {
 
         // class members
         this.viewState = initialViewState;
+        this.defaultHeight = 10;
         this.zoomedEntity = null;
         this.selectedEntity = {
             entityTypeName: null,
@@ -170,10 +151,8 @@ export default class CesiumView extends React.Component {
         this.viewer = new CesiumViewer(this.refs.map, this.viewState.options);
         this.handler = new ScreenSpaceEventHandler(this.viewer.scene.canvas);  
 
+        // set map start position
         this.viewer.camera.lookAt(Cartesian3.fromDegrees(this.viewState.center.x, this.viewState.center.y), new Cartesian3(0.0, 0.0, this.viewState.zoomHeight));
-
-        // subscribe viewer entities
-        // this.viewer.entities.collectionChanged.addEventListenter( (collection, added, removed, changed) => console.log('entities collection changed!'));
 
         // add data source for mission id tooltip
         this.viewer.dataSources.add(new CustomDataSource('EntityMissionTooltips'));
@@ -200,7 +179,6 @@ export default class CesiumView extends React.Component {
                 if (defined(pickedObject)) 
                 {
                     entity = pickedObject.id;
-                    //entity.billboard.scale = 1.2;
                     dragging = true;
                     viewer.scene.screenSpaceCameraController.enableInputs = false;
                 }
@@ -239,36 +217,6 @@ export default class CesiumView extends React.Component {
                 dragging = false;
                 viewer.scene.screenSpaceCameraController.enableInputs = true;
             }, ScreenSpaceEventType.LEFT_UP);
-           
-            //click two times animation handler
-            handler.setInputAction( click => 
-            {
-                if(!dragging)
-                {
-                    if (isFirstClick) // if first click on object
-                    {
-                        const pickedObject = viewer.scene.pick(click.position);
-
-                        if (defined(pickedObject)) 
-                        {
-                            selectedEntity = {
-                                id: pickedObject.id._id,
-                                entity: pickedObject.id, 
-                                x: click.position.x, 
-                                y: click.position.y 
-                            };
-
-                            this.clickType = false;
-                        }
-                    }
-                    else // if second click on object
-                    {
-                        const isRemoveWasSucceded = viewer.entities.removeById(selectedEntity.id);
-                        isFirstClick = true;
-                    }
-                }   // end if !dragging
-
-            }, ScreenSpaceEventType.LEFT_CLICK);
 
             // left click on map
             handler.setInputAction( click => {
@@ -280,7 +228,7 @@ export default class CesiumView extends React.Component {
                 else {
                     const cartesian = this.viewer.camera.pickEllipsoid( click.position, this.viewer.scene.globe.ellipsoid);
                     this.viewer.camera.lookAt(cartesian, new Cartesian3(0.0, 0.0, this.viewState.zoomHeight));
-                    hideEntityForm();
+                    this.hideEntityForm();
                 }
             }, ScreenSpaceEventType.RIGHT_UP);         
     }
@@ -351,15 +299,14 @@ export default class CesiumView extends React.Component {
 
     /**
      * maps the entities array of a entityType to a newly created cesium CustomDataSource object
-     * @param {Object} entityType the entityType object
+     * @param {Object} storeEntity the entityType object
      */
-    createEntityTypeDataSource(entityType) {
-        const entityTypeDataSource = new CustomDataSource(entityType.name);
-        entityType.entities.map(e => {
-            const entityToAdd = this.generateEntity(entityType.name, e);
-            const addedEntity = this.addEntityToDataSourceCollection(entityToAdd, entityTypeDataSource, entityType.name, e);    
-            // TODO: uncomment if want to see the mission number and more additional details  
-            //this.attachedAssociatedEntitiesToEntity(addedEntity);
+    createEntityTypeDataSource(storeEntity) {
+        const entityTypeDataSource = new CustomDataSource(storeEntity.name);
+
+        storeEntity.entities.map(e => {
+            const entityToAdd = this.generateEntity(storeEntity.name, e);
+            const addedEntity = this.addEntityToDataSourceCollection(entityToAdd, entityTypeDataSource, storeEntity.name, e);    
         });
 
         this.viewer.dataSources.add(entityTypeDataSource);
@@ -396,8 +343,7 @@ export default class CesiumView extends React.Component {
         
         addedEntity.addProperty('storeEntity');
         addedEntity['storeEntity'] = storeEntityReference;
-        //TODO: observe it by subscribing to entity.definitionChanged                                    
-
+        
         this.props.actions[resources.ACTIONS.SET_ENTITY_CESIUM_ID.TYPE](
             resources.AGENTS.USER, {
                 entityTypeName,
@@ -420,10 +366,11 @@ export default class CesiumView extends React.Component {
         // if object is related to a mission
         if(storeEntity.hasOwnProperty('missionId') && defined(storeEntity.missionId)) {
             const entityMissionTooltipsDataSource = this.getDataSourceByName('EntityMissionTooltips'),
+                positionDistanceToAdd = 0.005,
                 missionEntity = this.generateEntity(resources.ENTITY_TYPE_NAMES.MISSION_TOOLTIP, Object.assign({},{
                         position: {
-                        longitude: storeEntity.position.longitude + 0.005, 
-                        latitude: storeEntity.position.latitude + 0.005, 
+                        longitude: storeEntity.position.longitude + positionDistanceToAdd, 
+                        latitude: storeEntity.position.latitude + positionDistanceToAdd, 
                         height: storeEntity.position.height
                         }, ...storeEntity
                 }));
@@ -458,14 +405,14 @@ export default class CesiumView extends React.Component {
     getBillboard(entityTypeName, entity) {
         if (entity && entityTypeName) {
             let billboard = {
-                        image: `${resources.IMG.BASE_URL}${resources.ENTITY_TYPES[entityTypeName].ACTIONS.ADD.IMG}`,
-                        scale: resources.ENTITY_TYPES[entityTypeName].ACTIONS.ADD.SCALE || 1
+                image: `${resources.IMG.BASE_URL}${resources.ENTITY_TYPES[entityTypeName].ACTIONS.ADD.IMG}`,
+                scale: resources.ENTITY_TYPES[entityTypeName].ACTIONS.ADD.SCALE || 1
             };
 
             switch (entityTypeName) {
                 case resources.ENTITY_TYPE_NAMES.MISSION_TOOLTIP:
                 {
-                    const imageName = `${resources.ENTITY_TYPES[entityTypeName].ACTIONS.ADD.IMG}`;  // TODO: use without replace
+                    const imageName = `${resources.ENTITY_TYPES[entityTypeName].ACTIONS.ADD.IMG}`;  
                     const svgString = Images[imageName].replace('ENTER_NUMBER_HERE', entity.missionId);
 
                     billboard.image = this.pinColor(svgString, CesiumColor.BLACK);
@@ -474,7 +421,7 @@ export default class CesiumView extends React.Component {
                 case resources.ENTITY_TYPE_NAMES.AIRPLANE:
                 case resources.ENTITY_TYPE_NAMES.HELICOPTER:
                 {
-                    const imageName = `${resources.ENTITY_TYPES[entityTypeName].ACTIONS.ADD.IMG}`.replace('.svg', '');  // TODO: use without replace
+                    const imageName = `${resources.ENTITY_TYPES[entityTypeName].ACTIONS.ADD.IMG}`.replace('.svg', '');  
                     billboard.image = this.pinColor(Images[imageName], this.mapHeightToColor(entity.position.height));
                     break;          
                 }
@@ -540,7 +487,7 @@ export default class CesiumView extends React.Component {
         }
     
         function exportSVG(svg) {
-            return `data:image/svg+xml;base64,${btoa(svg)}` ;   // https://developer.mozilla.org/en/DOM/window.btoa
+            return `data:image/svg+xml;base64,${btoa(svg)}` ;   // window.btoa
         }
         
         const hexColor = cesiumRgb2Hex(color); // get the hex color to fill
@@ -559,7 +506,7 @@ export default class CesiumView extends React.Component {
         const mousePosition = new Cartesian2(x, y);
         let cartesian = mousePosition;
         if (this.viewer.scene.mode === 3) {
-            cartesian = this.viewer.camera.pickEllipsoid(mousePosition, this.viewer.scene.globe.ellipsoid); // maybe the problem here!!
+            cartesian = this.viewer.camera.pickEllipsoid(mousePosition, this.viewer.scene.globe.ellipsoid); 
         }
      
         const entityTypeName = event.dataTransfer.getData('text');
@@ -577,7 +524,7 @@ export default class CesiumView extends React.Component {
                     entityTypeName,
                     label: `${entityTypeName}-New-Added`,
                     position: { 
-                        height : defaultHeight,
+                        height : this.defaultHeight,
                         latitude : latitudeString,
                         longitude : longitudeString,
                     }
@@ -591,15 +538,13 @@ export default class CesiumView extends React.Component {
 
     onEntityFormClose(formData) {
         if(formData && formData.entity) {
-            console.log('EntityForm closed with OK:');
             this.selectedEntity = Object.assign({}, formData.entity);
             this.props.actions[resources.ACTIONS.ADD.TYPE](
                 resources.AGENTS.USER,
-                this.selectedEntity);  
-            console.dir(this.selectedEntity);        
+                this.selectedEntity);     
         }
         else {
-            console.log('EntityForm closed with Cancel.');
+            // EntityForm closed with Cancel
         }
 
         this.hideEntityForm();
@@ -610,15 +555,32 @@ export default class CesiumView extends React.Component {
             componentStyle.entityForm.top = top + 'px';
             componentStyle.entityForm.left = left + 'px';
         }
-        // componentStyle.entityForm.visibility = 'visible';
+        
         this.selectedEntity.showEntityForm = true;
         this.forceUpdate();
     }
 
     hideEntityForm() {
-        // componentStyle.entityForm.visibility = 'hidden';
         this.selectedEntity.showEntityForm = false;
         this.forceUpdate();
+    }
+
+    /**
+     * check if entity is in flight circle
+     * @param {Cesium.Entity} entity
+     * @param {Cesium.Entity} flightCircle
+     */
+    isEntityIsInFlightCircle(entity, flightCircle) {
+        const entityCart = Ellipsoid.WGS84.cartesianArrayToCartographicArray(entity.position._value),
+            flightCircleCart = Ellipsoid.WGS84.cartesianArrayToCartographicArray(flightCircle.position._value);
+
+        return isPointIsInsideCircle(
+            entityCart.longitude,               // pointX
+            entityCart.latitude,                // pointY
+            flightCircleCart.longitude,         // circleCenterX
+            flightCircleCart.latitude,          // circleCenterY
+            entityCart.billboard.width / 2      // circleRadius
+        );
     }
 
     render() {
