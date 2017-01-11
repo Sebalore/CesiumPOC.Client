@@ -255,7 +255,8 @@ export default class CesiumView extends React.Component {
                         if (entityTypeIsActive) {
                             if(eventData.agent === resources.AGENTS.USER) {
                                 if (entityTypeDataSource && entityTypeDataSource.entities) {
-                                    entityTypeDataSource.entities.removeById(eventData.data.cesiumId);
+                                    const entityToRemove = entityTypeDataSource.entities.values.find(e => e.storeEntity.id === eventData.data.id);
+                                    entityTypeDataSource.entities.remove(entityToRemove);
                                 }
                             }
                         }
@@ -268,7 +269,8 @@ export default class CesiumView extends React.Component {
                     }
                     case resources.ACTIONS.UPDATE_POSITION.TYPE: {
                         if (entityTypeIsActive) {
-                            const entityToUpdate = entityTypeDataSource.entities.getById(eventData.result.cesiumId);
+                            const entityToUpdate = entityTypeDataSource.entities.values.find(e => e.storeEntity.id === eventData.result.id);
+
                             // update position
                             entityToUpdate.position = this.getCartesianPosition(eventData.data.position);  
                             // update bilboard for new color due to the new height
@@ -353,15 +355,6 @@ export default class CesiumView extends React.Component {
         addedEntity.addProperty('storeEntity');
         addedEntity['storeEntity'] = storeEntityReference;
         
-        this.props.actions[resources.ACTIONS.SET_ENTITY_CESIUM_ID.TYPE](
-            resources.AGENTS.USER, {
-                entityTypeName,
-                entityId: storeEntityReference.id,
-                cesiumId: addedEntity.id
-            }
-        ); 
-
-        console.assert(storeEntityReference.cesiumId === addedEntity.id);
         return addedEntity;
     }
 

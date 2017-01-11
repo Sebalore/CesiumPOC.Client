@@ -41,18 +41,7 @@ class _store extends EventEmitter {
       resolve(data);
     });
   }
-  
-  ['handle' + resources.ACTIONS.SET_ENTITY_CESIUM_ID.TYPE](agent, data) {
-    return new Promise((resolve) => {
-      const entityTypeName = data.entityTypeName;
-      const entityTypeIndex = this.data.entityTypes.findIndex(l => l.name===entityTypeName);
-      const entityIndex = this.data.entityTypes[entityTypeIndex].entities.findIndex(e => e.id===data.entityId);
-      
-      this.data.entityTypes[entityTypeIndex].entities[entityIndex].cesiumId = data.cesiumId;
-      resolve(this.data.entityTypes[entityTypeIndex].entities[entityIndex]);
-    });
-  }
-  
+
   ['handle' + resources.ACTIONS.DELETE.TYPE](agent, data) {
       return new Promise((resolve) => {
       const entityTypeName = data.entityTypeName;
