@@ -15,7 +15,8 @@ export default  {
         }
       ],
       entities: []
-    }, {
+    }, 
+    {
       name: resources.ENTITY_TYPE_NAMES.DMA,
       imgUrl: `${resources.IMG.BASE_URL}${resources.ENTITY_TYPES[resources.ENTITY_TYPE_NAMES.DMA].IMG}`,
       active: true,
@@ -113,7 +114,8 @@ export default  {
           })
         }
       ]
-    }, {
+    }, 
+    {
       name: resources.ENTITY_TYPE_NAMES.HELICOPTER,
       imgUrl: `${resources.IMG.BASE_URL}${resources.ENTITY_TYPES[resources.ENTITY_TYPE_NAMES.HELICOPTER].IMG}`,
       active: true,

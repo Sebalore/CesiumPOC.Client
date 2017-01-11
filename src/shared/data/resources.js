@@ -72,12 +72,12 @@ export const resources = {
             }
         },
         [DMA]: {
-            IMG: 'icon_9.svg',
+            IMG: 'icon_8.svg',
             ACTIONS: {
                 ADD: {
                     ID: 'Add',
                     DESC: 'Add a new destination point',
-                    IMG: 'icon_9.svg',
+                    IMG: 'icon_8.svg',
                     SCALE: 0.5
                 }
             }

@@ -28,6 +28,7 @@ BingMapsApi.defaultKey = 'ApKtWGAVLWzzHvuvGZFWTRIXrsyLJ5czBuu9MkIGAdWwsQpXz_GiC5
 //various Cesium objects
 import CesiumViewer from 'cesium/Source/Widgets/Viewer/Viewer';
 import Entity from 'cesium/Source/DataSources/Entity';
+import Rectangle from 'cesium/Source/Core/Rectangle';
 import Cartesian2 from 'cesium/Source/Core/Cartesian2';
 import Cartesian3 from 'cesium/Source/Core/Cartesian3';
 import CesiumColor from 'cesium/Source/Core/Color';
@@ -275,17 +276,23 @@ export default class CesiumView extends React.Component {
                         break;
                     }
                     case resources.ACTIONS.TOGGLE_BEST_FIT_DISPLAY.TYPE: {
+                        const entity = eventData.data.entity || this.zoomedEntity;
+                        const isRectangle = entity.storeEntity.entityTypeName === resources.ENTITY_TYPE_NAMES.DMA;
+                        const zoomOptions = {
+                            heading : 0,
+                            pitch: -CesiumMath.PI/2
+                        };
 
                         if(!this.zoomedEntity) {
-                            const entity = eventData.data.entity;
-                            const range =  entity.billboard.sizeInMeters? entity.billboard.width.getValue() * 2.25: null;
-                            this.viewer.zoomTo(entity, {
-                                heading : 0,
-                                pitch: -CesiumMath.PI/2,
-                                range: range
-                            });
+                            // is need for best
+                            if(!isRectangle && entity.billboard.sizeInMeters) {
+                                zoomOptions.range = entity.billboard.width.getValue() * 2.25;
+                            }
+                            
+                            this.viewer.zoomTo(entity, zoomOptions);
                             this.zoomedEntity = entity;
-                        } else {
+                        } 
+                        else {
                             this.viewer.camera.lookAt(Cartesian3.fromDegrees(this.viewState.center.x, this.viewState.center.y), new Cartesian3(0.0, 0.0, this.viewState.zoomHeight));
                             this.zoomedEntity = null;
                         }
@@ -306,7 +313,8 @@ export default class CesiumView extends React.Component {
 
         storeEntity.entities.map(e => {
             const entityToAdd = this.generateEntity(storeEntity.name, e);
-            const addedEntity = this.addEntityToDataSourceCollection(entityToAdd, entityTypeDataSource, storeEntity.name, e);    
+            const addedEntity = this.addEntityToDataSourceCollection(entityToAdd, entityTypeDataSource, storeEntity.name, e);   
+             
         });
 
         this.viewer.dataSources.add(entityTypeDataSource);
@@ -392,14 +400,17 @@ export default class CesiumView extends React.Component {
      * @returns {Object} an object that can be added to cesium entities collection
      */
     generateEntity(entityTypeName, entity) {
-        const { position, label } = entity;
-        const cesiumEntity =  {
-                position: Cartesian3.fromDegrees(position.longitude, position.latitude, position.height),
-                billboard: this.getBillboard(entityTypeName, entity),
-                label
-        };
+        let { position, label, rectangle } = entity;
+        
+        position = entityTypeName !== resources.ENTITY_TYPE_NAMES.DMA ?
+             Cartesian3.fromDegrees(position.longitude, position.latitude, position.height) : null;
 
-        return cesiumEntity;
+        return {
+                position,
+                billboard: this.getBillboard(entityTypeName, entity),
+                label,
+                rectangle
+        };
     }
 
     getBillboard(entityTypeName, entity) {
@@ -410,6 +421,11 @@ export default class CesiumView extends React.Component {
             };
 
             switch (entityTypeName) {
+                case resources.ENTITY_TYPE_NAMES.DMA:
+                {
+                    billboard = null;
+                    break;
+                }
                 case resources.ENTITY_TYPE_NAMES.MISSION_TOOLTIP:
                 {
                     const imageName = `${resources.ENTITY_TYPES[entityTypeName].ACTIONS.ADD.IMG}`;  
@@ -518,8 +534,28 @@ export default class CesiumView extends React.Component {
             const longitudeString = CesiumMath.toDegrees(cartographic.longitude);
             const latitudeString = CesiumMath.toDegrees(cartographic.latitude);
             
-
-            this.selectedEntity = Object.assign({}, {
+            if(entityTypeName === resources.ENTITY_TYPE_NAMES.DMA) {
+                const west = -80.0,             // left
+                    south = 25.0,               // down
+                    east = longitudeString,     // currently the center x     // right 
+                    north = latitudeString,     // currently the center y     // up
+                    addEntityData = {
+                        entityTypeName,
+                        rectangle : {
+                                                                
+                            coordinates : Rectangle.fromDegrees(east - 0.1, north - 0.1, east, north) ,
+                            material : CesiumColor.RED.withAlpha(0.5),
+                            outline : true,
+                            outlineColor : CesiumColor.WHITE,
+                            fill: false,
+                        },
+                        id: Guid.create()
+                    };
+            
+                this.props.actions[resources.ACTIONS.ADD.TYPE](resources.AGENTS.USER, addEntityData);
+            }
+            else {
+                this.selectedEntity = Object.assign({}, {
                     id: Guid.create(),
                     entityTypeName,
                     label: `${entityTypeName}-New-Added`,
@@ -528,8 +564,10 @@ export default class CesiumView extends React.Component {
                         latitude : latitudeString,
                         longitude : longitudeString,
                     }
-            }); 
+                }); 
+            
             this.showEntityForm(y-90, x+120);
+            }
         } 
         else {
             console.log('CesiumView::onDrop(event) : something went wrong.');
