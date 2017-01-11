@@ -1,5 +1,5 @@
-import { createLinearCoordinatesGenerator } from './services';
-import {resources} from '../../shared/data/resources';
+import { createLinearCoordinatesGenerator } from '../utills/services';
+import {resources} from '../shared/data/resources';
 import Guid from 'guid';
 
 export default  {

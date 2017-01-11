@@ -2,7 +2,7 @@ import React from 'react';
 import Guid from 'guid';
 
 // resources
-import {resources} from '../../../../shared/data/resources';
+import {resources} from '../../shared/data/resources';
 
 const AddEntity =  (props) => {
     if (props.entityTypesInfo) {

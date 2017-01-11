@@ -41,11 +41,11 @@ import 'cesium/Source/Widgets/widgets.css';
 //-----------------------------------------------------------------------------------------------------------------
 
 //-----------------services ----------------------------------------
-import { defined, isPointIsInsideCircle } from '../../services';
+import { defined, isPointIsInsideCircle } from '../../utills/services';
 
 //-----------------resources----------------------------------------
-import {resources} from '../../../../shared/data/resources'; 
-import {Images} from '../../../../shared/images/AllImages';
+import {resources} from '../../shared/data/resources'; 
+import {Images} from '../../shared/images/AllImages';
 
 // Consts
 const componentStyle = {

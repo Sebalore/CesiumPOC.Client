@@ -1,14 +1,14 @@
 import React, {Component} from 'react';
 
 //inner components
-import actions from './actions';
-import store from './store';
-import CesiumView from './components/cesium/cesiumView';
-import EntityTypes from './components/entityTypes/entityTypesView';
-import AddEntity from './components/addEntity/addEntityView';
+import actions from '../flux/actions';
+import store from '../flux/store';
+import CesiumView from './cesium/cesiumView';
+import EntityTypes from './entityTypes/entityTypesView';
+import AddEntity from './addEntity/addEntityView';
 
 // resources
-import {resources} from '../../shared/data/resources';
+import {resources} from '../shared/data/resources';
 
 export default class Main extends Component {
 

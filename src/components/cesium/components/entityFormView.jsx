@@ -1,9 +1,9 @@
 import React from 'react';
 
-import FlightCircleForm from './flightCircleForm.jsx';
+import FlightCircleForm from './flightCircleForm';
 
 //-----------------resources----------------------------------------
-import {resources} from '../../../../../shared/data/resources.js'; 
+import {resources} from '../../../shared/data/resources'; 
 
 export default class EntityForm extends React.PureComponent {
     constructor(props) {

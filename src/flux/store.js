@@ -2,7 +2,7 @@ import {EventEmitter} from 'events';
 import dispatcher from './dispatcher';
 
 //resources
-import {resources} from '../../shared/data/resources';
+import {resources} from '../shared/data/resources';
 import initialViewState from './storeIntialState';
 
 class _store extends EventEmitter {

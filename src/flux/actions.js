@@ -1,5 +1,5 @@
 import dispatcher from './dispatcher';
-import { resources } from '../../shared/data/resources.js'; 
+import { resources } from '../shared/data/resources.js'; 
 
 export default {
     //--------- general actions ----------------------------------
