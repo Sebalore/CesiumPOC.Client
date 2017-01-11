@@ -94,7 +94,7 @@ const componentStyle = {
 const initialViewState = {
     activeEntityType: null,
     entityTypes: [],
-    zoomHeight: 990000,
+    zoomHeight: 20000,
     center: {
       x: resources.MAP_CENTER.longitude,
       y: resources.MAP_CENTER.latitude,
@@ -142,6 +142,7 @@ export default class CesiumView extends React.Component {
         this.addEntityToDataSourceCollection = this.addEntityToDataSourceCollection.bind(this);
         this.getDataSourceByName = this.getDataSourceByName.bind(this);
         this.attachedAssociatedEntitiesToEntity = this.attachedAssociatedEntitiesToEntity.bind(this);
+        this.getCartesianPosition = this.getCartesianPosition.bind(this);
     }
 
     componentDidMount() {
@@ -269,7 +270,7 @@ export default class CesiumView extends React.Component {
                         if (entityTypeIsActive) {
                             const entityToUpdate = entityTypeDataSource.entities.getById(eventData.result.cesiumId);
                             // update position
-                            entityToUpdate.position = Cartesian3.fromDegrees(eventData.data.position.latitude, eventData.data.position.longitude, 1000);  
+                            entityToUpdate.position = this.getCartesianPosition(eventData.data.position);  
                             // update bilboard for new color due to the new height
                             entityToUpdate.billboard = this.getBillboard(eventData.data.entityTypeName, eventData.result);
                         }
@@ -397,13 +398,22 @@ export default class CesiumView extends React.Component {
     /**
      * generate entity by params
      * @param {position} a position object containinf longitude and latitude in degrees (or radians?) and height in meters
+     * @returns {cartesianPosition} the cartesian converted position
+     */
+    getCartesianPosition(position) {
+        return position?Cartesian3.fromDegrees(position.longitude, position.latitude, position.height):null;
+    }
+
+    /**
+     * generate entity by params
+     * @param {position} a position object containinf longitude and latitude in degrees (or radians?) and height in meters
      * @returns {Object} an object that can be added to cesium entities collection
      */
     generateEntity(entityTypeName, entity) {
         let { position, label, rectangle } = entity;
         
         position = entityTypeName !== resources.ENTITY_TYPE_NAMES.DMA ?
-             Cartesian3.fromDegrees(position.longitude, position.latitude, position.height) : null;
+             this.getCartesianPosition(position) : null;
 
         return {
                 position,
