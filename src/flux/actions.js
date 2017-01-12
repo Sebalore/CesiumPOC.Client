@@ -2,7 +2,7 @@ import dispatcher from './dispatcher';
 import { resources } from '../shared/data/resources'; 
 import socketIO from 'socket.io-client';
 
-const socket = socketIO('http://localhost:8080');
+// const socket = socketIO('http://localhost:8080');
 
 export default {
     //--------- general actions ----------------------------------
@@ -11,7 +11,7 @@ export default {
     // entities actions
     [resources.ACTIONS.ADD.TYPE]: (agent, data) => {
         dispatcher.dispatch({type: resources.ACTIONS.ADD.TYPE, agent, data});
-        socket.emit('ADD', { data });
+        // socket.emit('ADD', { data });
     },
     [resources.ACTIONS.DELETE.TYPE]: (agent, data) => dispatcher.dispatch({type: resources.ACTIONS.DELETE.TYPE, agent, data}),
     [resources.ACTIONS.UPDATE_POSITION.TYPE]: (agent, data) => dispatcher.dispatch({type: resources.ACTIONS.UPDATE_POSITION.TYPE,  agent, data}),
