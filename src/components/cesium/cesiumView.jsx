@@ -172,7 +172,6 @@ export default class CesiumView extends React.Component {
             return;
         }
 
-        
         const modifyEntityTypeIndex = this.getModifiedEntityType(this.props.entityTypes, newProps.entityTypes),
             currentEntitiesNum = this.props.entityTypes[modifyEntityTypeIndex].entities.length,
             newEntitiesNum = newProps.entityTypes[modifyEntityTypeIndex].entities.length,
@@ -319,8 +318,25 @@ export default class CesiumView extends React.Component {
                 const pickedObject = viewer.scene.pick(click.position) || this.zoomedEntity;
 
                 if (pickedObject) {
-                    
-                    this.props.actions[resources.ACTIONS.TOGGLE_BEST_FIT_DISPLAY.TYPE](resources.AGENTS.USER, {entity: pickedObject?pickedObject.id:null});
+                    if(!this.zoomedEntity) {
+                        const entity = pickedObject.id,
+                            isRectangle = entity.storeEntity.entityTypeName === resources.ENTITY_TYPE_NAMES.DMA,
+                            zoomOptions = {
+                                heading : 0,
+                                pitch: -CesiumMath.PI/2
+                            };
+                        
+                        if(!isRectangle && entity.billboard.sizeInMeters) {
+                            zoomOptions.range = entity.billboard.width.getValue() * 2.25;
+                        }
+                        
+                        this.viewer.zoomTo(entity, zoomOptions);
+                        this.zoomedEntity = entity;
+                    } 
+                    else {
+                        this.viewer.camera.lookAt(Cartesian3.fromDegrees(this.viewState.center.x, this.viewState.center.y), new Cartesian3(0.0, 0.0, this.viewState.zoomHeight));
+                        this.zoomedEntity = null;
+                    } 
                 } 
                 else {
                     const cartesian = this.viewer.camera.pickEllipsoid( click.position, this.viewer.scene.globe.ellipsoid);
@@ -328,6 +344,28 @@ export default class CesiumView extends React.Component {
                     this.hideEntityForm();
                 }
             }, ScreenSpaceEventType.RIGHT_UP);         
+    }
+
+    handleBestFit(pickedObject) {
+        if(!this.zoomedEntity) {
+            const entity = pickedObject,
+                isRectangle = entity.storeEntity.entityTypeName === resources.ENTITY_TYPE_NAMES.DMA,
+                zoomOptions = {
+                    heading : 0,
+                    pitch: -CesiumMath.PI/2
+                };
+            
+            if(!isRectangle && entity.billboard.sizeInMeters) {
+                zoomOptions.range = entity.billboard.width.getValue() * 2.25;
+            }
+            
+            this.viewer.zoomTo(entity, zoomOptions);
+            this.zoomedEntity = entity;
+        } 
+        else {
+            this.viewer.camera.lookAt(Cartesian3.fromDegrees(this.viewState.center.x, this.viewState.center.y), new Cartesian3(0.0, 0.0, this.viewState.zoomHeight));
+            this.zoomedEntity = null;
+        } 
     }
 
     handleContextAwareActions(error, eventData) {
