@@ -1,15 +1,15 @@
-export function createLinearCoordinatesGenerator (velocity) {
-    return function * (origin) {
-        let forever = true;
-        while (forever) {
-            let currentPosition = origin;
-            for (let i = 0; i < 32; i++) {
-                currentPosition.longitude += velocity.longitude;
-                currentPosition.latitude += velocity.latitude;
-                currentPosition.height += velocity.height;
-              
-                yield currentPosition;
-            }
+export function * createLinearCoordinatesGenerator (velocity, origin) {
+    const forever = true;
+
+    while (forever) {
+        const currentPosition = origin;
+        
+        for (let i = 0; i < 32; i++) {
+            currentPosition.longitude += velocity.longitude;
+            currentPosition.latitude += velocity.latitude;
+            currentPosition.height += velocity.height;
+            
+            yield currentPosition;
         }
     }
 }
@@ -33,7 +33,6 @@ export function isPointIsInsideCircle(pointX, pointY, circleCenterX, circleCente
 export function defined(object) {
     return (object !== undefined && object !== null);
 }
-
 
 /**
  * @param {Object} obj
@@ -63,4 +62,50 @@ export function getDistanceBetweenPoints(point1, point2) {
     const d = R * c;
 
     return d;    
+}
+
+/**
+ * deep clone of objects
+ * @param {Object} sourceObject the object to clone from
+ * @returns {Object} the cloned object 
+ */
+export function deepClone(sourceObject)
+{
+    return JSON.parse(JSON.stringify(sourceObject));
+}
+
+/**
+ * check if two obejct are equal
+ * @param {Object} firstObj
+ * @param {Object} secondObj
+ * @returns {Boolean} 
+ */
+export function isEqualObjects(firstObj, secondObj) {
+    return JSON.stringify(firstObj) === JSON.stringify(secondObj);
+}
+
+/**
+ * get the index of the modified record between to equivalent sized arrays
+ * @param {Array} arr1
+ * @param {Array} arr2
+ * @returns {Number} the index of the first modified record if there is, otherwise -1 
+ */
+export function getModifiedRecordIdx(arr1, arr2) {
+    let modifiedIndexToReturn = -1;
+    
+    if(arr1.length !== arr2.length) {
+        return modifiedIndexToReturn;
+    }
+
+    for(let i = 0 ; i < arr1.length; i++) {
+        const firstObj = { ...arr1[i] },
+            secondObj = { ...arr2[i] };
+
+        if(!isEqualObjects(firstObj, secondObj)) {
+            modifiedIndexToReturn = i;
+            break;
+        }
+    }
+
+    return modifiedIndexToReturn;
 }

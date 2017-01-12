@@ -2,7 +2,90 @@ import React from 'react';
 import Guid from 'guid';
 import {resources} from '../../shared/data/resources'; 
 
-//CONSTS
+export default class EntityTypes extends React.PureComponent {
+    constructor(props) {
+        super(props);
+
+        this.onListItemClicked = this.onListItemClicked.bind(this);
+        this.onStaticListItemClicked = this.onStaticListItemClicked.bind(this);
+    }
+
+    onListItemClicked(entityType, idx) {
+        this.props.actions.toggleEntityTypeActivation(entityType.name);
+        this.refs[`svg${idx}`].style.backgroundColor = 
+            entityType.active ? 
+                '#c9953a' : 'white';
+    }
+
+    onStaticListItemClicked(idx) {
+        this.refs[`svg${idx}`].style.backgroundColor = 
+            this.refs[`svg${idx}`].style.backgroundColor === 'white' ? 
+                '#c9953a' : 'white';
+    }
+
+    render() {
+        return (
+            <div style = {componentStyle.containerDiv}>
+                <ul style = {componentStyle.ul}>
+                    <li style = {componentStyle.li} ref="li_16">
+                        <div
+                            ref = "svg16"
+                            style={this.props.setIconStyle('../../../../shared/images/icon_10.svg', false)} 
+                            draggable='false' 
+                            onClick = {() =>  this.onStaticListItemClicked(16)}
+                        />
+                    </li>
+                    <li style = {componentStyle.li} ref="li_15">
+                        <div
+                            ref = "svg15"
+                            style={this.props.setIconStyle('../../../../shared/images/icon_8.svg', false)} 
+                            draggable='false' 
+                            onClick = {() =>  this.onStaticListItemClicked(15)}
+                        />
+                    </li>
+                   <li style = {componentStyle.li} ref="li_14">
+                        <div
+                            ref = "svg14"
+                            style={this.props.setIconStyle('../../../../shared/images/icon_7.svg', false)} 
+                            draggable='false' 
+                            onClick = {() =>  this.onStaticListItemClicked(14)}
+                        />
+                    </li>
+                    {
+                        this.props.entityTypes instanceof Array &&
+                        this.props.entityTypes.map((entityType, idx) => 
+                            <li key={idx} style = {componentStyle.li} ref={`li_${idx}`}>
+                                <div 
+                                    ref = {`svg${idx}`}
+                                    id={Guid.create()} 
+                                    style={this.props.setIconStyle(entityType.imgUrl, entityType.active)} 
+                                    draggable='false' 
+                                    onClick = {() =>  this.onListItemClicked(entityType, idx)}
+                                />
+                            </li>)
+                    }
+                   <li style = {componentStyle.li} ref="li_13">
+                        <div
+                            ref = "svg13"
+                            style={this.props.setIconStyle('../../../../shared/images/icon_4.svg', false)} 
+                            draggable='false' 
+                            onClick = {() =>  this.onStaticListItemClicked(13)}
+                        />
+                    </li>
+                    <li style = {componentStyle.li} ref="li_11">
+                        <div
+                            ref = "svg11"
+                            style={this.props.setIconStyle('../../../../shared/images/icon_2.svg', false)} 
+                            draggable='false' 
+                            onClick = {() =>  this.onStaticListItemClicked(11)}
+                        />
+                    </li>
+                </ul>
+            </div>
+        );
+    }
+}
+
 const componentStyle = {
     containerDiv : {
         display: 'inline-block',
@@ -26,88 +109,3 @@ const componentStyle = {
         float: 'right',
     }
 };
-
-export default class EntityTypes extends React.PureComponent {
-    constructor(props) {
-        super(props);
-
-        this.onListItemClicked = this.onListItemClicked.bind(this);
-        this.onStaticListItemClicked = this.onStaticListItemClicked.bind(this);
-    }
-
-    onListItemClicked(entityType, idx) {
-        this.props.actions[resources.ACTIONS.TOGGLE_ENTITY_TYPE.TYPE](resources.AGENTS.USER,{entityTypeName: entityType.name});
-        this.refs[`svg${idx}`].style.backgroundColor = 
-            entityType.active ? 
-                '#c9953a' : 'white';
-    }
-
-    onStaticListItemClicked(idx) {
-        this.refs[`svg${idx}`].style.backgroundColor = 
-            this.refs[`svg${idx}`].style.backgroundColor === 'white' ? 
-                '#c9953a' : 'white';
-    }
-
-    render() {
-        return (
-            <div style = {componentStyle.containerDiv}>
-                <ul style = {componentStyle.ul}>
-                    <li style = {componentStyle.li} ref="li_16">
-                        <div
-                            ref = "svg16"
-                            style={this.props.setIconStyle('../../../../shared/images/icon_10.svg')} 
-                            draggable='false' 
-                            onClick = {() =>  this.onStaticListItemClicked(16)}
-                        />
-                    </li>
-                    <li style = {componentStyle.li} ref="li_15">
-                        <div
-                            ref = "svg15"
-                            style={this.props.setIconStyle('../../../../shared/images/icon_8.svg')} 
-                            draggable='false' 
-                            onClick = {() =>  this.onStaticListItemClicked(15)}
-                        />
-                    </li>
-                   <li style = {componentStyle.li} ref="li_14">
-                        <div
-                            ref = "svg14"
-                            style={this.props.setIconStyle('../../../../shared/images/icon_7.svg')} 
-                            draggable='false' 
-                            onClick = {() =>  this.onStaticListItemClicked(14)}
-                        />
-                    </li>
-                    {
-                        this.props.entityTypes.map((entityType, idx) => 
-                            <li key={idx} style = {componentStyle.li} ref={`li_${idx}`}>
-                                <div 
-                                    ref = {`svg${idx}`}
-                                    id={Guid.create()} 
-                                    style={this.props.setIconStyle(entityType.imgUrl)} 
-                                    draggable='false' 
-                                    onClick = {() =>  this.onListItemClicked(entityType, idx)}
-                                />
-                            </li>)
-                    }
-                   <li style = {componentStyle.li} ref="li_13">
-                        <div
-                            ref = "svg13"
-                            style={this.props.setIconStyle('../../../../shared/images/icon_4.svg')} 
-                            draggable='false' 
-                            onClick = {() =>  this.onStaticListItemClicked(13)}
-                        />
-                    </li>
-                    <li style = {componentStyle.li} ref="li_11">
-                        <div
-                            ref = "svg11"
-                            style={this.props.setIconStyle('../../../../shared/images/icon_2.svg')} 
-                            draggable='false' 
-                            onClick = {() =>  this.onStaticListItemClicked(11)}
-                        />
-                    </li>
-                </ul>
-            </div>
-        );
-    }
-}
-
-

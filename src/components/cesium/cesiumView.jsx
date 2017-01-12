@@ -42,7 +42,7 @@ import 'cesium/Source/Widgets/widgets.css';
 //-----------------------------------------------------------------------------------------------------------------
 
 //-----------------services ----------------------------------------
-import { defined, isPointIsInsideCircle } from '../../utills/services';
+import { defined, isPointIsInsideCircle, getModifiedRecordIdx, isEqualObjects } from '../../utills/services';
 
 //-----------------resources----------------------------------------
 import {resources} from '../../shared/data/resources'; 
@@ -159,10 +159,103 @@ export default class CesiumView extends React.Component {
         // add data source for mission id tooltip
         this.viewer.dataSources.add(new CustomDataSource('EntityMissionTooltips'));
         
-        // map the data sources from the entityTypes
-        this.props.entityTypes.forEach(entityType => this.createEntityTypeDataSource(entityType));
-
         this.setMapEventHandlers(this.viewer, this.handler, entity, selectedEntity, dragging, isFirstClick);
+    }
+
+    componentWillReceiveProps(newProps) {
+        // if the current state is that no entities at all
+        const firstinitialization = this.props.entityTypes.length === 0;
+        
+        if(firstinitialization) {    
+            // map the data sources from the entityTypes 
+            newProps.entityTypes.forEach(entityType => this.createEntityTypeDataSource(entityType));
+            return;
+        }
+
+        const modifyEntityTypeIndex = this.getModifiedEntityType(this.props.entityTypes, newProps.entityTypes);
+
+        if(modifyEntityTypeIndex !== -1) {
+            const currentEntitiesNum = this.props.entityTypes[modifyEntityTypeIndex].entities.length,
+            newEntitiesNum = newProps.entityTypes[modifyEntityTypeIndex].entities.length,
+            entityTypeName = this.props.entityTypes[modifyEntityTypeIndex].name,
+            entityTypeDataSource = this.getDataSourceByName(entityTypeName);
+
+            // toggle entity type activation occourd  
+            if(this.props.entityTypes[modifyEntityTypeIndex].active !== newProps.entityTypes[modifyEntityTypeIndex].active) {
+                entityTypeDataSource.show = !entityTypeDataSource.show;
+                return;
+            }
+
+            if(currentEntitiesNum < newEntitiesNum) {               // one entity added
+                const addedEntityInStore = newProps.entityTypes[modifyEntityTypeIndex].entities[newEntitiesNum - 1],
+                    entityToAdd = this.generateEntity(entityTypeName, addedEntityInStore);
+
+                this.addEntityToDataSourceCollection(entityToAdd, entityTypeDataSource, entityTypeName, addedEntityInStore);
+                return;
+            }
+
+            if(currentEntitiesNum > newEntitiesNum) {               // one entity removed
+                const entityIdxToDelete = this.getDeletedRecordIdx(this.props.entityTypes[modifyEntityTypeIndex]);
+
+                const entityToRemove = entityTypeDataSource.entities.values.find(e => e.storeEntity.id === entityIdxToDelete.id);
+                entityTypeDataSource.entities.remove(entityToRemove);
+                return;
+            }
+
+            if (currentEntitiesNum === newEntitiesNum) {            // one entity updated
+                const entityTypeDataSource = this.getDataSourceByName(newProps.entityTypes[modifyEntityTypeIndex].name),
+                    entityToUpdateIdx = getModifiedRecordIdx(this.props.entityTypes[modifyEntityTypeIndex].entities, newProps.entityTypes[modifyEntityTypeIndex].entities);
+
+                if(entityToUpdateIdx !== -1)
+                {
+                    const changedStoreEntity = newProps.entityTypes[modifyEntityTypeIndex].entities[entityToUpdateIdx];
+                    const entityToUpdate = entityTypeDataSource.entities.values.find(e => e.storeEntity.id === changedStoreEntity.id);
+                    // update position
+                    entityToUpdate.position = this.getCartesianPosition(changedStoreEntity.position);  
+                    // update bilboard for new color due to the new height
+                    entityToUpdate.billboard = this.getBillboard(newProps.entityTypes[modifyEntityTypeIndex].name, changedStoreEntity);
+                }
+                
+                return;
+            }
+        }
+    }
+
+    /**
+     * @param {Array} oldEntityTypes
+     * @param {Array} newEntityTypes
+     * @returns {Number} -1 if not found, otherwise the index
+     */
+    getModifiedEntityType(oldEntityTypes, newEntityTypes) {
+        let modifiedIdx = -1;
+
+        for(let i = 0 ; i < oldEntityTypes.length ; i++) {
+            if(!isEqualObjects(oldEntityTypes[i], newEntityTypes[i])) {
+                modifiedIdx = i;
+                break;
+            }
+        }
+
+        return modifiedIdx;
+    }
+
+    /**
+     * finds the deleted record from arr1, when arr1 and arr2 are equivalent except this record
+     * @param {Array} arr1
+     * @param {Array} arr2
+     * @returns {Number} the deleted record index
+     */
+    getDeletedRecordIdx(arr1, arr2) {
+        let recordToFind = -1;
+
+        for(let i = 0 ; i < arr2.length; i++) {
+            if(!isEqualObjects(arr1[i], arr2[i])) {
+                recordToFind = i;
+                break;
+            }
+        }
+
+        return recordToFind;
     }
 
     setMapEventHandlers(viewer, handler, entity, selectedEntity, dragging, isFirstClick) {
@@ -225,13 +318,31 @@ export default class CesiumView extends React.Component {
                 const pickedObject = viewer.scene.pick(click.position) || this.zoomedEntity;
 
                 if (pickedObject) {
-                    this.props.actions[resources.ACTIONS.TOGGLE_BEST_FIT_DISPLAY.TYPE](resources.AGENTS.USER, {entity: pickedObject?pickedObject.id:null});
+                    if(!this.zoomedEntity) {
+                        const entity = pickedObject.id,
+                            isRectangle = entity.storeEntity.entityTypeName === resources.ENTITY_TYPE_NAMES.DMA,
+                            zoomOptions = {
+                                heading : 0,
+                                pitch: -CesiumMath.PI/2
+                            };
+                        
+                        if(!isRectangle && entity.billboard.sizeInMeters) {
+                            zoomOptions.range = entity.billboard.width.getValue() * 2.25;
+                        }
+                        
+                        this.viewer.zoomTo(entity, zoomOptions);
+                        this.zoomedEntity = entity;
+                    } 
+                    else {
+                        this.viewer.camera.lookAt(Cartesian3.fromDegrees(this.viewState.center.x, this.viewState.center.y), new Cartesian3(0.0, 0.0, this.viewState.zoomHeight));
+                        this.zoomedEntity = null;
+                    } 
                 } 
                 else {
                     const cartesian = this.viewer.camera.pickEllipsoid( click.position, this.viewer.scene.globe.ellipsoid);
                     this.viewer.camera.lookAt(cartesian, new Cartesian3(0.0, 0.0, this.viewState.zoomHeight));
                     this.hideEntityForm();
-                }
+            }
             }, ScreenSpaceEventType.RIGHT_UP);         
     }
 
@@ -426,6 +537,10 @@ export default class CesiumView extends React.Component {
         };
     }
 
+    /**
+     * @param {String} entityTypeName
+     * @param {Object} entity store entity
+     */
     getBillboard(entityTypeName, entity) {
         if (entity && entityTypeName) {
             let billboard = {
@@ -565,7 +680,7 @@ export default class CesiumView extends React.Component {
                         id: Guid.create()
                     };
             
-                this.props.actions[resources.ACTIONS.ADD.TYPE](resources.AGENTS.USER, addEntityData);
+                this.props.actions.addEntity(entityTypeName, addEntityData);
             }
             else {
                 this.selectedEntity = Object.assign({}, {
@@ -590,9 +705,7 @@ export default class CesiumView extends React.Component {
     onEntityFormClose(formData) {
         if(formData && formData.entity) {
             this.selectedEntity = Object.assign({}, formData.entity);
-            this.props.actions[resources.ACTIONS.ADD.TYPE](
-                resources.AGENTS.USER,
-                this.selectedEntity);     
+            this.props.actions.addEntity(this.selectedEntity.entityTypeName, this.selectedEntity);    
         }
         else {
             // EntityForm closed with Cancel
