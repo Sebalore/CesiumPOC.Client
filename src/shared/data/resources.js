@@ -155,14 +155,6 @@ export const resources = {
             ],
             AGENTS: [USER]
         },
-        SET_ENTITY_CESIUM_ID : {
-            TYPE: SET_ENTITY_CESIUM_ID,
-            DESC: 'add generated cesiumId to added object in the store',
-            LAYERS: [
-                DMA, FLIGHT_AREA, FORBIDEN_FLIGHT_AREA, UAV, FLIGHT_CIRCLE
-            ],
-            AGENTS: [USER]
-        },
         TOGGLE_ENTITY_TYPE: {
             TYPE: TOGGLE_ENTITY_TYPE,
             DESC: 'Turn on/off layer and/or entity type on the map',
