@@ -58,3 +58,14 @@ export const setEntityPosition = (entityIdUpdate, entityPosition) => ({
     entityIdUpdate, entityPosition
   }
 });
+
+/**
+ * @param {Object} entityToAdd
+ */
+export const addEntity = (entityTypeName, entityToAdd) => ({
+  type: 'ADD_ENTITY',
+  data: {
+    entityToAdd,
+    entityTypeName
+  }
+});

@@ -656,6 +656,7 @@ export default class CesiumView extends React.Component {
                         id: Guid.create()
                     };
             
+                this.props.actions.
                 this.props.actions[resources.ACTIONS.ADD.TYPE](resources.AGENTS.USER, addEntityData);
             }
             else {

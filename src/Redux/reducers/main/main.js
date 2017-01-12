@@ -28,6 +28,17 @@ const mainReducer = (state = initialState, action) => {
             
             return newState;
         }
+        case 'ADD_ENTITY':
+        {
+            const unReached = -1,
+                whereToAdd = getEntityTypeIdx(newState.entityTypes, action.data.entityTypeName);
+
+            if(whereToAdd !== unReached) {
+                newState.entityTypes[whereToAdd].push(action.data.entityToAdd);
+            }
+  
+            return newState;
+        }
         case 'SET_ENTITY_POSITION':
         {
             const unReached = -1;
@@ -68,4 +79,23 @@ export function getEntityById(entityId, entityContianer) {
     }
 
     return entityIdx;
+}
+
+/**
+ * get entity type index by name
+ * @param {Array} entityTypeArr
+ * @param {String} entityTypeName
+ * @returns {Number} -1 if not found
+ */
+export function getEntityTypeIdx(entityTypeArr, entityTypeName) {
+    let idxToReturn = -1;
+
+    for(let i = 0 ; i < entityTypeArr.length; i++) {
+        if(entityTypeArr[i].name === entityTypeName) {
+            idxToReturn = i;
+            break;
+        }
+    }
+
+    return idxToReturn;
 }
