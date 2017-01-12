@@ -69,3 +69,11 @@ export const addEntity = (entityTypeName, entityToAdd) => ({
     entityTypeName
   }
 });
+
+/**
+ * @param {String} entityTypeName
+ */
+export const toggleEntityTypeActivation = (entityTypeName) => ({
+  type: 'TOGGLE_ENTITY_TYPE_ACTIVATION',
+  data: entityTypeName
+});

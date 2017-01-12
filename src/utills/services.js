@@ -81,7 +81,7 @@ export function deepClone(sourceObject)
  * @returns {Boolean} 
  */
 export function isEqualObjects(firstObj, secondObj) {
-    JSON.stringify(firstObj) === JSON.stringify(secondObj);
+    return JSON.stringify(firstObj) === JSON.stringify(secondObj);
 }
 
 /**

@@ -172,11 +172,18 @@ export default class CesiumView extends React.Component {
             return;
         }
 
+        
         const modifyEntityTypeIndex = this.getModifiedEntityType(this.props.entityTypes, newProps.entityTypes),
             currentEntitiesNum = this.props.entityTypes[modifyEntityTypeIndex].entities.length,
             newEntitiesNum = newProps.entityTypes[modifyEntityTypeIndex].entities.length,
             entityTypeName = this.props.entityTypes[modifyEntityTypeIndex].name,
             entityTypeDataSource = this.getDataSourceByName(entityTypeName);
+
+        // toggle entity type activation occourd  
+        if(this.props.entityTypes[modifyEntityTypeIndex].active !== newProps.entityTypes[modifyEntityTypeIndex].active) {
+            entityTypeDataSource.show = !entityTypeDataSource.show;
+            return;
+        }
 
         if(currentEntitiesNum < newEntitiesNum) {               // one entity added
             const addedEntityInStore = newProps.entityTypes[modifyEntityTypeIndex].entities[newEntitiesNum - 1],
@@ -312,6 +319,7 @@ export default class CesiumView extends React.Component {
                 const pickedObject = viewer.scene.pick(click.position) || this.zoomedEntity;
 
                 if (pickedObject) {
+                    
                     this.props.actions[resources.ACTIONS.TOGGLE_BEST_FIT_DISPLAY.TYPE](resources.AGENTS.USER, {entity: pickedObject?pickedObject.id:null});
                 } 
                 else {
@@ -656,8 +664,7 @@ export default class CesiumView extends React.Component {
                         id: Guid.create()
                     };
             
-                this.props.actions.
-                this.props.actions[resources.ACTIONS.ADD.TYPE](resources.AGENTS.USER, addEntityData);
+                this.props.actions.addEntity(entityTypeName, addEntityData);
             }
             else {
                 this.selectedEntity = Object.assign({}, {
@@ -682,9 +689,7 @@ export default class CesiumView extends React.Component {
     onEntityFormClose(formData) {
         if(formData && formData.entity) {
             this.selectedEntity = Object.assign({}, formData.entity);
-            this.props.actions[resources.ACTIONS.ADD.TYPE](
-                resources.AGENTS.USER,
-                this.selectedEntity);     
+            this.props.actions.addEntity(this.selectedEntity.entityTypeName, this.selectedEntity);    
         }
         else {
             // EntityForm closed with Cancel

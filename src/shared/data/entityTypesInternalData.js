@@ -7,7 +7,7 @@ export default  {
     {
       name: resources.ENTITY_TYPE_NAMES.FLIGHT_CIRCLE_IN,
       imgUrl: `${resources.IMG.BASE_URL}${resources.ENTITY_TYPES[resources.ENTITY_TYPE_NAMES.FLIGHT_CIRCLE_IN].IMG}`,
-      active: true,
+      active: false,
       actions: [{
           id: resources.ENTITY_TYPES[resources.ENTITY_TYPE_NAMES.DMA].ACTIONS.ADD.ID,
           description: resources.ENTITY_TYPES[resources.ENTITY_TYPE_NAMES.DMA].ACTIONS.ADD.DESC,
@@ -19,7 +19,7 @@ export default  {
     {
       name: resources.ENTITY_TYPE_NAMES.DMA,
       imgUrl: `${resources.IMG.BASE_URL}${resources.ENTITY_TYPES[resources.ENTITY_TYPE_NAMES.DMA].IMG}`,
-      active: true,
+      active: false,
       actions: [{
           id: resources.ENTITY_TYPES[resources.ENTITY_TYPE_NAMES.DMA].ACTIONS.ADD.ID,
           description: resources.ENTITY_TYPES[resources.ENTITY_TYPE_NAMES.DMA].ACTIONS.ADD.DESC,

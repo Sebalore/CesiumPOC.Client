@@ -34,7 +34,7 @@ const mainReducer = (state = initialState, action) => {
                 whereToAdd = getEntityTypeIdx(newState.entityTypes, action.data.entityTypeName);
 
             if(whereToAdd !== unReached) {
-                newState.entityTypes[whereToAdd].push(action.data.entityToAdd);
+                newState.entityTypes[whereToAdd].entities.push(action.data.entityToAdd);
             }
   
             return newState;
@@ -48,6 +48,17 @@ const mainReducer = (state = initialState, action) => {
                 newState.entityTypes[entityIdx].position = action.data.entityPosition;
             }
 
+            return newState;
+        }
+        case 'TOGGLE_ENTITY_TYPE_ACTIVATION':
+        {
+             const unReached = -1,
+                whereToAdd = getEntityTypeIdx(newState.entityTypes, action.data);
+
+            if(whereToAdd !== unReached) {
+                newState.entityTypes[whereToAdd].active = !newState.entityTypes[whereToAdd].active;
+            }
+  
             return newState;
         }
         

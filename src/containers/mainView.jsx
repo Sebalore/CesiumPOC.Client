@@ -52,7 +52,7 @@ class MainView extends React.Component
           });
     }
 
-    setIconStyle(imgName) {
+    setIconStyle(imgName, isActive) {
         const lastSlash = imgName.lastIndexOf('/');
         const parsedImage = imgName.substring(lastSlash + 1, imgName.length);
         const newStyle = JSON.parse(JSON.stringify(componentStyle.icon)); // deep cloning
@@ -60,6 +60,9 @@ class MainView extends React.Component
 
         newStyle.WebkitMask = concreteDisplay;
         newStyle.mask = concreteDisplay;
+
+        newStyle.backgroundColor = isActive ? 
+            '#c9953a' : 'white';
 
         return newStyle;
     }

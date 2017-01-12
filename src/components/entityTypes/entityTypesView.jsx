@@ -11,7 +11,7 @@ export default class EntityTypes extends React.PureComponent {
     }
 
     onListItemClicked(entityType, idx) {
-        this.props.actions[resources.ACTIONS.TOGGLE_ENTITY_TYPE.TYPE](resources.AGENTS.USER,{entityTypeName: entityType.name});
+        this.props.actions.toggleEntityTypeActivation(entityType.name);
         this.refs[`svg${idx}`].style.backgroundColor = 
             entityType.active ? 
                 '#c9953a' : 'white';
@@ -30,7 +30,7 @@ export default class EntityTypes extends React.PureComponent {
                     <li style = {componentStyle.li} ref="li_16">
                         <div
                             ref = "svg16"
-                            style={this.props.setIconStyle('../../../../shared/images/icon_10.svg')} 
+                            style={this.props.setIconStyle('../../../../shared/images/icon_10.svg', false)} 
                             draggable='false' 
                             onClick = {() =>  this.onStaticListItemClicked(16)}
                         />
@@ -38,7 +38,7 @@ export default class EntityTypes extends React.PureComponent {
                     <li style = {componentStyle.li} ref="li_15">
                         <div
                             ref = "svg15"
-                            style={this.props.setIconStyle('../../../../shared/images/icon_8.svg')} 
+                            style={this.props.setIconStyle('../../../../shared/images/icon_8.svg', false)} 
                             draggable='false' 
                             onClick = {() =>  this.onStaticListItemClicked(15)}
                         />
@@ -46,7 +46,7 @@ export default class EntityTypes extends React.PureComponent {
                    <li style = {componentStyle.li} ref="li_14">
                         <div
                             ref = "svg14"
-                            style={this.props.setIconStyle('../../../../shared/images/icon_7.svg')} 
+                            style={this.props.setIconStyle('../../../../shared/images/icon_7.svg', false)} 
                             draggable='false' 
                             onClick = {() =>  this.onStaticListItemClicked(14)}
                         />
@@ -58,7 +58,7 @@ export default class EntityTypes extends React.PureComponent {
                                 <div 
                                     ref = {`svg${idx}`}
                                     id={Guid.create()} 
-                                    style={this.props.setIconStyle(entityType.imgUrl)} 
+                                    style={this.props.setIconStyle(entityType.imgUrl, entityType.active)} 
                                     draggable='false' 
                                     onClick = {() =>  this.onListItemClicked(entityType, idx)}
                                 />
@@ -67,7 +67,7 @@ export default class EntityTypes extends React.PureComponent {
                    <li style = {componentStyle.li} ref="li_13">
                         <div
                             ref = "svg13"
-                            style={this.props.setIconStyle('../../../../shared/images/icon_4.svg')} 
+                            style={this.props.setIconStyle('../../../../shared/images/icon_4.svg', false)} 
                             draggable='false' 
                             onClick = {() =>  this.onStaticListItemClicked(13)}
                         />
@@ -75,7 +75,7 @@ export default class EntityTypes extends React.PureComponent {
                     <li style = {componentStyle.li} ref="li_11">
                         <div
                             ref = "svg11"
-                            style={this.props.setIconStyle('../../../../shared/images/icon_2.svg')} 
+                            style={this.props.setIconStyle('../../../../shared/images/icon_2.svg', false)} 
                             draggable='false' 
                             onClick = {() =>  this.onStaticListItemClicked(11)}
                         />
