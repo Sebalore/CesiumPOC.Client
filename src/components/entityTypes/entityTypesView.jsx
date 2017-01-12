@@ -2,31 +2,6 @@ import React from 'react';
 import Guid from 'guid';
 import {resources} from '../../shared/data/resources'; 
 
-//CONSTS
-const componentStyle = {
-    containerDiv : {
-        display: 'inline-block',
-        float: 'right',
-        height: '100%',
-        backgroundColor: '#47494c',
-        border: '2px solid black',
-        width: '60vw',
-        overflow: 'hidden',
-    }, 
-    li : {
-        height: '100%',
-        width: '2vw',
-        listStyle: 'none',
-        marginLeft: '25px',
-    },
-    ul : {
-        height: '100%',
-        margin: 'auto 2.5vw auto 0px',
-        display: 'inline-flex',
-        float: 'right',
-    }
-};
-
 export default class EntityTypes extends React.PureComponent {
     constructor(props) {
         super(props);
@@ -77,6 +52,7 @@ export default class EntityTypes extends React.PureComponent {
                         />
                     </li>
                     {
+                        this.props.entityTypes instanceof Array &&
                         this.props.entityTypes.map((entityType, idx) => 
                             <li key={idx} style = {componentStyle.li} ref={`li_${idx}`}>
                                 <div 
@@ -110,4 +86,26 @@ export default class EntityTypes extends React.PureComponent {
     }
 }
 
-
+const componentStyle = {
+    containerDiv : {
+        display: 'inline-block',
+        float: 'right',
+        height: '100%',
+        backgroundColor: '#47494c',
+        border: '2px solid black',
+        width: '60vw',
+        overflow: 'hidden',
+    }, 
+    li : {
+        height: '100%',
+        width: '2vw',
+        listStyle: 'none',
+        marginLeft: '25px',
+    },
+    ul : {
+        height: '100%',
+        margin: 'auto 2.5vw auto 0px',
+        display: 'inline-flex',
+        float: 'right',
+    }
+};

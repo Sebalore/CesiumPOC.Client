@@ -73,3 +73,39 @@ export function deepClone(sourceObject)
 {
     return JSON.parse(JSON.stringify(sourceObject));
 }
+
+/**
+ * check if two obejct are equal
+ * @param {Object} firstObj
+ * @param {Object} secondObj
+ * @returns {Boolean} 
+ */
+export function isEqualObjects(firstObj, secondObj) {
+    JSON.stringify(firstObj) === JSON.stringify(secondObj);
+}
+
+/**
+ * get the index of the modified record between to equivalent sized arrays
+ * @param {Array} arr1
+ * @param {Array} arr2
+ * @returns {Number} the index of the first modified record if there is, otherwise -1 
+ */
+export function getModifiedRecordIdx(arr1, arr2) {
+    let modifiedIndexToReturn = -1;
+    
+    if(arr1.length !== arr2.length) {
+        return modifiedIndexToReturn;
+    }
+
+    for(let i = 0 ; i < arr1.length; i++) {
+        const firstObj = { ...arr1[i] },
+            secondObj = { ...arr2[i] };
+
+        if(!isEqualObjects(firstObj, secondObj)) {
+            modifiedIndexToReturn = i;
+            break;
+        }
+    }
+
+    return modifiedIndexToReturn;
+}

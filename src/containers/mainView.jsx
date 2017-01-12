@@ -1,93 +1,101 @@
-import React, {Component} from 'react';
+// react imports
+import React from 'react';
 
-//inner components
-import actions from '../flux/actions';
-import store from '../flux/store';
-import CesiumView from './cesium/cesiumView';
-import EntityTypes from './entityTypes/entityTypesView';
-import AddEntity from './addEntity/addEntityView';
+// redux imports
+import { bindActionCreators } from 'redux';
+import { connect } from 'react-redux';
+
+// actions imports
+import * as mainActions from '../Redux/actions/mainActions';
+
+// sub components imports
+import CesiumView from '../components/cesium/cesiumView';
+import EntityTypes from '../components/entityTypes/entityTypesView';
+import AddEntity from '../components/addEntity/addEntityView';
+
+// utils
+import {isEmptyObject, createLinearCoordinatesGenerator} from '../utills/services';
 
 // resources
 import {resources} from '../shared/data/resources';
 
-export default class Main extends Component {
+class MainView extends React.Component
+{
+    componentDidMount() {
+        this.props.actions.fetchAllLayersData();
 
-  componentWillMount() {
-    this.setEntityTypes(store.data.entityTypes);
-    this.setAddableEntityTypesInfo(store.data.entityTypes);
-    store.on('entityTypesChanged', this.setEntityTypes.bind(this));
-    store.on('activeEntityTypesChanged', this.setAddableEntityTypesInfo.bind(this));
-  }
-
-  componentDidMount() {
-    store.on('contextAwareActionExecuted', this.refs.cesium.handleContextAwareActions.bind(this.refs.cesium));
-    window.dispatcher.dispatch({type: 'DEBUG_1'});
-  } 
-
-  componentWillUnmount() {
-    store.removeListener('entityTypesChanged', this.setEntityTypes);
-    store.removeListener('activeEntityTypesChanged', this.setAddableEntityTypesInfo);
-    store.removeListener('contextAwareActionExecuted', this.refs.cesium.handleContextAwareActions);
-  }
-
-  setEntityTypes(entityTypes) {
-    this.setState({entityTypes});
-  }
-
-  setAddableEntityTypesInfo(entityTypes) {
-    this.setState({
-      addableEntityTypesInfo: entityTypes
-      .filter(l => {
-          const add = resources.ACTIONS.ADD;
-          const hasUserAgent = add.AGENTS.some(agent => agent === resources.AGENTS.USER);
-          const hasLayer = true; 
-          return l.active && hasUserAgent && hasLayer;
-      }).map(l =>{
-        return {name: l.name, imgUrl: l.imgUrl};
-      })
-    });
-  }
-
-  setIconStyle(imgName) {
-    const lastSlash = imgName.lastIndexOf('/');
-    const parsedImage = imgName.substring(lastSlash + 1, imgName.length);
-    const newStyle = JSON.parse(JSON.stringify(componentStyle.icon)); // deep cloning
-    const concreteDisplay = `url(${resources.IMG.BASE_URL}${parsedImage}) no-repeat 50% 50%`;
-
-    newStyle.WebkitMask = concreteDisplay;
-    newStyle.mask = concreteDisplay;
-
-    return newStyle;
-  }
-
-  render() {
-    if (this.state && this.state.entityTypes) {
-      return (
-        <div className="mainContainer" style={componentStyle}>
-          <div style={componentStyle.mainComponentSon}>
-            <EntityTypes 
-              entityTypes={this.state.entityTypes} 
-              actions={actions} 
-              setIconStyle={this.setIconStyle}/>
-            <AddEntity
-              entityTypesInfo={this.state.addableEntityTypesInfo}
-              actions={actions}
-              setIconStyle={this.setIconStyle}/>
-          </div>
-          <CesiumView 
-            entityTypes={this.state.entityTypes} 
-            actions={actions} 
-            ref='cesium'
-          />
-        </div>
-      );
-    } else {
-      return (
-        <div>there is a problem, please refresh the page</div>
-      );
+        // setTimeout(() => {
+        //     this.startUpdatePositionInterval(2000);
+        // }, 5000);
     }
-  }
+
+    startUpdatePositionInterval(intervalTimeToUpdate) {
+
+        this.props.main.entityTypes.find(l => l.name===resources.ENTITY_TYPE_NAMES.AIRPLANE).entities.forEach(e =>{
+            const gen = createLinearCoordinatesGenerator(e.position);
+            setInterval(() => {
+              const cords = gen.next();
+                if(!cords.done) {
+                    this.props.actions.setEntityPosition(e.id, cords.value);               
+                }
+            }, intervalTimeToUpdate);            
+          });
+          
+          this.props.main.entityTypes.find(l => l.name===resources.ENTITY_TYPE_NAMES.HELICOPTER).entities.forEach(e =>{
+            const gen = createLinearCoordinatesGenerator(e.position);
+            setInterval(() => {
+              const cords = gen.next();
+                if(!cords.done) {
+                    this.props.actions.setEntityPosition(e.id, cords.value);              
+                }
+            }, intervalTimeToUpdate);            
+          });
+    }
+
+    setIconStyle(imgName) {
+        const lastSlash = imgName.lastIndexOf('/');
+        const parsedImage = imgName.substring(lastSlash + 1, imgName.length);
+        const newStyle = JSON.parse(JSON.stringify(componentStyle.icon)); // deep cloning
+        const concreteDisplay = `url(${resources.IMG.BASE_URL}${parsedImage}) no-repeat 50% 50%`;
+
+        newStyle.WebkitMask = concreteDisplay;
+        newStyle.mask = concreteDisplay;
+
+        return newStyle;
+    }
+
+    render() {
+        if (!isEmptyObject(this.props.main)) {
+            return (
+                <div className="mainContainer" style={componentStyle}>
+                    <div style={componentStyle.mainComponentSon}>
+                        <EntityTypes 
+                            entityTypes={this.props.main.entityTypes} 
+                            actions={this.props.actions} 
+                            setIconStyle={this.setIconStyle}
+                        />
+                        <AddEntity
+                            entityTypesInfo={this.props.main.addableEntityTypesInfo}
+                            actions={this.props.actions}
+                            setIconStyle={this.setIconStyle}
+                        />
+                    </div>
+                    <CesiumView 
+                        entityTypes={this.props.main.entityTypes} 
+                        actions={this.props.actions}
+                        ref='cesium'
+                    />
+                </div>
+            );
+            } 
+            else {
+                return ( <div>there is a problem, please refresh the page</div> );
+            }
+    }
 }
+
+//export default App;
+export default connect(mapStateToProps, mapDispatchToProps)(MainView);
 
 const componentStyle = {
 
@@ -113,3 +121,15 @@ const componentStyle = {
     backgroundColor: 'white'
   },
 };
+
+function mapDispatchToProps(dispatch) {
+  return {
+    actions: bindActionCreators({ ...mainActions }, dispatch)
+  };
+}
+
+function mapStateToProps(state) {
+  return {
+    main: state.main
+  };
+}

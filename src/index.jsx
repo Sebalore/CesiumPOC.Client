@@ -12,7 +12,7 @@ import mainInitialState from './Redux/reducers/main/mainIntialState';
 import configureStore from './Redux/reducers/configureStore';
 
 // Other Components Imports
-import MainView from './containers/MainViewNew.jsx';
+import MainView from './containers/MainView.jsx';
 
 
 function getInitialState () {

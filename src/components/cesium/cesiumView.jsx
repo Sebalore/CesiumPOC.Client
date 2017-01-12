@@ -42,7 +42,7 @@ import 'cesium/Source/Widgets/widgets.css';
 //-----------------------------------------------------------------------------------------------------------------
 
 //-----------------services ----------------------------------------
-import { defined, isPointIsInsideCircle } from '../../utills/services';
+import { defined, isPointIsInsideCircle, getModifiedRecordIdx, isEqualObjects } from '../../utills/services';
 
 //-----------------resources----------------------------------------
 import {resources} from '../../shared/data/resources'; 
@@ -159,10 +159,97 @@ export default class CesiumView extends React.Component {
         // add data source for mission id tooltip
         this.viewer.dataSources.add(new CustomDataSource('EntityMissionTooltips'));
         
-        // map the data sources from the entityTypes
-        this.props.entityTypes.forEach(entityType => this.createEntityTypeDataSource(entityType));
-
         this.setMapEventHandlers(this.viewer, this.handler, entity, selectedEntity, dragging, isFirstClick);
+    }
+
+    componentWillReceiveProps(newProps) {
+        // if the current state is that no entities at all
+        const firstinitialization = this.props.entityTypes.length === 0;
+        
+        if(firstinitialization) {    
+            // map the data sources from the entityTypes 
+            newProps.entityTypes.forEach(entityType => this.createEntityTypeDataSource(entityType));
+            return;
+        }
+
+        const modifyEntityTypeIndex = this.getModifiedEntityType(this.props.entityTypes, newProps.entityTypes),
+            currentEntitiesNum = this.props.entityTypes[modifyEntityTypeIndex].entities.length,
+            newEntitiesNum = newProps.entityTypes[modifyEntityTypeIndex].entities.length,
+            entityTypeName = this.props.entityTypes[modifyEntityTypeIndex].name,
+            entityTypeDataSource = this.getDataSourceByName(entityTypeName);
+
+        if(currentEntitiesNum < newEntitiesNum) {               // one entity added
+            const addedEntityInStore = newProps.entityTypes[modifyEntityTypeIndex].entities[newEntitiesNum - 1],
+                entityToAdd = this.generateEntity(entityTypeName, addedEntityInStore);
+
+            this.addEntityToDataSourceCollection(entityToAdd, entityTypeDataSource, entityTypeName, addedEntityInStore);
+            return;
+        }
+
+        if(currentEntitiesNum > newEntitiesNum) {               // one entity removed
+             const entityIdxToDelete = this.getDeletedRecordIdx(this.props.entityTypes[modifyEntityTypeIndex]);
+
+            const entityToRemove = entityTypeDataSource.entities.values.find(e => e.storeEntity.id === entityIdxToDelete.id);
+            entityTypeDataSource.entities.remove(entityToRemove);
+            return;
+        }
+
+        if (currentEntitiesNum === newEntitiesNum) {            // one entity updated
+            // check if there was a update
+            const updatedEntityNameIdx = getModifiedRecordIdx(this.props.entityTypes[modifyEntityTypeIndex], newProps.entityTypes[modifyEntityTypeIndex]),
+                unReached = -1,
+                entityTypeIsActive = updatedEntityNameIdx !== unReached  && newProps.entityTypes[modifyEntityTypeIndex][updatedEntityNameIdx].active;
+
+            if(entityTypeIsActive) {
+                const entityTypeDataSource = this.getDataSourceByName(newProps.entityTypes[updatedEntityNameIdx].name),
+                    entityToUpdateIdx = getModifiedRecordIdx(newProps.entityTypes[updatedEntityNameIdx].entities, newProps.entityTypes[updatedEntityNameIdx].entities),
+                    entityToUpdate = entityTypeDataSource.get(entityToUpdateIdx);
+
+                // update position
+                entityToUpdate.position = this.getCartesianPosition(newProps.entityTypes[updatedEntityNameIdx].entities[entityToUpdateIdx]);  
+                // update bilboard for new color due to the new height
+                entityToUpdate.billboard = this.getBillboard(newProps.entityTypes[updatedEntityNameIdx].name, newProps.entityTypes[updatedEntityNameIdx].entities[entityToUpdateIdx]);
+                
+                return;
+            }
+        }
+    }
+
+    /**
+     * @param {Array} oldEntityTypes
+     * @param {Array} newEntityTypes
+     * @returns {Number} -1 if not found, otherwise the index
+     */
+    getModifiedEntityType(oldEntityTypes, newEntityTypes) {
+        let modifiedIdx = -1;
+
+        for(let i = 0 ; i < oldEntityTypes.length ; i++) {
+            if(!isEqualObjects(oldEntityTypes[i], newEntityTypes[i])) {
+                modifiedIdx = i;
+                break;
+            }
+        }
+
+        return modifiedIdx;
+    }
+
+    /**
+     * finds the deleted record from arr1, when arr1 and arr2 are equivalent except this record
+     * @param {Array} arr1
+     * @param {Array} arr2
+     * @returns {Number} the deleted record index
+     */
+    getDeletedRecordIdx(arr1, arr2) {
+        let recordToFind = -1;
+
+        for(let i = 0 ; i < arr2.length; i++) {
+            if(!isEqualObjects(arr1[i], arr2[i])) {
+                recordToFind = i;
+                break;
+            }
+        }
+
+        return recordToFind;
     }
 
     setMapEventHandlers(viewer, handler, entity, selectedEntity, dragging, isFirstClick) {
@@ -426,6 +513,10 @@ export default class CesiumView extends React.Component {
         };
     }
 
+    /**
+     * @param {String} entityTypeName
+     * @param {Object} entity store entity
+     */
     getBillboard(entityTypeName, entity) {
         if (entity && entityTypeName) {
             let billboard = {

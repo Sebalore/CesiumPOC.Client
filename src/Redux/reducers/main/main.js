@@ -3,17 +3,42 @@ import {deepClone} from '../../../utills/services';
 
 const mainReducer = (state = initialState, action) => {
 
-    let newState = deepClone(state); 
+    const newState = deepClone(state); 
 
     switch (action.type) {
 
-        case 'SET_VALUE_1':
-            newState.value1 = action.data;
+        case 'SET_ENTITY_TYPES':
+        {
+            newState.entityTypes = action.data;
             return newState;
+        }
+        case 'SET_ADDABLE_ENTITY_TYPES_INFO':
+        {
+            newState.addableEntityTypesInfo = action.data;
+            return newState;
+        }
+        case 'DELETE_ENTITY':
+        {
+            const unReached = -1;
+            const entityIdx = getEntityById(action.data, state.entityTypes);
 
-        case 'SET_VALUE_2':
-            newState.value2 = action.data;
+            if(entityIdx != unReached) {
+                newState.entityTypes.splice(entityIdx, 1);
+            }
+            
             return newState;
+        }
+        case 'SET_ENTITY_POSITION':
+        {
+            const unReached = -1;
+            const entityIdx = getEntityById(action.data.entityIdUpdate, state.entityTypes);
+
+            if(entityIdx != unReached) {
+                newState.entityTypes[entityIdx].position = action.data.entityPosition;
+            }
+
+            return newState;
+        }
         
         default:
             return state;
@@ -21,3 +46,26 @@ const mainReducer = (state = initialState, action) => {
 };
 
 export default mainReducer;
+
+// -------------------------------------------- helper functions -------------------
+
+/**
+ * get entity index in the container array by his id
+ * @param {String} entityId
+ * @param {Array} entityContianer
+ * @returns {Number} the entity index if found, otherwise -1
+ */
+export function getEntityById(entityId, entityContianer) {
+    let entityIdx = -1;
+
+    for(let i = 0 ; i < entityContianer. length; i++) {
+        const currentEntity = entityContianer[i];
+
+        if (currentEntity.id === entityId) {
+            entityIdx = i;
+            break;
+        }
+    }
+
+    return entityIdx;
+}
