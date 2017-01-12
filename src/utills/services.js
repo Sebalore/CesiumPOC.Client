@@ -34,7 +34,6 @@ export function defined(object) {
     return (object !== undefined && object !== null);
 }
 
-
 /**
  * @param {Object} obj
  */
@@ -63,4 +62,14 @@ export function getDistanceBetweenPoints(point1, point2) {
     const d = R * c;
 
     return d;    
+}
+
+/**
+ * deep clone of objects
+ * @param {Object} sourceObject the object to clone from
+ * @returns {Object} the cloned object 
+ */
+export function deepClone(sourceObject)
+{
+    return JSON.parse(JSON.stringify(sourceObject));
 }
