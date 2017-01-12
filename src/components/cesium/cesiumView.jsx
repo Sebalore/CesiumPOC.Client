@@ -172,49 +172,49 @@ export default class CesiumView extends React.Component {
             return;
         }
 
-        const modifyEntityTypeIndex = this.getModifiedEntityType(this.props.entityTypes, newProps.entityTypes),
-            currentEntitiesNum = this.props.entityTypes[modifyEntityTypeIndex].entities.length,
+        const modifyEntityTypeIndex = this.getModifiedEntityType(this.props.entityTypes, newProps.entityTypes);
+
+        if(modifyEntityTypeIndex !== -1) {
+            const currentEntitiesNum = this.props.entityTypes[modifyEntityTypeIndex].entities.length,
             newEntitiesNum = newProps.entityTypes[modifyEntityTypeIndex].entities.length,
             entityTypeName = this.props.entityTypes[modifyEntityTypeIndex].name,
             entityTypeDataSource = this.getDataSourceByName(entityTypeName);
 
-        // toggle entity type activation occourd  
-        if(this.props.entityTypes[modifyEntityTypeIndex].active !== newProps.entityTypes[modifyEntityTypeIndex].active) {
-            entityTypeDataSource.show = !entityTypeDataSource.show;
-            return;
-        }
+            // toggle entity type activation occourd  
+            if(this.props.entityTypes[modifyEntityTypeIndex].active !== newProps.entityTypes[modifyEntityTypeIndex].active) {
+                entityTypeDataSource.show = !entityTypeDataSource.show;
+                return;
+            }
 
-        if(currentEntitiesNum < newEntitiesNum) {               // one entity added
-            const addedEntityInStore = newProps.entityTypes[modifyEntityTypeIndex].entities[newEntitiesNum - 1],
-                entityToAdd = this.generateEntity(entityTypeName, addedEntityInStore);
+            if(currentEntitiesNum < newEntitiesNum) {               // one entity added
+                const addedEntityInStore = newProps.entityTypes[modifyEntityTypeIndex].entities[newEntitiesNum - 1],
+                    entityToAdd = this.generateEntity(entityTypeName, addedEntityInStore);
 
-            this.addEntityToDataSourceCollection(entityToAdd, entityTypeDataSource, entityTypeName, addedEntityInStore);
-            return;
-        }
+                this.addEntityToDataSourceCollection(entityToAdd, entityTypeDataSource, entityTypeName, addedEntityInStore);
+                return;
+            }
 
-        if(currentEntitiesNum > newEntitiesNum) {               // one entity removed
-             const entityIdxToDelete = this.getDeletedRecordIdx(this.props.entityTypes[modifyEntityTypeIndex]);
+            if(currentEntitiesNum > newEntitiesNum) {               // one entity removed
+                const entityIdxToDelete = this.getDeletedRecordIdx(this.props.entityTypes[modifyEntityTypeIndex]);
 
-            const entityToRemove = entityTypeDataSource.entities.values.find(e => e.storeEntity.id === entityIdxToDelete.id);
-            entityTypeDataSource.entities.remove(entityToRemove);
-            return;
-        }
+                const entityToRemove = entityTypeDataSource.entities.values.find(e => e.storeEntity.id === entityIdxToDelete.id);
+                entityTypeDataSource.entities.remove(entityToRemove);
+                return;
+            }
 
-        if (currentEntitiesNum === newEntitiesNum) {            // one entity updated
-            // check if there was a update
-            const updatedEntityNameIdx = getModifiedRecordIdx(this.props.entityTypes[modifyEntityTypeIndex], newProps.entityTypes[modifyEntityTypeIndex]),
-                unReached = -1,
-                entityTypeIsActive = updatedEntityNameIdx !== unReached  && newProps.entityTypes[modifyEntityTypeIndex][updatedEntityNameIdx].active;
+            if (currentEntitiesNum === newEntitiesNum) {            // one entity updated
+                const entityTypeDataSource = this.getDataSourceByName(newProps.entityTypes[modifyEntityTypeIndex].name),
+                    entityToUpdateIdx = getModifiedRecordIdx(this.props.entityTypes[modifyEntityTypeIndex].entities, newProps.entityTypes[modifyEntityTypeIndex].entities);
 
-            if(entityTypeIsActive) {
-                const entityTypeDataSource = this.getDataSourceByName(newProps.entityTypes[updatedEntityNameIdx].name),
-                    entityToUpdateIdx = getModifiedRecordIdx(newProps.entityTypes[updatedEntityNameIdx].entities, newProps.entityTypes[updatedEntityNameIdx].entities),
-                    entityToUpdate = entityTypeDataSource.get(entityToUpdateIdx);
-
-                // update position
-                entityToUpdate.position = this.getCartesianPosition(newProps.entityTypes[updatedEntityNameIdx].entities[entityToUpdateIdx]);  
-                // update bilboard for new color due to the new height
-                entityToUpdate.billboard = this.getBillboard(newProps.entityTypes[updatedEntityNameIdx].name, newProps.entityTypes[updatedEntityNameIdx].entities[entityToUpdateIdx]);
+                if(entityToUpdateIdx !== -1)
+                {
+                    const changedStoreEntity = newProps.entityTypes[modifyEntityTypeIndex].entities[entityToUpdateIdx];
+                    const entityToUpdate = entityTypeDataSource.entities.values.find(e => e.storeEntity.id === changedStoreEntity.id);
+                    // update position
+                    entityToUpdate.position = this.getCartesianPosition(changedStoreEntity.position);  
+                    // update bilboard for new color due to the new height
+                    entityToUpdate.billboard = this.getBillboard(newProps.entityTypes[modifyEntityTypeIndex].name, changedStoreEntity);
+                }
                 
                 return;
             }
@@ -342,30 +342,8 @@ export default class CesiumView extends React.Component {
                     const cartesian = this.viewer.camera.pickEllipsoid( click.position, this.viewer.scene.globe.ellipsoid);
                     this.viewer.camera.lookAt(cartesian, new Cartesian3(0.0, 0.0, this.viewState.zoomHeight));
                     this.hideEntityForm();
-                }
-            }, ScreenSpaceEventType.RIGHT_UP);         
-    }
-
-    handleBestFit(pickedObject) {
-        if(!this.zoomedEntity) {
-            const entity = pickedObject,
-                isRectangle = entity.storeEntity.entityTypeName === resources.ENTITY_TYPE_NAMES.DMA,
-                zoomOptions = {
-                    heading : 0,
-                    pitch: -CesiumMath.PI/2
-                };
-            
-            if(!isRectangle && entity.billboard.sizeInMeters) {
-                zoomOptions.range = entity.billboard.width.getValue() * 2.25;
             }
-            
-            this.viewer.zoomTo(entity, zoomOptions);
-            this.zoomedEntity = entity;
-        } 
-        else {
-            this.viewer.camera.lookAt(Cartesian3.fromDegrees(this.viewState.center.x, this.viewState.center.y), new Cartesian3(0.0, 0.0, this.viewState.zoomHeight));
-            this.zoomedEntity = null;
-        } 
+            }, ScreenSpaceEventType.RIGHT_UP);         
     }
 
     handleContextAwareActions(error, eventData) {

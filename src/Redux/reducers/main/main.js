@@ -1,5 +1,5 @@
 import initialState from './mainIntialState';
-import {deepClone} from '../../../utills/services';
+import {deepClone, isEmptyObject} from '../../../utills/services';
 
 const mainReducer = (state = initialState, action) => {
 
@@ -41,11 +41,10 @@ const mainReducer = (state = initialState, action) => {
         }
         case 'SET_ENTITY_POSITION':
         {
-            const unReached = -1;
-            const entityIdx = getEntityById(action.data.entityIdUpdate, state.entityTypes);
+            const entityDetails = getEntityById(action.data.entityIdUpdate, state.entityTypes);
 
-            if(entityIdx != unReached) {
-                newState.entityTypes[entityIdx].position = action.data.entityPosition;
+            if(!isEmptyObject(entityDetails)) {
+                newState.entityTypes[entityDetails.entityTypeIndex].entities[entityDetails.entityIndex].position = action.data.entityPosition;
             }
 
             return newState;
@@ -74,22 +73,25 @@ export default mainReducer;
 /**
  * get entity index in the container array by his id
  * @param {String} entityId
- * @param {Array} entityContianer
- * @returns {Number} the entity index if found, otherwise -1
+ * @param {Array} entityTypesContianer
+ * @returns {Object} the entity index if found, otherwise empty object
  */
-export function getEntityById(entityId, entityContianer) {
-    let entityIdx = -1;
+export function getEntityById(entityId, entityTypesContianer) {
+    const entityDetails = {};
 
-    for(let i = 0 ; i < entityContianer. length; i++) {
-        const currentEntity = entityContianer[i];
+    for(let i = 0 ; i < entityTypesContianer.length; i++) {
+        const currentEntityType = entityTypesContianer[i];
 
-        if (currentEntity.id === entityId) {
-            entityIdx = i;
-            break;
+        for(let j = 0 ; j < currentEntityType.entities.length; j++) {
+            if (currentEntityType.entities[j].id === entityId) {
+                entityDetails.entityIndex = j;
+                entityDetails.entityTypeIndex = i;
+                break;
+            }
         }
     }
 
-    return entityIdx;
+    return entityDetails;
 }
 
 /**
