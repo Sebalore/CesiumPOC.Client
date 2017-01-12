@@ -314,10 +314,20 @@ export default class CesiumView extends React.Component {
         storeEntity.entities.map(e => {
             const entityToAdd = this.generateEntity(storeEntity.name, e);
             const addedEntity = this.addEntityToDataSourceCollection(entityToAdd, entityTypeDataSource, storeEntity.name, e);   
-             
+            
+            // addedEntity.definitionChanged.addEventListener(this.handleEntitiesChange);
         });
 
         this.viewer.dataSources.add(entityTypeDataSource);
+    }
+
+    /**
+     * callback function that subscribe to changes in entities that sign in to it
+     * @param {Cesium.Entity} entity
+     * @param {String} changedField
+     */
+    handleEntitiesChange(entity, changedField) {
+        //
     }
 
     /**
