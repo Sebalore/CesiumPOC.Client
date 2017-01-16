@@ -37,6 +37,9 @@ import CesiumMath from 'cesium/Source/Core/Math';
 import CustomDataSource from 'cesium/Source/DataSources/CustomDataSource';
 import Ellipsoid from 'cesium/Source/Core/Ellipsoid';
 import ScreenSpaceEventType from 'cesium/Source/Core/ScreenSpaceEventType';
+import SceneMode from 'cesium/Source/Scene/SceneMode';
+
+import Cartographic from 'cesium/Source/Core/Cartographic';
 
 import 'cesium/Source/Widgets/widgets.css';
 //-----------------------------------------------------------------------------------------------------------------
@@ -92,8 +95,8 @@ const componentStyle = {
 };
 
 const initialViewState = {
-    activeEntityType: null,
-    entityTypes: [],
+    // activeEntityType: null,
+    // entityTypes: [],
     zoomHeight: 20000,
     center: {
       x: resources.MAP_CENTER.longitude,
@@ -107,8 +110,8 @@ const initialViewState = {
         infoBox: false,  // allow the info box to pop up when selecting an entity
         navigationHelpButton: false,
         shadows: false,
-        sceneModePicker: false,
-        sceneMode: 3, //Cesium.SceneMode.SCENE3D
+        sceneModePicker: false, 
+        sceneMode: SceneMode.SCENE2D , 
         selectionIndicator: true,   // allow a green box that displayed around the selected entity
         baseLayerPicker: false,
         geocoder: false,
@@ -286,7 +289,7 @@ export default class CesiumView extends React.Component {
 
                 if (dragging) 
                 {
-                    entity.position = viewer.camera.pickEllipsoid(movement.endPosition);
+                    // entity.position = viewer.camera.pickEllipsoid(movement.endPosition);
                 }
                 else {
                     const pickedObject = viewer.scene.pick(movement.endPosition);
@@ -642,48 +645,43 @@ export default class CesiumView extends React.Component {
     /** the function handle droping entities from this combobox to the map */
     onDrop(event)    {
         // calculate new object drop area
-        const dim = this.refs.map.getClientRects()[0];
-        const x = (event.clientX - dim.left);
-        const y = (event.clientY - dim.top);
+        const dim = this.refs.map.getClientRects()[0],
+            x = (event.clientX - dim.left),
+            y = (event.clientY - dim.top);
 
         // add the new object to the map
-        const mousePosition = new Cartesian2(x, y);
-        let cartesian = mousePosition;
-        if (this.viewer.scene.mode === 3) {
-            cartesian = this.viewer.camera.pickEllipsoid(mousePosition, this.viewer.scene.globe.ellipsoid); 
-        }
-     
-        const entityTypeName = event.dataTransfer.getData('text');
-        const entityType = this.props.entityTypes.find(l => l.name === entityTypeName);
+        const mousePosition = new Cartesian2(x, y),
+            cartesian = this.viewer.camera.pickEllipsoid(mousePosition, this.viewer.scene.globe.ellipsoid),
+            entityTypeName = event.dataTransfer.getData('text'),
+            entityType = this.props.entityTypes.find(l => l.name === entityTypeName);
 
         if (cartesian && entityTypeName && entityType) {
-                      
-            const cartographic =  this.viewer.scene.globe.ellipsoid.cartesianToCartographic(cartesian);
-            const longitudeString = CesiumMath.toDegrees(cartographic.longitude);
-            const latitudeString = CesiumMath.toDegrees(cartographic.latitude);
+            let addEntityData;
+            // const cartographic = this.viewer.scene.globe.ellipsoid.cartesianToCartographic(cartesian),
+            const cartographic = Cartographic.fromCartesian(cartesian),
+                longitudeString = CesiumMath.toDegrees(cartographic.longitude),
+                latitudeString = CesiumMath.toDegrees(cartographic.latitude);
             
             if(entityTypeName === resources.ENTITY_TYPE_NAMES.DMA) {
                 const west = -80.0,             // left
                     south = 25.0,               // down
                     east = longitudeString,     // currently the center x     // right 
-                    north = latitudeString,     // currently the center y     // up
-                    addEntityData = {
-                        entityTypeName,
-                        rectangle : {
-                                                                
-                            coordinates : Rectangle.fromDegrees(east - 0.1, north - 0.1, east, north) ,
-                            material : CesiumColor.RED.withAlpha(0.5),
-                            outline : true,
-                            outlineColor : CesiumColor.WHITE,
-                            fill: false,
-                        },
-                        id: Guid.create()
-                    };
-            
-                this.props.actions.addEntity(entityTypeName, addEntityData);
+                    north = latitudeString;     // currently the center y     // up
+                    
+                addEntityData = {
+                    entityTypeName,
+                    rectangle : {
+                        coordinates : Rectangle.fromDegrees(east - 0.1, north - 0.1, east, north) ,
+                        material : CesiumColor.RED.withAlpha(0.5),
+                        outline : true,
+                        outlineColor : CesiumColor.WHITE,
+                        fill: false,
+                    },
+                    id: Guid.create()
+                };
             }
             else {
-                this.selectedEntity = Object.assign({}, {
+                addEntityData = {
                     id: Guid.create(),
                     entityTypeName,
                     label: `${entityTypeName}-New-Added`,
@@ -692,10 +690,13 @@ export default class CesiumView extends React.Component {
                         latitude : latitudeString,
                         longitude : longitudeString,
                     }
-                }); 
+                }; 
             
-            this.showEntityForm(y-90, x+120);
+                this.selectedEntity = addEntityData;
+                this.showEntityForm(y-90, x+120);
             }
+
+            this.props.actions.addEntity(entityTypeName, addEntityData);
         } 
         else {
             console.log('CesiumView::onDrop(event) : something went wrong.');
