@@ -7,11 +7,13 @@ import { connect } from 'react-redux';
 
 // actions imports
 import * as mainActions from '../Redux/actions/mainActions';
+import * as sideMenuActions from '../Redux/actions/sideMenuActions';
 
 // sub components imports
 import CesiumView from '../components/cesium/cesiumView';
 import EntityTypes from '../components/entityTypes/entityTypesView';
 import AddEntity from '../components/addEntity/addEntityView';
+import SideMenu from './SideMenu';
 
 // utils
 import {isEmptyObject, createLinearCoordinatesGenerator} from '../utills/services';
@@ -73,6 +75,7 @@ class MainView extends React.Component
     }
 
     render() {
+
         if (!isEmptyObject(this.props.main)) {
             return (
                 <div className="mainContainer" style={componentStyle}>
@@ -88,11 +91,18 @@ class MainView extends React.Component
                             setIconStyle={this.setIconStyle}
                         />
                     </div>
-                    <CesiumView 
-                        entityTypes={this.props.main.entityTypes} 
-                        actions={this.props.actions}
-                        ref='cesium'
-                    />
+                    <div id="content" style = {componentStyle.content}>
+                        <CesiumView 
+                            entityTypes={this.props.main.entityTypes} 
+                            actions={this.props.actions}
+                            ref='cesium'
+                        />
+                        <SideMenu 
+                            setIconStyle={this.setIconStyle}
+                            sideMenu = {this.props.sideMenu}
+                            actions = {this.props.actions}
+                        />
+                    </div>
                 </div>
             );
             } 
@@ -102,42 +112,49 @@ class MainView extends React.Component
     }
 }
 
-//export default App;
 export default connect(mapStateToProps, mapDispatchToProps)(MainView);
 
 const componentStyle = {
-
-  position: 'fixed',
-  height: '100%',
-  width: '100%',
-  top: '0',
-  left: '0',
-  mainComponentSon: {
+    position: 'fixed',
+    height: '100%',
+    width: '100%',
     top: '0',
     left: '0',
-    fontSize: '30px',
-    width: '91vw',
-    height: '6vh',
-    margin: '0 auto'
-  },
-  icon: {
-    width: '48px',
-    height: '100%',
-    display: 'inline-block',
-    WebkitMaskSize: 'cover',
-    maskSize: 'cover',
-    backgroundColor: 'white'
-  },
+    mainComponentSon: {
+        top: '0',
+        left: '0',
+        fontSize: '30px',
+        width: '91vw',
+        height: '6vh',
+        margin: '0 auto'
+    },
+    icon: {
+        width: '48px',
+        height: '100%',
+        display: 'inline-block',
+        WebkitMaskSize: 'cover',
+        maskSize: 'cover',
+        backgroundColor: 'white'
+    },
+    content : {
+        width: '100vw',
+        height: '95vh',
+        top: '5vh',
+        sideMenu : {
+
+        }
+    }
 };
 
 function mapDispatchToProps(dispatch) {
   return {
-    actions: bindActionCreators({ ...mainActions }, dispatch)
+    actions: bindActionCreators({ ...mainActions, ...sideMenuActions }, dispatch)
   };
 }
 
 function mapStateToProps(state) {
   return {
-    main: state.main
+    main: state.main,
+    sideMenu: state.sideMenu,
   };
 }

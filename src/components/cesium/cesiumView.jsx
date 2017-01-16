@@ -750,7 +750,7 @@ export default class CesiumView extends React.Component {
 
     render() {
         return (
-            <div style = {componentStyle.general}>
+            <div>
                 <div id="general" ref="general" style = {componentStyle.fullSizeDimentions}>
                     <div style = {componentStyle.map} id="map"className="map" ref="map" onDragOver= { (e) => e.preventDefault() } onDrop={this.onDrop} onContextMenu={ e => e.preventDefault()} >
                     </div>
