@@ -328,6 +328,7 @@ export default class CesiumView extends React.Component {
 
                         this.props.actions.setDrawingZiahStatus(false);
                         this.props.actions.addEntity(entityTypeName, addEntityData);
+                        this.ziahPointsArr = [];
                         }
                     }
                 }
