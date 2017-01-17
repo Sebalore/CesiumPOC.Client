@@ -111,7 +111,7 @@ const initialViewState = {
         navigationHelpButton: false,
         shadows: false,
         sceneModePicker: false, 
-        sceneMode: SceneMode.SCENE2D , 
+        sceneMode: SceneMode.SCENE3D , 
         selectionIndicator: true,   // allow a green box that displayed around the selected entity
         baseLayerPicker: false,
         geocoder: false,
@@ -146,6 +146,7 @@ export default class CesiumView extends React.Component {
         this.getDataSourceByName = this.getDataSourceByName.bind(this);
         this.attachedAssociatedEntitiesToEntity = this.attachedAssociatedEntitiesToEntity.bind(this);
         this.getCartesianPosition = this.getCartesianPosition.bind(this);
+        this.disableSceneUndesiredOptions = this.disableSceneUndesiredOptions.bind(this);
     }
 
     componentDidMount() {
@@ -156,6 +157,8 @@ export default class CesiumView extends React.Component {
         this.viewer = new CesiumViewer(this.refs.map, this.viewState.options);
         this.handler = new ScreenSpaceEventHandler(this.viewer.scene.canvas);  
 
+        this.disableSceneUndesiredOptions();
+
         // set map start position
         this.viewer.camera.lookAt(Cartesian3.fromDegrees(this.viewState.center.x, this.viewState.center.y), new Cartesian3(0.0, 0.0, this.viewState.zoomHeight));
 
@@ -163,6 +166,18 @@ export default class CesiumView extends React.Component {
         this.viewer.dataSources.add(new CustomDataSource('EntityMissionTooltips'));
         
         this.setMapEventHandlers(this.viewer, this.handler, entity, selectedEntity, dragging, isFirstClick);
+    }
+
+    /**
+     * handle disabling undesired Viewer.Scene options
+     */
+    disableSceneUndesiredOptions() {
+        // this.viewer.scene.screenSpaceCameraController.enableInputs = false;
+        this.viewer.scene.screenSpaceCameraController.enableLook  = false;
+        this.viewer.scene.screenSpaceCameraController.enableRotate  = false;
+        this.viewer.scene.screenSpaceCameraController.enableTilt  = false;
+        this.viewer.scene.screenSpaceCameraController.enableTranslate  = false;
+        // this.viewer.scene.screenSpaceCameraController.enableZoom  = false;
     }
 
     componentWillReceiveProps(newProps) {
@@ -651,7 +666,7 @@ export default class CesiumView extends React.Component {
 
         // add the new object to the map
         const mousePosition = new Cartesian2(x, y),
-            cartesian = this.viewer.camera.pickEllipsoid(mousePosition, this.viewer.scene.globe.ellipsoid),
+            cartesian = this.viewer.camera.pickEllipsoid(mousePosition),
             entityTypeName = event.dataTransfer.getData('text'),
             entityType = this.props.entityTypes.find(l => l.name === entityTypeName);
 
@@ -691,7 +706,7 @@ export default class CesiumView extends React.Component {
                         longitude : longitudeString,
                     }
                 }; 
-            
+
                 this.selectedEntity = addEntityData;
                 this.showEntityForm(y-90, x+120);
             }
