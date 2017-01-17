@@ -58,7 +58,7 @@ export default class EntityTypes extends React.PureComponent {
                                 <div 
                                     ref = {`svg${idx}`}
                                     id={Guid.create()} 
-                                    style={this.props.setIconStyle(entityType.imgUrl, entityType.active)} 
+                                    style={this.props.setIconStyle(resources.ENTITY_TYPES[entityType.name].ACTIONS.ADD.IMG, entityType.active)} 
                                     draggable='false' 
                                     onClick = {() =>  this.onListItemClicked(entityType, idx)}
                                 />

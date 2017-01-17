@@ -21,11 +21,11 @@ export default class EntityForm extends React.PureComponent {
 
     render() {
         switch (this.props.entity.entityTypeName) {
-            case resources.ENTITY_TYPE_NAMES.AIRPLANE:
+            case resources.ENTITY_TYPE_NAMES.VISINT:
             case resources.ENTITY_TYPE_NAMES.FLIGHT_AREA:
             case resources.ENTITY_TYPE_NAMES.FLIGHT_CIRCLE_OUT:
             case resources.ENTITY_TYPE_NAMES.FORBIDEN_FLIGHT_AREA:
-            case resources.ENTITY_TYPE_NAMES.HELICOPTER:
+            case resources.ENTITY_TYPE_NAMES.SIGINT:
                 {
                     break;
                 }
