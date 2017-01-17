@@ -95,8 +95,6 @@ const componentStyle = {
 };
 
 const initialViewState = {
-    // activeEntityType: null,
-    // entityTypes: [],
     zoomHeight: 20000,
     center: {
       x: resources.MAP_CENTER.longitude,
@@ -137,6 +135,7 @@ export default class CesiumView extends React.Component {
             }            
         };
         this.selectedLayerName = null;
+        this.ziahPointsArr = [];
 
        // class methods
         this.onDrop = this.onDrop.bind(this);
@@ -287,13 +286,24 @@ export default class CesiumView extends React.Component {
             // Drag & Drop 
             handler.setInputAction( click => 
             {
-                const pickedObject = viewer.scene.pick(click.position);
+                if(this.props.drawingZiahOn) {
+                    if(this.ziahPointsArr.length <= 4) {
+                        console.log('add new position to Ziah points', click.position);
+                        this.ziahPointsArr.push(click.position);
+                    }
+                    else {
+                        console.log('I can draw polygon!', this.ziahPointsArr);
+                    }
+                }
+                else {
+                    const pickedObject = viewer.scene.pick(click.position);
                 
-                if (defined(pickedObject)) 
-                {
-                    entity = pickedObject.id;
-                    dragging = true;
-                    viewer.scene.screenSpaceCameraController.enableInputs = false;
+                    if (defined(pickedObject)) 
+                    {
+                        entity = pickedObject.id;
+                        dragging = true;
+                        viewer.scene.screenSpaceCameraController.enableInputs = false;
+                    }
                 }
             }, ScreenSpaceEventType.LEFT_DOWN);
 
@@ -672,7 +682,6 @@ export default class CesiumView extends React.Component {
 
         if (cartesian && entityTypeName && entityType) {
             let addEntityData;
-            // const cartographic = this.viewer.scene.globe.ellipsoid.cartesianToCartographic(cartesian),
             const cartographic = Cartographic.fromCartesian(cartesian),
                 longitudeString = CesiumMath.toDegrees(cartographic.longitude),
                 latitudeString = CesiumMath.toDegrees(cartographic.latitude);

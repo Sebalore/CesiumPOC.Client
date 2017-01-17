@@ -60,6 +60,11 @@ const mainReducer = (state = initialState, action) => {
   
             return newState;
         }
+        case 'SET_DRAWING_ZIAH_STATUS': 
+        {
+            newState.drawingZiahOn = action.data;
+            return newState;
+        }
         
         default:
             return state;

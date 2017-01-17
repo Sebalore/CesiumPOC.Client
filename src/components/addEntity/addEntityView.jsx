@@ -1,3 +1,5 @@
+'use strict';
+
 import React from 'react';
 import Guid from 'guid';
 
@@ -5,6 +7,15 @@ import Guid from 'guid';
 import {resources} from '../../shared/data/resources';
 
 const AddEntity =  (props) => {
+    const onDrawPointsClicked = (event, entityType) => {
+        event.preventDefault();
+
+        if(entityType.name === resources.ENTITY_TYPE_NAMES.ZIAH) {
+            // toggle the state
+            props.actions.setDrawingZiahStatus(!props.drawingZiahOn);
+        }
+    };
+    
     if (props.entityTypesInfo) {
         return (
             <div style={componentStyle.containerDiv}>
@@ -13,7 +24,11 @@ const AddEntity =  (props) => {
                         <div style={props.setIconStyle('icon_7.svg')} draggable='false'/>
                     </li>
                     <li style={componentStyle.li}>
-                        <div style={props.setIconStyle('icon_8.svg')} draggable='false'/>
+                        <div 
+                            style={props.setIconStyle('icon_8.svg')} 
+                            draggable='false'
+                            onClick={ (e) => { onDrawPointsClicked(e, {name: resources.ENTITY_TYPE_NAMES.ZIAH}); }}
+                        />
                     </li>
                     {
                         props.entityTypesInfo.map((entityType, idx) => 
@@ -23,6 +38,7 @@ const AddEntity =  (props) => {
                                 style={props.setIconStyle(entityType.imgUrl)} 
                                 draggable='true' 
                                 onDragStart={(e) => { e.dataTransfer.setData('text', entityType.name); }}
+                                onClick={ (e) => { onDrawPointsClicked(e, entityType); }}
                             />
                         </li>)
                     }

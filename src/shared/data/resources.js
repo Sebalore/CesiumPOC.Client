@@ -11,6 +11,7 @@ const FLIGHT_CIRCLE = 'FlightCircle'; //layer
 const FLIGHT_CIRCLE_IN = 'FlightCircle - Enter'; //entity type
 const FLIGHT_CIRCLE_OUT = 'FlightCircle - Exit'; //entity type
 const MISSION_TOOLTIP = 'MissionTooltip'; //entity type
+const ZIAH = 'Ziah?'; //entity type
 
 //--------------------------------- ------- ACTION NAMES ------------
 const ADD = 'ADD';
@@ -42,7 +43,8 @@ export const resources = {
         FLIGHT_AREA : FLIGHT_AREA,
         FLIGHT_CIRCLE_IN : FLIGHT_CIRCLE_IN, 
         FLIGHT_CIRCLE_OUT : FLIGHT_CIRCLE_OUT, 
-        MISSION_TOOLTIP: MISSION_TOOLTIP
+        MISSION_TOOLTIP: MISSION_TOOLTIP,
+        ZIAH
     },
     MAP_CENTER: {
         longitude: 34.99249855493725,

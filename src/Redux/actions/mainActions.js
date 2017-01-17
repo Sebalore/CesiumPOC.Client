@@ -77,3 +77,11 @@ export const toggleEntityTypeActivation = (entityTypeName) => ({
   type: 'TOGGLE_ENTITY_TYPE_ACTIVATION',
   data: entityTypeName
 });
+
+/**
+ * @param {Boolean} isOn
+ */
+export const setDrawingZiahStatus = (isOn) => ({
+  type: 'SET_DRAWING_ZIAH_STATUS',
+  data: isOn
+});

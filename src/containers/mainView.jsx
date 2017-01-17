@@ -87,6 +87,7 @@ class MainView extends React.Component
                         />
                         <AddEntity
                             entityTypesInfo={this.props.main.addableEntityTypesInfo}
+                            drawingZiahOn={this.props.main.drawingZiahOn}
                             actions={this.props.actions}
                             setIconStyle={this.setIconStyle}
                         />
@@ -94,6 +95,7 @@ class MainView extends React.Component
                     <div id="content" style = {componentStyle.content}>
                         <CesiumView 
                             entityTypes={this.props.main.entityTypes} 
+                            drawingZiahOn={this.props.main.drawingZiahOn}
                             actions={this.props.actions}
                             ref='cesium'
                         />
