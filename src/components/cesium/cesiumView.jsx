@@ -45,7 +45,7 @@ import 'cesium/Source/Widgets/widgets.css';
 //-----------------------------------------------------------------------------------------------------------------
 
 //-----------------services ----------------------------------------
-import { defined, isPointIsInsideCircle, getModifiedRecordIdx, isEqualObjects } from '../../utills/services';
+import { defined, isPointIsInsideCircle, getModifiedRecordIdx, isEqualObjects, isEmptyObject } from '../../utills/services';
 
 //-----------------resources----------------------------------------
 import {resources} from '../../shared/data/resources'; 
@@ -146,6 +146,7 @@ export default class CesiumView extends React.Component {
         this.attachedAssociatedEntitiesToEntity = this.attachedAssociatedEntitiesToEntity.bind(this);
         this.getCartesianPosition = this.getCartesianPosition.bind(this);
         this.disableSceneUndesiredOptions = this.disableSceneUndesiredOptions.bind(this);
+        this.mousePositionToCoordinates = this.mousePositionToCoordinates.bind(this);
     }
 
     componentDidMount() {
@@ -700,24 +701,43 @@ export default class CesiumView extends React.Component {
         return exportSVG(svg.replace('ffffff', hexColor));
     }
 
-    /** the function handle droping entities from this combobox to the map */
-    onDrop(event)    {
+    /**
+     * calculate mouse position to cesium coordinates
+     * @param {Number} mouseX
+     * @param {Number} mouseY
+     * @returns {Object} empty if not succeeded, otherwise have the longitude and latitude fields
+     */
+    mousePositionToCoordinates(mouseX, mouseY) {
+        const resultCoordinates = {};
+
         // calculate new object drop area
         const dim = this.refs.map.getClientRects()[0],
-            x = (event.clientX - dim.left),
-            y = (event.clientY - dim.top);
+            x = (mouseX - dim.left),
+            y = (mouseY - dim.top);
 
         // add the new object to the map
         const mousePosition = new Cartesian2(x, y),
-            cartesian = this.viewer.camera.pickEllipsoid(mousePosition),
+            cartesian = this.viewer.camera.pickEllipsoid(mousePosition);
+
+        if (cartesian) {
+            const cartographic = Cartographic.fromCartesian(cartesian);
+
+            resultCoordinates.longitude = CesiumMath.toDegrees(cartographic.longitude);
+            resultCoordinates.latitude = CesiumMath.toDegrees(cartographic.latitude);
+        }
+
+        return resultCoordinates;
+    }
+
+    /** the function handle droping entities from this combobox to the map */
+    onDrop(event) {
+        const coordinates = this.mousePositionToCoordinates(event.clientX, event.clientY),
             entityTypeName = event.dataTransfer.getData('text'),
             entityType = this.props.entityTypes.find(l => l.name === entityTypeName);
 
-        if (cartesian && entityTypeName && entityType) {
+        if (!isEmptyObject(coordinates) && entityTypeName && entityType) {
             let addEntityData;
-            const cartographic = Cartographic.fromCartesian(cartesian),
-                longitudeString = CesiumMath.toDegrees(cartographic.longitude),
-                latitudeString = CesiumMath.toDegrees(cartographic.latitude);
+            const longitudeString = coordinates.longitude, latitudeString = coordinates.latitude;
             
             if(entityTypeName === resources.ENTITY_TYPE_NAMES.DMA) {
                 const west = -80.0,             // left
@@ -750,7 +770,9 @@ export default class CesiumView extends React.Component {
                 }; 
 
                 this.selectedEntity = addEntityData;
-                this.showEntityForm(y-90, x+120);
+
+                const dim = this.refs.map.getClientRects()[0];
+                this.showEntityForm(event.clientY - dim.top - 90, event.clientX - dim.left + 120);
             }
 
             this.props.actions.addEntity(entityTypeName, addEntityData);
