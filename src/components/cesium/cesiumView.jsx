@@ -156,7 +156,8 @@ export default class CesiumView extends React.Component {
         this.viewer = new CesiumViewer(this.refs.map, this.viewState.options);
         this.handler = new ScreenSpaceEventHandler(this.viewer.scene.canvas);  
 
-        this.disableSceneUndesiredOptions();
+        // TODO: uncomment
+        // this.disableSceneUndesiredOptions();
 
         // set map start position
         this.viewer.camera.lookAt(Cartesian3.fromDegrees(this.viewState.center.x, this.viewState.center.y), new Cartesian3(0.0, 0.0, this.viewState.zoomHeight));
@@ -204,10 +205,28 @@ export default class CesiumView extends React.Component {
             }
 
             if(currentEntitiesNum < newEntitiesNum) {               // one entity added
-                const addedEntityInStore = newProps.entityTypes[modifyEntityTypeIndex].entities[newEntitiesNum - 1],
-                    entityToAdd = this.generateEntity(entityTypeName, addedEntityInStore);
+                const addedEntityInStore = newProps.entityTypes[modifyEntityTypeIndex].entities[newEntitiesNum - 1];
 
-                this.addEntityToDataSourceCollection(entityToAdd, entityTypeDataSource, entityTypeName, addedEntityInStore);
+                switch (entityTypeName) {
+                    case resources.ENTITY_TYPE_NAMES.ZIAH:
+                    {
+                        const entityToAdd = {
+                            name: addedEntityInStore.name,
+                            polygon: addedEntityInStore.polygon
+                        };
+
+                        this.addEntityToDataSourceCollection(entityToAdd, entityTypeDataSource, entityTypeName, addedEntityInStore);
+                        break;
+                    }
+                    default:
+                    { 
+                        const entityToAdd = this.generateEntity(entityTypeName, addedEntityInStore);
+
+                        this.addEntityToDataSourceCollection(entityToAdd, entityTypeDataSource, entityTypeName, addedEntityInStore);
+                        break;
+                    }
+                }
+                
                 return;
             }
 
@@ -287,12 +306,26 @@ export default class CesiumView extends React.Component {
             handler.setInputAction( click => 
             {
                 if(this.props.drawingZiahOn) {
-                    if(this.ziahPointsArr.length <= 4) {
-                        console.log('add new position to Ziah points', click.position);
-                        this.ziahPointsArr.push(click.position);
-                    }
-                    else {
-                        console.log('I can draw polygon!', this.ziahPointsArr);
+                    if(this.ziahPointsArr.length < 4) {
+                        this.ziahPointsArr.push(new Cartesian3(click.position.x, 
+                                                               click.position.y, 
+                                                               this.defaultHeight));
+                        if(this.ziahPointsArr.length === 4) {
+                            const entityTypeName = resources.ENTITY_TYPE_NAMES.ZIAH,
+                            addEntityData = {
+                                id: Guid.create(),
+                                entityTypeName,
+                                label: `${entityTypeName}-New-Added`,
+                                name: 'Ziah',
+                                polygon : {
+                                    hierarchy : this.ziahPointsArr,
+                                    material : CesiumColor.RED
+                                }
+                            }; 
+
+                        this.props.actions.setDrawingZiahStatus(false);
+                        this.props.actions.addEntity(entityTypeName, addEntityData);
+                        }
                     }
                 }
                 else {
@@ -348,13 +381,13 @@ export default class CesiumView extends React.Component {
                 if (pickedObject) {
                     if(!this.zoomedEntity) {
                         const entity = pickedObject.id,
-                            isRectangle = entity.storeEntity.entityTypeName === resources.ENTITY_TYPE_NAMES.DMA,
+                            // isRectangle = entity.storeEntity.entityTypeName === resources.ENTITY_TYPE_NAMES.DMA,
                             zoomOptions = {
                                 heading : 0,
                                 pitch: -CesiumMath.PI/2
                             };
                         
-                        if(!isRectangle && entity.billboard.sizeInMeters) {
+                        if(defined(entity.billboard) && entity.billboard.sizeInMeters) {
                             zoomOptions.range = entity.billboard.width.getValue() * 2.25;
                         }
                         

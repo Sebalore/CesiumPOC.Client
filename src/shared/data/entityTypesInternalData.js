@@ -140,5 +140,11 @@ export default  {
         }
       ]
     },
+    {
+      name: resources.ENTITY_TYPE_NAMES.ZIAH,
+      imgUrl: `${resources.IMG.BASE_URL}icon_8.svg`,
+      active: false,
+      entities: []
+    }, 
   ]
 };
