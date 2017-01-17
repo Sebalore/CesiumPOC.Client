@@ -10,7 +10,7 @@ const componentStyle = {
         height: '100%',
         backgroundColor: '#47494c',
         border: '2px solid black',
-        width: '60vw',
+        width: '59.85vw',
         overflow: 'hidden',
     }, 
     li : {
@@ -82,7 +82,7 @@ export default class EntityTypes extends React.PureComponent {
                                 <div 
                                     ref = {`svg${idx}`}
                                     id={Guid.create()} 
-                                    style={this.props.setIconStyle(entityType.imgUrl)} 
+                                    style={this.props.setIconStyle(resources.ENTITY_TYPES[entityType.name].ACTIONS.ADD.IMG)} 
                                     draggable='false' 
                                     onClick = {() =>  this.onListItemClicked(entityType, idx)}
                                 />

@@ -16,11 +16,6 @@ class _store extends EventEmitter {
     return this.data;
   }
 
-  update(data) {
-    this.data = data;
-    return Promise.resolve(this.data);
-  }
-  
   ['handle' + resources.ACTIONS.TOGGLE_ENTITY_TYPE.TYPE](agent, data) {
     return new Promise((resolve) => {
       const entityTypeName = data.entityTypeName;
@@ -32,39 +27,43 @@ class _store extends EventEmitter {
     });
   }
   
-  ['handle' + resources.ACTIONS.ADD.TYPE](agent, data) {
+  ['handle' + resources.ACTIONS.ADD.TYPE](eventData) {
     return new Promise((resolve) => {
-      const entityTypeName = data.entityTypeName;
+      const entityTypeName = eventData.data.entityTypeName;
       const entityTypeIndex = this.data.entityTypes.findIndex(l => l.name===entityTypeName);
       
-      this.data.entityTypes[entityTypeIndex].entities.push(data);
-      resolve(data);
+      this.data.entityTypes[entityTypeIndex].entities.push(eventData.data);
+      resolve(eventData.data);
     });
   }
 
-  ['handle' + resources.ACTIONS.DELETE.TYPE](agent, data) {
+  ['handle' + resources.ACTIONS.DELETE.TYPE](eventData) {
       return new Promise((resolve) => {
-      const entityTypeName = data.entityTypeName;
+      const entityTypeName = eventData.data.entityTypeName;
       const entityTypeIndex = this.data.entityTypes.findIndex(l => l.name===entityTypeName);
-      const entityIndex = this.data.entityTypes[entityTypeIndex].entities.findIndex(e => e.id===data.entityId);
+      const entityIndex = this.data.entityTypes[entityTypeIndex].entities.findIndex(e => e.id===eventData.data.id);
       
       this.data.entityTypes[entityTypeIndex].entities.splice(entityIndex, 1);   
       resolve(true);
     });
   }
 
-  ['handle' +  resources.ACTIONS.UPDATE_POSITION.TYPE](agent, data) {
+  ['handle' +  resources.ACTIONS.UPDATE_POSITION.TYPE](eventData) {
       return new Promise((resolve) => {
-      const entityTypeName = data.entityTypeName;
+      const entityTypeName = eventData.data.entityTypeName;
       const entityTypeIndex = this.data.entityTypes.findIndex(l => l.name===entityTypeName);
-      const entityIndex = this.data.entityTypes[entityTypeIndex].entities.findIndex(e => e.id===data.entityId);
-      
-      this.data.entityTypes[entityTypeIndex].entities[entityIndex].position = data.position;
-      resolve(this.data.entityTypes[entityTypeIndex].entities[entityIndex]);
+      const entityIndex = this.data.entityTypes[entityTypeIndex].entities.findIndex(e => e.id===eventData.data.id);
+      if (entityIndex!==-1) {
+        this.data.entityTypes[entityTypeIndex].entities[entityIndex].position = eventData.data.position;
+        resolve(this.data.entityTypes[entityTypeIndex].entities[entityIndex]);
+      } else {
+        eventData.action = resources.ACTIONS.ADD.TYPE;
+        resolve( this['handle' + eventData.action](eventData));
+      }
     });
   }
 
-  handleContextAwareActions(action) {
+  handleActions(action) {
     if (resources.ACTIONS[action.type]) {
       const eventData = {
         agent: action.agent,
@@ -76,7 +75,7 @@ class _store extends EventEmitter {
 
       if (typeof this['handle' + action.type] === 'function') {
         //execute the action if there is a matching function defined in store
-        this['handle' + action.type](action.agent, action.data)
+        this['handle' + action.type](eventData)
         .then((actionResult) => {
             this.emit('entityTypesChanged', this.data.entityTypes);
             return Promise.resolve(actionResult);
@@ -97,67 +96,11 @@ class _store extends EventEmitter {
       }
     }
   }
-
-  handleActions(action) {
-    switch (action.type) {
-      case 'UPDATE':
-        {
-          this.update(action.data).then(this.emit('change')).catch();
-          break;
-        }
-      case 'DEBUG_1':
-        {        
-          initialViewState.entityTypes.find(l => l.name===resources.ENTITY_TYPE_NAMES.AIRPLANE).entities.forEach(e =>{
-            const gen = e.gen(e.position);
-            setInterval(() => {
-              const cords = gen.next();
-                if(!cords.done) {
-                  dispatcher.dispatch({
-                    type: resources.ACTIONS.UPDATE_POSITION.TYPE,
-                    agent: resources.AGENTS.API,
-                    data: {
-                      // TODO: add billboard
-                        entityTypeName: resources.ENTITY_TYPE_NAMES.AIRPLANE,
-                        entityId: e.id,
-                        position: cords.value,
-                        label: `AIRPLANE-${e.id}`
-                    }                              
-                  });                
-                }
-            }, 2000);            
-          });
-          
-          initialViewState.entityTypes.find(l => l.name===resources.ENTITY_TYPE_NAMES.HELICOPTER).entities.forEach(e =>{
-            const gen = e.gen(e.position);
-            setInterval(() => {
-              const cords = gen.next();
-                if(!cords.done) {
-                  dispatcher.dispatch({
-                    type: resources.ACTIONS.UPDATE_POSITION.TYPE,
-                    agent: resources.AGENTS.API,
-                    data: {
-                      // TODO: add billboard
-                        entityTypeName: resources.ENTITY_TYPE_NAMES.HELICOPTER,
-                        entityId: e.id,
-                        position: cords.value,
-                        label: `helicopter-${e.id}`
-                    }                              
-                  });                
-                }
-            }, 2000);            
-          });
-
-          break;
-        }
-    }
-  }
 }
 
 const store = new _store;
 
 dispatcher.register(store.handleActions.bind(store));
-dispatcher.register(store.handleContextAwareActions.bind(store));
-
 window.dispatcher = dispatcher;
 window.store = store;
 

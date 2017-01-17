@@ -21,7 +21,9 @@ export default class Main extends Component {
 
   componentDidMount() {
     store.on('contextAwareActionExecuted', this.refs.cesium.handleContextAwareActions.bind(this.refs.cesium));
-    window.dispatcher.dispatch({type: 'DEBUG_1'});
+    
+    //window.dispatcher.dispatch({type: 'DEBUG_1'});
+    actions.listenForServerActions();
   } 
 
   componentWillUnmount() {
@@ -43,7 +45,7 @@ export default class Main extends Component {
           const hasLayer = true; 
           return l.active && hasUserAgent && hasLayer;
       }).map(l =>{
-        return {name: l.name, imgUrl: l.imgUrl};
+        return {name: l.name, imgUrl: resources.ENTITY_TYPES[l.name].ACTIONS.ADD.IMG};
       })
     });
   }

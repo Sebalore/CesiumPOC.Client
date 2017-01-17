@@ -20,7 +20,7 @@ const AddEntity =  (props) => {
                         <li key={idx} style={componentStyle.li}>
                             <div 
                                 id={Guid.create()} 
-                                style={props.setIconStyle(entityType.imgUrl)} 
+                                style={props.setIconStyle(resources.ENTITY_TYPES[entityType.name].ACTIONS.ADD.IMG)} 
                                 draggable='true' 
                                 onDragStart={(e) => { e.dataTransfer.setData('text', entityType.name); }}
                             />
