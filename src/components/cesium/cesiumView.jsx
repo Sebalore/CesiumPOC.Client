@@ -215,7 +215,7 @@ export default class CesiumView extends React.Component {
                             name: addedEntityInStore.name,
                             polygon: addedEntityInStore.polygon
                         };
-
+                        
                         this.addEntityToDataSourceCollection(entityToAdd, entityTypeDataSource, entityTypeName, addedEntityInStore);
                         break;
                     }
@@ -308,8 +308,10 @@ export default class CesiumView extends React.Component {
             {
                 if(this.props.drawingZiahOn) {
                     if(this.ziahPointsArr.length < 4) {
-                        this.ziahPointsArr.push(new Cartesian3(click.position.x, 
-                                                               click.position.y, 
+                        const coordinates = this.mousePositionToCoordinates(click.position.x, click.position.y);
+
+                        this.ziahPointsArr.push(new Cartesian3(coordinates.longitude, 
+                                                               coordinates.latitude, 
                                                                this.defaultHeight));
                         if(this.ziahPointsArr.length === 4) {
                             const entityTypeName = resources.ENTITY_TYPE_NAMES.ZIAH,
