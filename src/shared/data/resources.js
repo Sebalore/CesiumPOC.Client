@@ -1,8 +1,8 @@
 
 //------LAYERS AND ENTITY TYPES NAMES --------------
 const UAV = 'UAV';
-const AIRPLANE = 'Airplane';
-const HELICOPTER = 'Helicopter';
+const VISINT = 'VISINT';
+const SIGINT = 'SIGINT';
 
 const DMA = 'DynamicMissionArea';
 const FORBIDEN_FLIGHT_AREA = 'ForbidenFlightArea';
@@ -36,8 +36,8 @@ export const resources = {
         FLIGHT_CIRCLE : FLIGHT_CIRCLE,         
     },
     ENTITY_TYPE_NAMES :{
-        AIRPLANE : AIRPLANE,
-        HELICOPTER : HELICOPTER,
+        VISINT : VISINT,
+        SIGINT : SIGINT,
         DMA : DMA,
         FORBIDEN_FLIGHT_AREA : FORBIDEN_FLIGHT_AREA,
         FLIGHT_AREA : FLIGHT_AREA,
@@ -84,18 +84,18 @@ export const resources = {
                 }
             }
         },
-        [AIRPLANE]: {
+        [VISINT]: {
             IMG: 'icon_5.svg',
             ACTIONS: {
                 ADD: {
                     ID: 'Add',
-                    DESC: 'Add a new AIRPLANE',
+                    DESC: 'Add a new VISINT',
                     IMG: 'icon_5_black_1.svg',
                     SCALE: 0.5
                 }
             }
         },
-        [HELICOPTER]: {
+        [SIGINT]: {
             IMG: 'icon_3.svg',
             ACTIONS: {
                 ADD: {
@@ -106,6 +106,17 @@ export const resources = {
                 }
             }
         },
+        [ZIAH]: {
+            IMG: 'icon_8.svg',
+            ACTIONS: {
+                ADD: {
+                    ID: 'Add',
+                    DESC: 'Add a new ZIAH',
+                    IMG: 'icon_8.svg',
+                    SCALE: 0.5
+                }
+            }
+        },        
         [MISSION_TOOLTIP] : {
             IMG: 'circle_with_number_inside',
             ACTIONS: {

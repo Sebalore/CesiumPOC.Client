@@ -139,7 +139,7 @@ export default class CesiumView extends React.Component {
 
        // class methods
         this.onDrop = this.onDrop.bind(this);
-        this.handleContextAwareActions = this.handleContextAwareActions.bind(this);
+        this.handleContextAwareActions = this.handleActions.bind(this);
         this.onEntityFormClose = this.onEntityFormClose.bind(this);
         this.addEntityToDataSourceCollection = this.addEntityToDataSourceCollection.bind(this);
         this.getDataSourceByName = this.getDataSourceByName.bind(this);
@@ -411,7 +411,7 @@ export default class CesiumView extends React.Component {
             }, ScreenSpaceEventType.RIGHT_UP);         
     }
 
-    handleContextAwareActions(error, eventData) {
+    handleActions(error, eventData) {
         return new Promise((resolve, reject) => {
             if (error) {
                 reject(error);
@@ -439,18 +439,22 @@ export default class CesiumView extends React.Component {
                         break;
                     }                    
                     case resources.ACTIONS.ADD.TYPE: {
-                        const entityToAdd = this.generateEntity(eventData.data.entityTypeName, eventData.result);
-                        this.addEntityToDataSourceCollection(entityToAdd, entityTypeDataSource, eventData.data.entityTypeName, eventData.result);  
+                        this.generateEntity(eventData.data.entityTypeName, eventData.result)
+                        .then(entityToAdd => this.addEntityToDataSourceCollection(entityToAdd, entityTypeDataSource, eventData.data.entityTypeName, eventData.result));  
                         break;
                     }
                     case resources.ACTIONS.UPDATE_POSITION.TYPE: {
                         if (entityTypeIsActive) {
-                            const entityToUpdate = entityTypeDataSource.entities.values.find(e => e.storeEntity.id === eventData.result.id);
-
-                            // update position
-                            entityToUpdate.position = this.getCartesianPosition(eventData.data.position);  
-                            // update bilboard for new color due to the new height
-                            entityToUpdate.billboard = this.getBillboard(eventData.data.entityTypeName, eventData.result);
+                            Promise.resolve(
+                                entityTypeDataSource.entities.values.find(e => e.storeEntity.id === eventData.result.id)
+                                    || this.generateEntity(eventData.data.entityTypeName, eventData.result)
+                                    .then(entityToAdd => this.addEntityToDataSourceCollection(entityToAdd, entityTypeDataSource, eventData.data.entityTypeName, eventData.result)))
+                            .then(entityToUpdate => {
+                                // update position
+                                entityToUpdate.position = this.getCartesianPosition(eventData.data.position);  
+                                // update bilboard for new color due to the new height
+                                entityToUpdate.billboard = this.getBillboard(eventData.data.entityTypeName, eventData.result);
+                            });
                         }
                         break;
                     }
@@ -490,12 +494,12 @@ export default class CesiumView extends React.Component {
     createEntityTypeDataSource(storeEntity) {
         const entityTypeDataSource = new CustomDataSource(storeEntity.name);
 
-        storeEntity.entities.map(e => {
-            const entityToAdd = this.generateEntity(storeEntity.name, e);
-            const addedEntity = this.addEntityToDataSourceCollection(entityToAdd, entityTypeDataSource, storeEntity.name, e);   
+        // storeEntity.entities.map(e => {
+        //     const entityToAdd = this.generateEntity(storeEntity.name, e);
+        //     const addedEntity = this.addEntityToDataSourceCollection(entityToAdd, entityTypeDataSource, storeEntity.name, e);   
             
-            // addedEntity.definitionChanged.addEventListener(this.handleEntitiesChange);
-        });
+        //     // addedEntity.definitionChanged.addEventListener(this.handleEntitiesChange);
+        // });
 
         this.viewer.dataSources.add(entityTypeDataSource);
     }
@@ -589,17 +593,19 @@ export default class CesiumView extends React.Component {
      * @returns {Object} an object that can be added to cesium entities collection
      */
     generateEntity(entityTypeName, entity) {
-        let { position, label, rectangle } = entity;
-        
-        position = entityTypeName !== resources.ENTITY_TYPE_NAMES.DMA ?
-             this.getCartesianPosition(position) : null;
+        return new Promise((resolve) => {
+            let { position, label, rectangle } = entity;
+            
+            position = entityTypeName !== resources.ENTITY_TYPE_NAMES.DMA ?
+                this.getCartesianPosition(position) : null;
 
-        return {
-                position,
-                billboard: this.getBillboard(entityTypeName, entity),
-                label,
-                rectangle
-        };
+            resolve({
+                    position,
+                    billboard: this.getBillboard(entityTypeName, entity),
+                    label,
+                    rectangle
+            });
+        });
     }
 
     /**
@@ -627,8 +633,8 @@ export default class CesiumView extends React.Component {
                     billboard.image = this.pinColor(svgString, CesiumColor.BLACK);
                     break;
                 }
-                case resources.ENTITY_TYPE_NAMES.AIRPLANE:
-                case resources.ENTITY_TYPE_NAMES.HELICOPTER:
+                case resources.ENTITY_TYPE_NAMES.VISINT:
+                case resources.ENTITY_TYPE_NAMES.SIGINT:
                 {
                     const imageName = `${resources.ENTITY_TYPES[entityTypeName].ACTIONS.ADD.IMG}`.replace('.svg', '');  
                     billboard.image = this.pinColor(Images[imageName], this.mapHeightToColor(entity.position.height));

@@ -25,38 +25,7 @@ class MainView extends React.Component
 {
     componentDidMount() {
         this.props.actions.fetchAllLayersData();
-
-        setTimeout(() => {
-            this.startUpdatePositionInterval(2000);
-        }, 5000);
-    }
-
-    startUpdatePositionInterval(intervalTimeToUpdate) {
-        const velocity = {
-            longitude: -0.00001,
-            latitude: 0.0001,
-            height: 250
-        };
-
-        // this.props.main.entityTypes.find(l => l.name===resources.ENTITY_TYPE_NAMES.AIRPLANE).entities.forEach(e =>{
-        //     const gen = createLinearCoordinatesGenerator(velocity, e.position);
-        //     setInterval(() => {
-        //       const cords = gen.next();
-        //         if(!cords.done) {
-        //             this.props.actions.setEntityPosition(e.id, cords.value);               
-        //         }
-        //     }, intervalTimeToUpdate);            
-        //   });
-          
-        //   this.props.main.entityTypes.find(l => l.name===resources.ENTITY_TYPE_NAMES.HELICOPTER).entities.forEach(e =>{
-        //     const gen = createLinearCoordinatesGenerator(velocity, e.position);
-        //     setInterval(() => {
-        //       const cords = gen.next();
-        //         if(!cords.done) {
-        //             this.props.actions.setEntityPosition(e.id, cords.value);              
-        //         }
-        //     }, intervalTimeToUpdate);            
-        //   });
+        // this.props.actions.listenForServerActions();
     }
 
     setIconStyle(imgName, isActive) {

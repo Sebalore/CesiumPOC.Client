@@ -29,18 +29,18 @@ export default  {
       entities: []
     }, 
     {
-      name: resources.ENTITY_TYPE_NAMES.AIRPLANE,
-      imgUrl: `${resources.IMG.BASE_URL}${resources.ENTITY_TYPES[resources.ENTITY_TYPE_NAMES.AIRPLANE].IMG}`,
+      name: resources.ENTITY_TYPE_NAMES.VISINT,
+      imgUrl: `${resources.IMG.BASE_URL}${resources.ENTITY_TYPES[resources.ENTITY_TYPE_NAMES.VISINT].IMG}`,
       active: true,
       actions: [{
-          id: resources.ENTITY_TYPES[resources.ENTITY_TYPE_NAMES.AIRPLANE].ACTIONS.ADD.ID,
-          description: resources.ENTITY_TYPES[resources.ENTITY_TYPE_NAMES.AIRPLANE].ACTIONS.ADD.DESC,
-          imgUrl: `${resources.IMG.BASE_URL}${resources.ENTITY_TYPES[resources.ENTITY_TYPE_NAMES.AIRPLANE].ACTIONS.ADD.IMG}`
+          id: resources.ENTITY_TYPES[resources.ENTITY_TYPE_NAMES.VISINT].ACTIONS.ADD.ID,
+          description: resources.ENTITY_TYPES[resources.ENTITY_TYPE_NAMES.VISINT].ACTIONS.ADD.DESC,
+          imgUrl: `${resources.IMG.BASE_URL}${resources.ENTITY_TYPES[resources.ENTITY_TYPE_NAMES.VISINT].ACTIONS.ADD.IMG}`
         },
       ],
       entities: [{
           id: Guid.create(), //serial number on planes tail;
-          label: `${resources.ENTITY_TYPE_NAMES.AIRPLANE}: 001`,
+          label: `${resources.ENTITY_TYPE_NAMES.VISINT}: 001`,
           missionId : 123,
           position: {
             longitude: resources.MAP_CENTER.longitude - 0.075,
@@ -70,7 +70,7 @@ export default  {
           })
         } , {
           id: Guid.create(),
-          label: `${resources.ENTITY_TYPE_NAMES.AIRPLANE}: 002`,
+          label: `${resources.ENTITY_TYPE_NAMES.VISINT}: 002`,
            missionId : 777,
           position: {
             longitude: resources.MAP_CENTER.longitude - 0.05,
@@ -84,7 +84,7 @@ export default  {
           })
         }, {
           id: Guid.create(),
-          label: `${resources.ENTITY_TYPE_NAMES.AIRPLANE}: 003`,
+          label: `${resources.ENTITY_TYPE_NAMES.VISINT}: 003`,
           position: {
             longitude: resources.MAP_CENTER.longitude + 0.085,
             latitude: resources.MAP_CENTER.latitude + 0.02,
@@ -99,19 +99,19 @@ export default  {
       ]
     }, 
     {
-      name: resources.ENTITY_TYPE_NAMES.HELICOPTER,
-      imgUrl: `${resources.IMG.BASE_URL}${resources.ENTITY_TYPES[resources.ENTITY_TYPE_NAMES.HELICOPTER].IMG}`,
+      name: resources.ENTITY_TYPE_NAMES.SIGINT,
+      imgUrl: `${resources.IMG.BASE_URL}${resources.ENTITY_TYPES[resources.ENTITY_TYPE_NAMES.SIGINT].IMG}`,
       active: true,
       actions: [{
-          id: resources.ENTITY_TYPES[resources.ENTITY_TYPE_NAMES.HELICOPTER].ACTIONS.ADD.ID,
-          description: resources.ENTITY_TYPES[resources.ENTITY_TYPE_NAMES.HELICOPTER].ACTIONS.ADD.DESC,
-          imgUrl: `${resources.IMG.BASE_URL}${resources.ENTITY_TYPES[resources.ENTITY_TYPE_NAMES.HELICOPTER].ACTIONS.ADD.IMG}`
+          id: resources.ENTITY_TYPES[resources.ENTITY_TYPE_NAMES.SIGINT].ACTIONS.ADD.ID,
+          description: resources.ENTITY_TYPES[resources.ENTITY_TYPE_NAMES.SIGINT].ACTIONS.ADD.DESC,
+          imgUrl: `${resources.IMG.BASE_URL}${resources.ENTITY_TYPES[resources.ENTITY_TYPE_NAMES.SIGINT].ACTIONS.ADD.IMG}`
         }
       ],
       entities: [
         {
           id: Guid.create(),
-          label: `${resources.ENTITY_TYPE_NAMES.HELICOPTER}: 001`,
+          label: `${resources.ENTITY_TYPE_NAMES.SIGINT}: 001`,
           position: {
             longitude: resources.MAP_CENTER.longitude, 
             latitude: resources.MAP_CENTER.latitude, 
@@ -125,7 +125,7 @@ export default  {
         }, 
         {
           id: Guid.create(),
-          label: `${resources.ENTITY_TYPE_NAMES.HELICOPTER}: 002`,
+          label: `${resources.ENTITY_TYPE_NAMES.SIGINT}: 002`,
           missionId : 888,
           position: {
             longitude: resources.MAP_CENTER.longitude  + 0.0065,
