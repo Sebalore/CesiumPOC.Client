@@ -3,20 +3,24 @@
 import React from 'react';
 import Guid from 'guid';
 
-// resources
-import {resources} from '../../shared/data/resources';
 
 const AddEntity =  (props) => {
+    
     const onDrawPointsClicked = (event, entityType) => {
         event.preventDefault();
 
-        if(entityType.name === resources.ENTITY_TYPE_NAMES.ZIAH) {
+        if(entityType.name === this.context.resources.ENTITY_TYPE_NAMES.ZIAH) {
             // toggle the state
             props.actions.setDrawingZiahStatus(!props.drawingZiahOn);
         }
     };
+
+    const contextTypes = {
+      resources: PropTypes.object.isRequired,
+    }
     
     if (props.entityTypesInfo) {
+        const { resources } = this.context;
         return (
             <div style={componentStyle.containerDiv}>
                 <ul style={componentStyle.ul}>

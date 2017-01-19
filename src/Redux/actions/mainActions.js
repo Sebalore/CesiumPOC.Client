@@ -1,6 +1,8 @@
-import {resources} from '../../shared/data/resources';
+import ResourceProvider from '../../shared/data/resources';
 
 import internalData from '../../shared/data/entityTypesInternalData';
+
+const resources = ResourceProvider.resources;
 
 /**
  * @param {Array} entityTypes

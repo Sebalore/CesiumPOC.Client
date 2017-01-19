@@ -3,7 +3,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 
 // redux imports
-import { Provider } from 'react-redux';
+import {Provider} from 'react-redux';
 
 // initial state from all the reducers
 import mainInitialState from './Redux/reducers/main/mainIntialState';
@@ -12,10 +12,10 @@ import mainInitialState from './Redux/reducers/main/mainIntialState';
 import configureStore from './Redux/reducers/configureStore';
 
 // Other Components Imports
-import MainView from './containers/MainView.jsx';
+import MainView from './containers/MainView';
+import ResourceProvider from './shared/data/resources';
 
-
-function getInitialState () {
+function getInitialState() {
   const _initState = {
     main: mainInitialState
   };
@@ -25,6 +25,8 @@ function getInitialState () {
 const store = configureStore(getInitialState());
 
 ReactDOM.render(
-    <Provider store={store}>
-        <MainView/> 
-    </Provider>, document.getElementById('root'));
+  <Provider store={store}>
+    <ResourceProvider>
+      <MainView/>
+    </ResourceProvider>
+  </Provider>, document.getElementById('root'));

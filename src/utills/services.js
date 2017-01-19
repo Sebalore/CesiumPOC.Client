@@ -1,19 +1,3 @@
-export function * createLinearCoordinatesGenerator (velocity, origin) {
-    const forever = true;
-
-    while (forever) {
-        const currentPosition = origin;
-        
-        for (let i = 0; i < 32; i++) {
-            currentPosition.longitude += velocity.longitude;
-            currentPosition.latitude += velocity.latitude;
-            currentPosition.height += velocity.height;
-            
-            yield currentPosition;
-        }
-    }
-}
-
 /**
  * check if a given point is in circle
  * @param {Number} pointX  

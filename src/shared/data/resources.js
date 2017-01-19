@@ -1,188 +1,107 @@
+import React, { Component, PropTypes, Children } from 'react';
+import axios from 'axios';
+import config from 'config.json';
 
-//------LAYERS AND ENTITY TYPES NAMES --------------
-const UAV = 'UAV';
-const VISINT = 'VISINT';
-const SIGINT = 'SIGINT';
+let fetching = false;
+let resources = undefined;
 
-const DMA = 'DynamicMissionArea';
-const FORBIDEN_FLIGHT_AREA = 'ForbidenFlightArea';
-const FLIGHT_AREA = 'FlightArea';
-const FLIGHT_CIRCLE = 'FlightCircle'; //layer
-const FLIGHT_CIRCLE_IN = 'FlightCircle - Enter'; //entity type
-const FLIGHT_CIRCLE_OUT = 'FlightCircle - Exit'; //entity type
-const MISSION_TOOLTIP = 'MissionTooltip'; //entity type
-const ZIAH = 'Ziah?'; //entity type
+const rd_resolves = [],
+        rd_rejects = [];
 
-//--------------------------------- ------- ACTION NAMES ------------
-const ADD = 'ADD';
-const DELETE = 'DELETE';
-const UPDATE_POSITION = 'UPDATE_POSITION';
-const MAP_CENTER = 'MAP_CENTER';
-const TOGGLE_ENTITY_TYPE = 'TOGGLE_ENTITY_TYPE';
-const SET_ENTITY_CESIUM_ID = 'SET_ENTITY_CESIUM_ID';
-const TOGGLE_BEST_FIT_DISPLAY = 'TOGGLE_BEST_FIT_DISPLAY';
 
-//--------------------------------- ------ AGENTS ------------------
-const USER = 'USER';
-const API = 'API';
-//--------------------------------
-
-export const resources = {
-    LAYER_NAMES: {
-        UAV : UAV,
-        DMA : DMA,
-        FORBIDEN_FLIGHT_AREA : FORBIDEN_FLIGHT_AREA,
-        FLIGHT_AREA : FLIGHT_AREA,
-        FLIGHT_CIRCLE : FLIGHT_CIRCLE,         
-    },
-    ENTITY_TYPE_NAMES :{
-        VISINT : VISINT,
-        SIGINT : SIGINT,
-        DMA : DMA,
-        FORBIDEN_FLIGHT_AREA : FORBIDEN_FLIGHT_AREA,
-        FLIGHT_AREA : FLIGHT_AREA,
-        FLIGHT_CIRCLE_IN : FLIGHT_CIRCLE_IN, 
-        FLIGHT_CIRCLE_OUT : FLIGHT_CIRCLE_OUT, 
-        MISSION_TOOLTIP: MISSION_TOOLTIP,
-        ZIAH
-    },
-    MAP_CENTER: {
-        longitude: 34.99249855493725,
-        latitude:  32.79628841345832,
-        height: 1.0
-    },
-    IMG: {
-        BASE_URL: 'src/shared/images/',
-        SCALE: '25%',
-        MAX_WIDTH: '65px',
-        MAX_HEIGHT: '45px'
-    },
-    AGENTS: {
-        USER: USER,
-        API: API
-    },
-    ENTITY_TYPES: {
-        [FLIGHT_CIRCLE_IN]: {
-            IMG: 'icon_1.svg',
-            ACTIONS: {
-                ADD: {
-                    ID: 'Add',
-                    DESC: 'Add a new flight circle.',
-                    IMG: 'icon_11.svg',
-                    SCALE: 1
+const  loadResourcesDataPromise = (resolve, reject) => {
+    if (resources) {
+        resolve(resources);
+    } else {
+        rd_resolves.push(promise);
+        rd_rejects.push(reject);
+        if (!fetching) {
+            let error;
+            fetching = true;
+            axios.get(config.server.url + "/resources")
+            .then(data => {
+                resources = data;
+                if (thisOne.state) {
+                    thisOne.setState({resources});
                 }
-            }
-        },
-        [DMA]: {
-            IMG: 'icon_8.svg',
-            ACTIONS: {
-                ADD: {
-                    ID: 'Add',
-                    DESC: 'Add a new destination point',
-                    IMG: 'icon_8.svg',
-                    SCALE: 0.5
+            })
+            .catch(err => error = err)
+            .then(()=> {
+                fetching = false;
+                if (error) {
+                    rd_resolves = [];
+                    while(rd_rejects.length>0) {
+                        rd_rejects.pop()(error);
+                    }
+                } else {
+                    rd_rejects = [];
+                    while(rd_resolves.length>0) {
+                        rd_resolves.pop()(resources);
+                    }            
                 }
-            }
-        },
-        [VISINT]: {
-            IMG: 'icon_5.svg',
-            ACTIONS: {
-                ADD: {
-                    ID: 'Add',
-                    DESC: 'Add a new VISINT',
-                    IMG: 'icon_5_black_1.svg',
-                    SCALE: 0.5
-                }
-            }
-        },
-        [SIGINT]: {
-            IMG: 'icon_3.svg',
-            ACTIONS: {
-                ADD: {
-                    ID: 'Add',
-                    DESC: 'Add a new helicopter',
-                    IMG: 'icon_3_black_1.svg',
-                    SCALE: 0.5
-                }
-            }
-        },
-        [ZIAH]: {
-            IMG: 'icon_8.svg',
-            ACTIONS: {
-                ADD: {
-                    ID: 'Add',
-                    DESC: 'Add a new ZIAH',
-                    IMG: 'icon_8.svg',
-                    SCALE: 0.5
-                }
-            }
-        },        
-        [MISSION_TOOLTIP] : {
-            IMG: 'circle_with_number_inside',
-            ACTIONS: {
-                ADD: {
-                    ID: 'Add',
-                    DESC: 'Add a new helicopter mission id tooltip',
-                    IMG: 'circle_with_number_inside',
-                    SCALE: 1
-                }
-            }
-        }      
-    },
-    ACTIONS: {
-        ADD: {
-            TYPE: ADD,
-            DESC: 'Add a new entity',
-            LAYERS: [
-                DMA, FLIGHT_AREA, FORBIDEN_FLIGHT_AREA, UAV, FLIGHT_CIRCLE
-            ], //ON WHAT LAYERS CAN THIS ACTION BE PERFORMED
-            AGENTS: [
-                USER, API
-            ], //WHOS CAN PERFORM ACTION
-            IMG: 'entityType'
-        },
-        DELETE: {
-            TYPE: DELETE,
-            DESC: 'Delete an entity',
-            LAYERS: [
-                DMA, FLIGHT_AREA, FORBIDEN_FLIGHT_AREA, UAV, FLIGHT_CIRCLE
-            ],
-            AGENTS: [
-                USER, API
-            ],
-            IMG: 'icon_7.svg'
-        },
-        UPDATE_POSITION: {
-            TYPE: UPDATE_POSITION,
-            DESC: 'Change position coordinates (and rotation?) of entity',
-            LAYERS: [
-                DMA, FLIGHT_AREA, FORBIDEN_FLIGHT_AREA, UAV
-            ],
-            AGENTS: [USER, API]
-        },
-        MAP_CENTER: {
-            TYPE: MAP_CENTER,
-            DESC: 'Change map camera view to center on the entity',
-            LAYERS: [
-                DMA, FLIGHT_AREA, FORBIDEN_FLIGHT_AREA, UAV, FLIGHT_CIRCLE
-            ],
-            AGENTS: [USER]
-        },
-        TOGGLE_ENTITY_TYPE: {
-            TYPE: TOGGLE_ENTITY_TYPE,
-            DESC: 'Turn on/off layer and/or entity type on the map',
-            LAYERS: [
-                DMA, FLIGHT_AREA, FORBIDEN_FLIGHT_AREA, UAV, FLIGHT_CIRCLE
-            ],
-            AGENTS: [USER, API]
-        },
-        TOGGLE_BEST_FIT_DISPLAY: {
-            TYPE: TOGGLE_BEST_FIT_DISPLAY,
-            DESC: 'Turn on/off best fit zoom on object',
-            LAYERS: [
-                DMA, FLIGHT_AREA, FORBIDEN_FLIGHT_AREA, FLIGHT_CIRCLE
-            ],
-            AGENTS: [USER]
+            });
         }
     }
-};
+}
+
+class ResourceProvider extends Component {
+
+    constructor(props) {
+        super(props);
+        this.loadResourcesData();
+    }
+ 
+    
+    static propTypes = {
+        theme: PropTypes.object.isRequired,
+    }
+
+    getInitialState(){
+        return {
+            resources
+        }
+    }
+
+    loadResourcesData() {
+        return new Promise((resolve, reject) => loadResourcesDataPromise(resolve, reject));
+    }
+
+    get resources () {
+       return resources;
+    }
+
+    componentDidMount(){
+        this.loadResourcesData().then(resources => this.setState({resources}));
+    }
+
+    componentWillReceiveProps(nextProps){
+        this.loadResourcesData().then(resources => this.setState({resources}));
+    }    
+  // you must specify what you’re adding to the context
+  static childContextTypes = {
+    theme: PropTypes.object.isRequired,
+  }
+  
+  getChildContext() {
+      return resources;
+  }
+
+  render() {
+
+      // Handle case where the response is not here yet
+      if (fetching) {
+         //TODO: a spinner or something...
+         return <div>The resources are comming!</div>
+      }
+
+      if (!resources) {
+          return <div>Some problem with fetching resources</div>;
+      } 
+
+
+      // Normal case         
+     return Children.only(this.props.children)
+  }
+}
+
+export default ResourceProvider;
