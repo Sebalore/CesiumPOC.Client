@@ -7,10 +7,6 @@ export default class Tabs extends React.Component
     constructor(props) {
         super(props);
 
-        // this.state = {
-        //     selected: this.props.selected
-        // };
-
         this.onClick = this.onClick.bind(this);
         this.renderTitles = this.renderTitles.bind(this);
         this.getOneLabel = this.getOneLabel.bind(this);
@@ -29,11 +25,9 @@ export default class Tabs extends React.Component
     }
 
     renderTitles() {
-        const children = React.Children.toArray(this.props.children);
-
         return (
             <ul style={componentStyle.tabsLabels}>
-                { children.map(this.getOneLabel) }
+                { React.Children.map(this.props.children, this.getOneLabel) }
             </ul>
         );
     }
