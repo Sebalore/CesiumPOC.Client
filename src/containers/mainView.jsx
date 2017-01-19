@@ -49,6 +49,12 @@ class MainView extends React.Component
         if (!isEmptyObject(this.props.main)) {
             return (
                 <div className="mainContainer" style={componentStyle}>
+                    <div id="staticAppInfo" style={componentStyle.staticAppInfo}>
+                        <img src="../shared/images/refaelLogo.svg.png" style={componentStyle.staticAppInfo.logo} />
+                        <span id="projectName" style={componentStyle.staticAppInfo.projectName}>
+                            הפרוייקט המגניב
+                        </span>
+                    </div>
                     <div style={componentStyle.mainComponentSon}>
                         <EntityTypes 
                             entityTypes={this.props.main.entityTypes} 
@@ -76,6 +82,9 @@ class MainView extends React.Component
                             controllers = {this.props.uiControllers.SideBar}
                         />
                     </div>
+                    <div id="footer" style={componentStyle.footer}>
+                            <span id="currentMousePositionCoordinates">{'static coordinates (123, 1452)'}</span>
+                        </div>
                 </div>
             );
             } 
@@ -97,7 +106,7 @@ const componentStyle = {
         top: '0',
         left: '0',
         fontSize: '30px',
-        width: '91vw',
+        width: '100%',
         height: '6vh',
         margin: '0 auto'
     },
@@ -111,11 +120,33 @@ const componentStyle = {
     },
     content : {
         width: '100vw',
-        height: '95vh',
+        height: '88vh',
         top: '5vh',
         sideMenu : {
 
         }
+    },
+    staticAppInfo: {
+        top: '0',
+        left: '0',
+        fontSize: '30px',
+        width: '100%',
+        height: '3vh',
+        backgroundColor: '#47494c',
+        color: 'white',
+        projectName: {
+            float: 'right',
+            fontSize: '20px'
+        },
+        logo: {
+            float: 'left',
+            height: '100%'
+        }
+    },
+    footer : {
+        height: '3vh',
+        backgroundColor: '#47494c',
+        color: 'white',
     }
 };
 

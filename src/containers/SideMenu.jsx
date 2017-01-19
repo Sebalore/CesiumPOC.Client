@@ -38,10 +38,9 @@ SideMenu.propTypes = {
 const componentStyle = {
     position: 'relative',
     float: 'right',
-    top: '-127vh',
+    top: '-136vh',
     width: '26%',
-    height: '92%',
-    marginRight: '4.5vw',
+    height: '100%',
     icon : {
         width: '110px',
         position: 'relative',

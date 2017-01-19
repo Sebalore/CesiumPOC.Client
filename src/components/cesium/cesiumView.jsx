@@ -55,21 +55,19 @@ import {Images} from '../../shared/images/AllImages';
 const componentStyle = {
     general: {
         width: '100vw',
-        height: '95vh',
+        height: '92vh',
     },
     fullSizeDimentions: {
         height : '95%',
-        margin: '5px auto'
     },
     map : {
         height: '95%',
-        width: '91vw',
-        margin: '0 auto',
+        width: '100%',
     },
     altimeter : {
         position: 'relative',
-        top: '-70vh',
-        marginLeft: '120px'
+        top: '-84vh',
+        marginLeft: '65px'
     },
     tooltip : {
         display: 'block',
