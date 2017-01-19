@@ -8,15 +8,17 @@ export default class SideMenu extends React.Component
 {
     constructor(props) {
         super(props);
-
     }
 
     render() {
         return (
             <div style = {componentStyle}>
                 {
-                    this.props.sideMenu.isOpen ?
+                    // this.props.sideMenu.isOpen ?
+                    this.props.controllers.isOpen ?
                         <XXX 
+                            upperSelectedIndex = {this.props.controllers.upperSelectedIndex}
+                            lowerSelectedIndex = {this.props.controllers.lowerSelectedIndex}
                             actions = {this.props.actions}
                         />  :
                         <div id = "openMenuBtn"

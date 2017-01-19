@@ -8,6 +8,7 @@ import { connect } from 'react-redux';
 // actions imports
 import * as mainActions from '../Redux/actions/mainActions';
 import * as sideMenuActions from '../Redux/actions/sideMenuActions';
+import * as uiControllers from '../Redux/actions/uiControllersActions';
 
 // sub components imports
 import CesiumView from '../components/cesium/cesiumView';
@@ -72,6 +73,7 @@ class MainView extends React.Component
                             setIconStyle={this.setIconStyle}
                             sideMenu = {this.props.sideMenu}
                             actions = {this.props.actions}
+                            controllers = {this.props.uiControllers.SideBar}
                         />
                     </div>
                 </div>
@@ -119,7 +121,7 @@ const componentStyle = {
 
 function mapDispatchToProps(dispatch) {
   return {
-    actions: bindActionCreators({ ...mainActions, ...sideMenuActions }, dispatch)
+    actions: bindActionCreators({ ...mainActions, ...sideMenuActions, ...uiControllers }, dispatch)
   };
 }
 
@@ -127,5 +129,6 @@ function mapStateToProps(state) {
   return {
     main: state.main,
     sideMenu: state.sideMenu,
+    uiControllers: state.uiControllers
   };
 }

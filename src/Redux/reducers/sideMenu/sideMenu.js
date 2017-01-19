@@ -6,10 +6,6 @@ const sideMenuReducer = (state = initialState, action) => {
     const newState = deepClone(state); 
 
     switch (action.type) {
-
-        case 'SET_MENU_STATUS':
-            newState.isOpen = action.data;
-            return newState;
         
         default:
             return state;
