@@ -1,8 +1,32 @@
+// react imports
 import React from 'react';
 import ReactDOM from 'react-dom';
-//import {Provider} from 'react-redux';
-import Main from './scenes/main/mainView';
-//import {store} from './store';
 
-//ReactDOM.render(<Provider store={store}><MainView/></Provider>, document.getElementById('root'));
-ReactDOM.render(<Main/>, document.getElementById('root'));
+// redux imports
+import {Provider} from 'react-redux';
+
+// initial state from all the reducers
+import mainInitialState from './Redux/reducers/main/mainIntialState';
+
+// import configuration
+import configureStore from './Redux/reducers/configureStore';
+
+// Other Components Imports
+import MainView from './containers/MainView';
+import ResourceProvider from './shared/data/resources';
+
+function getInitialState() {
+  const _initState = {
+    main: mainInitialState
+  };
+  return _initState;
+}
+
+const store = configureStore(getInitialState());
+
+ReactDOM.render(
+  <Provider store={store}>
+    <ResourceProvider>
+      <MainView/>
+    </ResourceProvider>
+  </Provider>, document.getElementById('root'));

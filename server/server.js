@@ -2,13 +2,13 @@
 const webpack = require('webpack');
 const WebpackDevServer = require('webpack-dev-server');
 
-const devConfig = require('./webpack.config.dev');
-const prodConfig = require('./webpack.config.prod');
+const devConfig = require('../webpack.config.dev');
+const prodConfig = require('../webpack.config.prod');
 
 const port = process.env.npm_package_config_port || 3000;
 const host = process.env.npm_package_config_host || '0.0.0.0';
 
-const enviroment = require('./package.json').config.enviroment;
+const enviroment = require('../package.json').config.enviroment;
 const isProduction = enviroment == 'prod';
 
 var compailer, config;
@@ -24,11 +24,6 @@ else
     config = devConfig;
 }
 
-console.dir(process);
-
-
-
-
 new WebpackDevServer(compailer,  {
     publicPath: config.output.publicPath,
     hot: true,
@@ -43,8 +38,6 @@ new WebpackDevServer(compailer,  {
     if (err) {
         console.log(err);
     }
-
-
     console.log(`enviroment: ${enviroment}`);
     console.log(`Listening at http://${host}:${port}/`);
 });

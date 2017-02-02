@@ -1,0 +1,14 @@
+Terrain:
+
+live Sandcastle demo:
+https://cesiumjs.org/Cesium/Apps/Sandcastle/index.html?src=Terrain%20Exaggeration.html&label=Showcases
+
+documentation:
+https://cesiumjs.org/Cesium/Build/Documentation/CesiumTerrainProvider.html?classFilter=CesiumTerrainProvider
+
+general explanation and tutorial:
+http://cesiumjs.org/data-and-assets/terrain/
+http://cesiumjs.org/tutorials/Terrain-Tutorial/
+
+plugin:
+https://github.com/kaktus40/Cesium-GeoserverTerrainProvider
